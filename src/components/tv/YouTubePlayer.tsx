@@ -26,16 +26,19 @@ type Props = {
   onEnded: () => void;
   onReady?: () => void;
   onTitle?: (title: string) => void;
+  onProgress?: (elapsed: number, duration: number) => void;
   muted?: boolean;
 };
 
-export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, muted }: Props) {
+export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, muted }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const endedRef = useRef(onEnded);
   const titleRef = useRef(onTitle);
+  const progressRef = useRef(onProgress);
   endedRef.current = onEnded;
   titleRef.current = onTitle;
+  progressRef.current = onProgress;
 
   useEffect(() => {
     let cancelled = false;
@@ -88,6 +91,17 @@ export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, muted }: Pro
     if (!p || !p.loadVideoById) return;
     p.loadVideoById(videoId);
   }, [videoId]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const p = playerRef.current;
+      if (!p || !p.getCurrentTime || !p.getDuration) return;
+      try {
+        progressRef.current?.(p.getCurrentTime() || 0, p.getDuration() || 0);
+      } catch {}
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-black">
