@@ -8,7 +8,7 @@ import { Guide } from "@/components/tv/Guide";
 import { Ticker } from "@/components/tv/Ticker";
 import { Clock } from "@/components/tv/Clock";
 import { Schedule } from "@/components/tv/Schedule";
-import { IPTV_COUNTRIES, type IptvChannel } from "@/lib/iptv";
+import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/iptv";
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { ChevronUp, ChevronDown, Grid3x3, SkipForward, Volume2, VolumeX, Tv, Globe2, Radio as RadioIcon } from "lucide-react";
 
@@ -97,11 +97,24 @@ function Index() {
   const pickIptv = useCallback((country: string, ch: IptvChannel) => {
     setIptvCountry(country);
     setIptvChannel(ch);
-    setIptvCandidates([]);
     setIptvError(null);
     setMode("iptv");
     setTitle(ch.name);
     setGuideOpen(false);
+    // Pre-load same-group siblings as auto-skip candidates if the stream dies.
+    loadCountryChannels(country)
+      .then((list) => {
+        const pool = list.filter(
+          (c) => c.url !== ch.url && (!ch.group || c.group === ch.group)
+        );
+        // shuffle a little so we don't always retry the same one first
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        setIptvCandidates(pool.slice(0, 12));
+      })
+      .catch(() => setIptvCandidates([]));
   }, []);
 
   const pickRadio = useCallback((country: string, st: RadioStation) => {
