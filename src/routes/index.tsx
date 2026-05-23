@@ -3,12 +3,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CHANNELS, shuffle, type Channel } from "@/lib/channels";
 import { YouTubePlayer } from "@/components/tv/YouTubePlayer";
 import { HlsPlayer } from "@/components/tv/HlsPlayer";
+import { RadioPlayer } from "@/components/tv/RadioPlayer";
 import { Guide } from "@/components/tv/Guide";
 import { Ticker } from "@/components/tv/Ticker";
 import { Clock } from "@/components/tv/Clock";
 import { Schedule } from "@/components/tv/Schedule";
 import { IPTV_COUNTRIES, type IptvChannel } from "@/lib/iptv";
-import { ChevronUp, ChevronDown, Grid3x3, SkipForward, Volume2, VolumeX, Tv, Globe2 } from "lucide-react";
+import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
+import { ChevronUp, ChevronDown, Grid3x3, SkipForward, Volume2, VolumeX, Tv, Globe2, Radio as RadioIcon } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,10 +37,14 @@ function Index() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [title, setTitle] = useState<string>("");
-  const [mode, setMode] = useState<"yt" | "iptv">("yt");
+  const [mode, setMode] = useState<"yt" | "iptv" | "radio">("yt");
   const [iptvCountry, setIptvCountry] = useState<string>("us");
   const [iptvChannel, setIptvChannel] = useState<IptvChannel | null>(null);
+  const [iptvCandidates, setIptvCandidates] = useState<IptvChannel[]>([]);
   const [iptvError, setIptvError] = useState<string | null>(null);
+  const [radioCountry, setRadioCountry] = useState<string>("US");
+  const [radioStation, setRadioStation] = useState<RadioStation | null>(null);
+  const [radioError, setRadioError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
   // Per-channel persistent shuffled queues + cursors
@@ -91,10 +97,36 @@ function Index() {
   const pickIptv = useCallback((country: string, ch: IptvChannel) => {
     setIptvCountry(country);
     setIptvChannel(ch);
+    setIptvCandidates([]);
     setIptvError(null);
     setMode("iptv");
     setTitle(ch.name);
     setGuideOpen(false);
+  }, []);
+
+  const pickRadio = useCallback((country: string, st: RadioStation) => {
+    setRadioCountry(country);
+    setRadioStation(st);
+    setRadioError(null);
+    setMode("radio");
+    setTitle(st.name);
+    setGuideOpen(false);
+  }, []);
+
+  // Auto-skip broken IPTV streams. When an error fires we walk through the
+  // remaining candidates from the playlist and try the next one automatically.
+  const handleIptvError = useCallback((msg: string) => {
+    setIptvCandidates((rest) => {
+      const [next, ...remaining] = rest;
+      if (next) {
+        setIptvChannel(next);
+        setIptvError(null);
+        setTitle(next.name);
+        return remaining;
+      }
+      setIptvError(`${msg} — no working stream nearby`);
+      return [];
+    });
   }, []);
 
   useEffect(() => {
@@ -114,6 +146,10 @@ function Index() {
   const countryLabel = useMemo(
     () => IPTV_COUNTRIES.find((c) => c.code === iptvCountry),
     [iptvCountry]
+  );
+  const radioCountryLabel = useMemo(
+    () => RADIO_COUNTRIES.find((c) => c.code === radioCountry),
+    [radioCountry]
   );
 
   return (
@@ -143,9 +179,52 @@ function Index() {
         {/* Channel rail (desktop) */}
         <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-black/30 lg:block">
           <div className="border-b border-border/60 px-4 py-3 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
-            Channels · {CHANNELS.length}
+            Sources
           </div>
           <div className="h-[calc(100vh-180px)] overflow-y-auto py-2">
+            <button
+              onClick={() => { setMode("iptv"); setGuideOpen(true); }}
+              className={
+                "flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
+                (mode === "iptv"
+                  ? "border-accent bg-accent/10"
+                  : "border-transparent hover:bg-card/60")
+              }
+            >
+              <Globe2 className="h-5 w-5 text-accent" />
+              <span className="flex-1">
+                <span className="block text-sm font-semibold tracking-tight">LIVE TV · WORLD</span>
+                <span className="block text-[11px] text-muted-foreground">
+                  {countryLabel?.flag} {countryLabel?.name}
+                </span>
+              </span>
+              {mode === "iptv" && (
+                <span className="h-2 w-2 animate-pulse-dot rounded-full bg-accent shadow-glow" />
+              )}
+            </button>
+            <button
+              onClick={() => { setMode("radio"); setGuideOpen(true); }}
+              className={
+                "flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
+                (mode === "radio"
+                  ? "border-primary bg-primary/10"
+                  : "border-transparent hover:bg-card/60")
+              }
+            >
+              <RadioIcon className="h-5 w-5 text-primary" />
+              <span className="flex-1">
+                <span className="block text-sm font-semibold tracking-tight">RADIO · WORLD</span>
+                <span className="block text-[11px] text-muted-foreground">
+                  {radioCountryLabel?.flag} {radioCountryLabel?.name}
+                </span>
+              </span>
+              {mode === "radio" && (
+                <span className="h-2 w-2 animate-pulse-dot rounded-full bg-primary shadow-glow" />
+              )}
+            </button>
+            <div className="mt-3 border-t border-border/60 px-4 pt-3 pb-1 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+              YouTube channels · {CHANNELS.length}
+            </div>
             {CHANNELS.map((ch, i) => {
               const active = mode === "yt" && i === channelIdx;
               return (
@@ -175,26 +254,6 @@ function Index() {
                 </button>
               );
             })}
-            <button
-              onClick={() => { setMode("iptv"); setGuideOpen(true); }}
-              className={
-                "mt-2 flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
-                (mode === "iptv"
-                  ? "border-accent bg-accent/10"
-                  : "border-transparent hover:bg-card/60")
-              }
-            >
-              <Globe2 className="h-5 w-5 text-accent" />
-              <span className="flex-1">
-                <span className="block text-sm font-semibold tracking-tight">LIVE TV · WORLD</span>
-                <span className="block text-[11px] text-muted-foreground">
-                  {countryLabel?.flag} {countryLabel?.name}
-                </span>
-              </span>
-              {mode === "iptv" && (
-                <span className="h-2 w-2 animate-pulse-dot rounded-full bg-accent shadow-glow" />
-              )}
-            </button>
           </div>
         </aside>
 
@@ -210,17 +269,39 @@ function Index() {
                 onProgress={(e, d) => { setElapsed(e); setDuration(d); }}
                 muted={muted}
               />
-            ) : iptvChannel ? (
+            ) : mode === "iptv" && iptvChannel ? (
               <HlsPlayer
+                key={iptvChannel.url}
                 src={iptvChannel.url}
                 muted={muted}
-                onError={(m) => setIptvError(m)}
+                onError={handleIptvError}
               />
+            ) : mode === "radio" && radioStation ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-black via-card to-black text-center">
+                <RadioIcon className="h-16 w-16 animate-pulse-dot text-primary" />
+                <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  Radio · {radioCountryLabel?.name}
+                </div>
+                <div className="text-2xl font-bold tracking-tight">{radioStation.name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {(radioStation.tags || "").split(",").slice(0, 3).join(" · ") || "live audio"}
+                </div>
+                <RadioPlayer
+                  key={radioStation.url_resolved || radioStation.url}
+                  src={radioStation.url_resolved || radioStation.url}
+                  muted={muted}
+                  onError={(m) => setRadioError(m)}
+                />
+              </div>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black text-center">
-                <Globe2 className="h-10 w-10 text-accent" />
+                {mode === "radio" ? (
+                  <RadioIcon className="h-10 w-10 text-primary" />
+                ) : (
+                  <Globe2 className="h-10 w-10 text-accent" />
+                )}
                 <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                  Live TV · pick a country & channel
+                  {mode === "radio" ? "Radio · pick a country & station" : "Live TV · pick a country & channel"}
                 </div>
                 <button
                   onClick={() => setGuideOpen(true)}
@@ -238,7 +319,7 @@ function Index() {
                 <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-primary" />
                 Live
               </span>
-              {mode === "yt" ? (
+              {mode === "yt" && (
                 <>
                   <span
                     className="font-mono-tv text-lg font-bold leading-none"
@@ -248,7 +329,8 @@ function Index() {
                   </span>
                   <span className="text-sm font-semibold tracking-tight">{channel.name}</span>
                 </>
-              ) : (
+              )}
+              {mode === "iptv" && (
                 <>
                   <span className="font-mono-tv text-lg leading-none">{countryLabel?.flag}</span>
                   <span className="text-sm font-semibold tracking-tight">
@@ -256,11 +338,30 @@ function Index() {
                   </span>
                 </>
               )}
+              {mode === "radio" && (
+                <>
+                  <span className="font-mono-tv text-lg leading-none">{radioCountryLabel?.flag}</span>
+                  <span className="text-sm font-semibold tracking-tight">
+                    {radioStation?.name ?? "Radio"}
+                  </span>
+                </>
+              )}
             </div>
 
             {iptvError && mode === "iptv" && (
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-md border border-destructive/60 bg-destructive/20 px-3 py-1.5 text-xs text-destructive backdrop-blur">
+                {iptvError}
+                <button
+                  onClick={() => setGuideOpen(true)}
+                  className="rounded bg-destructive/40 px-2 py-0.5 text-[10px] uppercase tracking-widest text-destructive-foreground hover:bg-destructive/60"
+                >
+                  Pick another
+                </button>
+              </div>
+            )}
+            {radioError && mode === "radio" && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-md border border-destructive/60 bg-destructive/20 px-3 py-1.5 text-xs text-destructive backdrop-blur">
-                {iptvError} — try another channel
+                {radioError} — try another station
               </div>
             )}
           </div>
@@ -270,13 +371,22 @@ function Index() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="font-mono-tv text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                  Now playing · {mode === "yt" ? channel.category : `Live TV · ${countryLabel?.name}`}
+                  Now playing ·{" "}
+                  {mode === "yt"
+                    ? channel.category
+                    : mode === "iptv"
+                    ? `Live TV · ${countryLabel?.name}`
+                    : `Radio · ${radioCountryLabel?.name}`}
                 </div>
                 <div className="mt-1 truncate text-lg font-semibold tracking-tight">
                   {title || "Tuning in…"}
                 </div>
                 <div className="mt-0.5 truncate text-sm text-muted-foreground">
-                  {mode === "yt" ? channel.tagline : (iptvChannel?.group || "free over-the-air streams")}
+                  {mode === "yt"
+                    ? channel.tagline
+                    : mode === "iptv"
+                    ? iptvChannel?.group || "free over-the-air streams"
+                    : (radioStation?.tags || "").split(",").slice(0, 3).join(" · ") || "free radio worldwide"}
                 </div>
               </div>
 
@@ -328,7 +438,12 @@ function Index() {
               <span>G guide</span>
               <span>M mute</span>
               <span className="text-foreground/60">
-                mode · {mode === "yt" ? "youtube channels" : "iptv worldwide"}
+                mode ·{" "}
+                {mode === "yt"
+                  ? "youtube channels"
+                  : mode === "iptv"
+                  ? "iptv worldwide"
+                  : "radio worldwide"}
               </span>
             </div>
           </div>
@@ -354,6 +469,10 @@ function Index() {
           iptvCountry={iptvCountry}
           onCountryChange={setIptvCountry}
           iptvCurrentUrl={iptvChannel?.url ?? null}
+          onPickRadio={pickRadio}
+          radioCountry={radioCountry}
+          onRadioCountryChange={setRadioCountry}
+          radioCurrentUrl={radioStation?.url_resolved ?? radioStation?.url ?? null}
           onClose={() => setGuideOpen(false)}
         />
       </section>
