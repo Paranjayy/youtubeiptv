@@ -1,4 +1,5 @@
 import { CHANNELS, type Channel } from "@/lib/channels";
+import { useEffect, useState } from "react";
 
 type Props = {
   channel: Channel;
@@ -15,7 +16,14 @@ function fmtClock(d: Date) {
 }
 
 export function Schedule({ channel, order, cursor, currentDuration, currentElapsed }: Props) {
-  const now = new Date();
+  // Avoid SSR mismatch (React #418): render only after mount on the client.
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const t = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(t);
+  }, []);
+  if (!now) return null;
   const currentLen = currentDuration > 0 ? currentDuration : AVG_LEN;
   const remaining = Math.max(0, currentLen - currentElapsed);
 

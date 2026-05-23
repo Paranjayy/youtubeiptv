@@ -46,6 +46,7 @@ export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, 
       if (cancelled || !hostRef.current) return;
       playerRef.current = new window.YT.Player(hostRef.current, {
         videoId,
+        host: "https://www.youtube-nocookie.com",
         playerVars: {
           autoplay: 1,
           mute: muted ? 1 : 0,
@@ -53,6 +54,8 @@ export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, 
           rel: 0,
           iv_load_policy: 3,
           playsinline: 1,
+          origin: typeof window !== "undefined" ? window.location.origin : undefined,
+          enablejsapi: 1,
         },
         events: {
           onReady: (e: any) => {
