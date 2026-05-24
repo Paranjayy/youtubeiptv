@@ -302,7 +302,7 @@ function Index() {
         {/* Stage */}
         <div className="relative flex flex-1 flex-col">
           {/* Player */}
-          <div className="relative aspect-video w-full bg-black lg:aspect-auto lg:flex-1">
+          <div className={"relative aspect-video w-full bg-black lg:aspect-auto lg:flex-1 " + (crt ? "crt-screen" : "")}>
             {mode === "yt" ? (
               <YouTubePlayer
                 videoId={currentVideo}
@@ -354,6 +354,14 @@ function Index() {
               </div>
             )}
             <div className="bg-scanlines pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay" />
+            {/* Channel-change static burst */}
+            {staticBurst > 0 && (
+              <div
+                key={staticBurst}
+                className="tv-static pointer-events-none absolute inset-0 z-10"
+                onAnimationEnd={() => setStaticBurst(0)}
+              />
+            )}
 
             {/* Channel badge overlay */}
             <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-3 rounded-md border border-border/60 bg-background/70 px-3 py-2 backdrop-blur">
@@ -479,6 +487,9 @@ function Index() {
               {mode === "yt" && <span>→ skip</span>}
               <span>G guide</span>
               <span>M mute</span>
+              <span>C crt {crt ? "on" : "off"}</span>
+              {mode === "yt" && <span>F fav</span>}
+              <button onClick={() => setHelpOpen(true)} className="underline-offset-2 hover:text-foreground hover:underline">? help</button>
               <span className="text-foreground/60">
                 mode ·{" "}
                 {mode === "yt"
@@ -516,7 +527,50 @@ function Index() {
           onRadioCountryChange={setRadioCountry}
           radioCurrentUrl={radioStation?.url_resolved ?? radioStation?.url ?? null}
           onClose={() => setGuideOpen(false)}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
         />
+
+        {helpOpen && (
+          <div
+            className="absolute inset-0 z-40 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+            onClick={() => setHelpOpen(false)}
+          >
+            <div
+              className="w-[min(520px,90vw)] rounded-xl border border-border/60 bg-card/90 p-6 shadow-glow"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-primary text-glow">▎ Remote</div>
+              <div className="mt-1 text-xl font-bold tracking-tight">Keyboard shortcuts</div>
+              <div className="mt-4 grid grid-cols-2 gap-2 font-mono-tv text-[11px] uppercase tracking-widest">
+                {[
+                  ["↑ / ↓", "change channel"],
+                  ["→", "skip video"],
+                  ["G", "open guide"],
+                  ["M", "mute / unmute"],
+                  ["C", "CRT shader"],
+                  ["F", "favorite channel"],
+                  ["?", "this help"],
+                  ["ESC", "close overlays"],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between rounded border border-border/60 bg-black/30 px-3 py-2">
+                    <span className="text-primary text-glow">{k}</span>
+                    <span className="text-muted-foreground">{v}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-[11px] text-muted-foreground">
+                Tip: press <span className="text-foreground">C</span> to flip on the CRT shader for that authentic late-90s cable feel.
+              </div>
+              <button
+                onClick={() => setHelpOpen(false)}
+                className="mt-4 w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );
