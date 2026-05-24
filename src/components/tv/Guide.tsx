@@ -3,7 +3,7 @@ import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/ipt
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Loader2, Globe2, Tv, Radio as RadioIcon } from "lucide-react";
+import { Loader2, Globe2, Tv, Radio as RadioIcon, Star } from "lucide-react";
 
 type Props = {
   open: boolean;
@@ -20,6 +20,8 @@ type Props = {
   onRadioCountryChange: (code: string) => void;
   radioCurrentUrl: string | null;
   onClose: () => void;
+  favorites?: string[];
+  onToggleFavorite?: (id: string) => void;
 };
 
 export function Guide({
@@ -37,6 +39,8 @@ export function Guide({
   onRadioCountryChange,
   radioCurrentUrl,
   onClose,
+  favorites = [],
+  onToggleFavorite,
 }: Props) {
   const [cat, setCat] = useState<string>("All");
   const [iptvList, setIptvList] = useState<IptvChannel[]>([]);
@@ -100,8 +104,14 @@ export function Guide({
   }, [radioList]);
 
   if (!open) return null;
-  const cats = ["All", ...CATEGORIES];
-  const list = cat === "All" ? CHANNELS : CHANNELS.filter((c) => c.category === cat);
+  const hasFavs = favorites.length > 0;
+  const cats = ["All", ...(hasFavs ? ["★ Favs"] : []), ...CATEGORIES];
+  const list =
+    cat === "All"
+      ? CHANNELS
+      : cat === "★ Favs"
+      ? CHANNELS.filter((c) => favorites.includes(c.id))
+      : CHANNELS.filter((c) => c.category === cat);
   let filteredIptv = iptvList;
   if (group !== "All") filteredIptv = filteredIptv.filter((c) => (c.group || "") === group);
   if (search) filteredIptv = filteredIptv.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
@@ -191,6 +201,7 @@ export function Guide({
       <div className="grid flex-1 gap-3 overflow-y-auto p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {list.map((ch) => {
           const active = ch.id === currentId;
+          const fav = favorites.includes(ch.id);
           return (
             <button
               key={ch.id}
@@ -202,6 +213,21 @@ export function Guide({
               style={{ ["--ch-color" as string]: ch.color }}
             >
               <div className="bg-scanlines pointer-events-none absolute inset-0 opacity-30" />
+              {onToggleFavorite && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); onToggleFavorite(ch.id); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); onToggleFavorite(ch.id); } }}
+                  className={cn(
+                    "absolute right-3 top-3 z-10 rounded-md border border-border/60 bg-black/40 p-1.5 transition-colors hover:border-foreground/40",
+                    fav ? "text-accent" : "text-muted-foreground"
+                  )}
+                  aria-label={fav ? "Unfavorite" : "Favorite"}
+                >
+                  <Star className={cn("h-3.5 w-3.5", fav && "fill-current")} />
+                </span>
+              )}
               <div className="flex items-start justify-between">
                 <div
                   className="font-mono-tv text-3xl font-bold leading-none text-glow"
