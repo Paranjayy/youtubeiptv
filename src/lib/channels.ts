@@ -335,6 +335,122 @@ CHANNELS.push(
   }
 );
 
+// Mood-as-television: vibes over genres.
+CHANNELS.push(
+  {
+    id: "melancholy",
+    number: "29",
+    name: "MELANCHOLY",
+    tagline: "sad lofi & rainy windows",
+    category: "Mood",
+    color: "var(--neon-purple)",
+    videos: ["DWcJFNfaw9c", "rUxyKA_-grg", "4xDzrJKXOOY", "n61ULEU7CO0"],
+  },
+  {
+    id: "focus",
+    number: "30",
+    name: "FOCUS LAB",
+    tagline: "deep work · no distractions",
+    category: "Mood",
+    color: "var(--neon-green)",
+    videos: ["jfKfPfyJRdk", "5qap5aO4i9A", "lTRiuFIWV54", "tfBVp0Zi2iE"],
+  },
+  {
+    id: "rainy",
+    number: "31",
+    name: "RAINY CAFE",
+    tagline: "coffee shop · rain on glass",
+    category: "Mood",
+    color: "var(--neon-cyan)",
+    videos: ["VMAPTo7RtDQ", "h2zkV-l_TfgM", "BOdLmxy06H0", "BJUuoZ74e2g"],
+  },
+  {
+    id: "cyber",
+    number: "32",
+    name: "CYBER 2049",
+    tagline: "neon dystopia ambience",
+    category: "Mood",
+    color: "var(--neon-pink)",
+    videos: ["MV_3Dpw-BRY", "UedTcufyrHc", "ALZHF5UqnU4", "9Ip0sNbtFnk"],
+  },
+  {
+    id: "threeam",
+    number: "33",
+    name: "3AM SCROLL",
+    tagline: "late-night liminal hours",
+    category: "Mood",
+    color: "var(--neon-purple)",
+    videos: ["Fpf-IRRRZW8", "1ZYbU82GVz4", "8rJ56Oycczs", "DWcJFNfaw9c"],
+  },
+  {
+    id: "airport",
+    number: "34",
+    name: "AIRPORT CORE",
+    tagline: "terminals · departures · drift",
+    category: "Mood",
+    color: "var(--neon-cyan)",
+    videos: ["FjHGZj2IjBk", "K4TOrB7at0Y", "h1BQPV-iCkU", "P6AaSMfXHbA"],
+  },
+
+  // Internet screensaver: ambient passive cinema.
+  {
+    id: "iss",
+    number: "35",
+    name: "ISS LIVE",
+    tagline: "earth from low orbit",
+    category: "Screensaver",
+    color: "var(--neon-cyan)",
+    videos: ["21X5lGlDOfg", "P9C25Un7xaM", "EEIk7gwjgIM", "0jHsq36_NTU"],
+  },
+  {
+    id: "tokyo",
+    number: "36",
+    name: "TOKYO WALKS",
+    tagline: "shibuya · shinjuku · neon rain",
+    category: "Screensaver",
+    color: "var(--neon-pink)",
+    videos: ["6sDvAVZGuJk", "kZcDe7P9-O4", "St7aTfoIdYQ", "5dE3JTbI_kw"],
+  },
+  {
+    id: "trains",
+    number: "37",
+    name: "CAB VIEW",
+    tagline: "train rides · alpine to arctic",
+    category: "Screensaver",
+    color: "var(--neon-green)",
+    videos: ["IjCK9D0Bx2c", "iqz0qVcPDB4", "_xufmlrJ6oQ", "wsuWNFkXY8E"],
+  },
+
+  // Learning OS: 24/7 study television.
+  {
+    id: "math",
+    number: "38",
+    name: "MATH WAVE",
+    tagline: "theorems · proofs · intuitions",
+    category: "Learn",
+    color: "var(--neon-amber)",
+    videos: ["kCc8FmEb1nY", "spUNpyF58BY", "fNk_zzaMoSs", "WUvTyaaNkzM"],
+  },
+  {
+    id: "python",
+    number: "39",
+    name: "PYTHON LIVE",
+    tagline: "code-alongs & projects",
+    category: "Learn",
+    color: "var(--neon-green)",
+    videos: ["rfscVS0vtbw", "_uQrJ0TkZlc", "HGOBQPFzWKo", "8124kv-632k"],
+  },
+  {
+    id: "airadar",
+    number: "40",
+    name: "AI RADAR",
+    tagline: "papers · launches · talks",
+    category: "Learn",
+    color: "var(--neon-cyan)",
+    videos: ["zjkBMFhNj_g", "kCc8FmEb1nY", "wjZofJX0v4M", "VMj-3S1tku0"],
+  }
+);
+
 export const CATEGORIES = Array.from(new Set(CHANNELS.map((c) => c.category)));
 
 export function shuffle<T>(arr: T[], seed = Date.now()): T[] {
