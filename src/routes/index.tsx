@@ -47,6 +47,30 @@ function Index() {
   const [radioError, setRadioError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [crt, setCrt] = useState(false);
+  const [staticBurst, setStaticBurst] = useState(0);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  // Hydrate persisted prefs.
+  useEffect(() => {
+    try {
+      const f = JSON.parse(localStorage.getItem("tubetv:favs") || "[]");
+      if (Array.isArray(f)) setFavorites(f);
+      if (localStorage.getItem("tubetv:crt") === "1") setCrt(true);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("tubetv:favs", JSON.stringify(favorites)); } catch {}
+  }, [favorites]);
+  useEffect(() => {
+    try { localStorage.setItem("tubetv:crt", crt ? "1" : "0"); } catch {}
+  }, [crt]);
+  const toggleFavorite = useCallback((id: string) => {
+    setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
+  }, []);
+  const triggerStatic = useCallback(() => {
+    setStaticBurst((n) => n + 1);
+  }, []);
   // Per-channel persistent shuffled queues + cursors
   const queuesRef = useRef<Record<string, { order: string[]; cursor: number }>>({});
   const [, force] = useState(0);
@@ -80,7 +104,8 @@ function Index() {
     setTitle("");
     setElapsed(0);
     setDuration(0);
-  }, []);
+    triggerStatic();
+  }, [triggerStatic]);
 
   const pickChannel = useCallback((ch: Channel) => {
     const i = CHANNELS.findIndex((c) => c.id === ch.id);
@@ -91,8 +116,9 @@ function Index() {
       setDuration(0);
       setMode("yt");
       setGuideOpen(false);
+      triggerStatic();
     }
-  }, []);
+  }, [triggerStatic]);
 
   const pickIptv = useCallback((country: string, ch: IptvChannel) => {
     setIptvCountry(country);
@@ -149,12 +175,15 @@ function Index() {
       else if (mode === "yt" && e.key === "ArrowDown") { e.preventDefault(); changeChannel(-1); }
       else if (mode === "yt" && e.key === "ArrowRight") { e.preventDefault(); advance(); }
       else if (e.key.toLowerCase() === "g") setGuideOpen((o) => !o);
-      else if (e.key === "Escape") setGuideOpen(false);
+      else if (e.key === "Escape") { setGuideOpen(false); setHelpOpen(false); }
       else if (e.key.toLowerCase() === "m") setMuted((m) => !m);
+      else if (e.key.toLowerCase() === "c") setCrt((c) => !c);
+      else if (e.key === "?" || e.key === "/") { e.preventDefault(); setHelpOpen((o) => !o); }
+      else if (e.key.toLowerCase() === "f" && mode === "yt") toggleFavorite(CHANNELS[channelIdx].id);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [changeChannel, advance, mode]);
+  }, [changeChannel, advance, mode, channelIdx, toggleFavorite]);
 
   const countryLabel = useMemo(
     () => IPTV_COUNTRIES.find((c) => c.code === iptvCountry),
