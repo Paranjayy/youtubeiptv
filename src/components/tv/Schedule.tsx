@@ -57,9 +57,7 @@ export function Schedule({ channel, order, cursor, currentDuration, currentElaps
             >
               {fmtClock(it.start)}
             </span>
-            <span className="truncate text-[11px] text-foreground/80">
-              {it.label}
-            </span>
+            <span className="truncate text-[11px] text-foreground/80">{it.label}</span>
             <span className="ml-auto font-mono-tv text-[10px] text-muted-foreground">
               {it.id.slice(0, 6)}
             </span>

@@ -62,10 +62,18 @@ export function Guide({
     setError(null);
     setGroup("All");
     loadCountryChannels(iptvCountry)
-      .then((list) => { if (!cancelled) setIptvList(list); })
-      .catch((e) => { if (!cancelled) setError(e.message || "Failed to load"); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .then((list) => {
+        if (!cancelled) setIptvList(list);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e.message || "Failed to load");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [mode, open, iptvCountry]);
 
   useEffect(() => {
@@ -75,10 +83,18 @@ export function Guide({
     setRadioError(null);
     setRadioTag("All");
     loadCountryRadio(radioCountry)
-      .then((list) => { if (!cancelled) setRadioList(list); })
-      .catch((e) => { if (!cancelled) setRadioError(e.message || "Failed to load"); })
-      .finally(() => { if (!cancelled) setRadioLoading(false); });
-    return () => { cancelled = true; };
+      .then((list) => {
+        if (!cancelled) setRadioList(list);
+      })
+      .catch((e) => {
+        if (!cancelled) setRadioError(e.message || "Failed to load");
+      })
+      .finally(() => {
+        if (!cancelled) setRadioLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [mode, open, radioCountry]);
 
   const iptvGroups = useMemo(() => {
@@ -110,19 +126,21 @@ export function Guide({
     cat === "All"
       ? CHANNELS
       : cat === "★ Favs"
-      ? CHANNELS.filter((c) => favorites.includes(c.id))
-      : CHANNELS.filter((c) => c.category === cat);
+        ? CHANNELS.filter((c) => favorites.includes(c.id))
+        : CHANNELS.filter((c) => c.category === cat);
   let filteredIptv = iptvList;
   if (group !== "All") filteredIptv = filteredIptv.filter((c) => (c.group || "") === group);
-  if (search) filteredIptv = filteredIptv.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
-  if (sort === "name") filteredIptv = [...filteredIptv].sort((a, b) => a.name.localeCompare(b.name));
+  if (search)
+    filteredIptv = filteredIptv.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
+  if (sort === "name")
+    filteredIptv = [...filteredIptv].sort((a, b) => a.name.localeCompare(b.name));
 
   let filteredRadio = radioList;
   if (radioTag !== "All")
     filteredRadio = filteredRadio.filter((s) => (s.tags || "").toLowerCase().includes(radioTag));
   if (radioSearch)
     filteredRadio = filteredRadio.filter((s) =>
-      s.name.toLowerCase().includes(radioSearch.toLowerCase())
+      s.name.toLowerCase().includes(radioSearch.toLowerCase()),
     );
 
   return (
@@ -136,8 +154,8 @@ export function Guide({
             {mode === "yt"
               ? "Pick a channel"
               : mode === "iptv"
-              ? "Live TV — worldwide"
-              : "Radio — worldwide"}
+                ? "Live TV — worldwide"
+                : "Radio — worldwide"}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -146,7 +164,9 @@ export function Guide({
               onClick={() => onModeChange("yt")}
               className={cn(
                 "flex items-center gap-1.5 rounded px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
-                mode === "yt" ? "bg-primary/20 text-primary text-glow" : "text-muted-foreground hover:text-foreground"
+                mode === "yt"
+                  ? "bg-primary/20 text-primary text-glow"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Tv className="h-3.5 w-3.5" /> YouTube
@@ -155,7 +175,9 @@ export function Guide({
               onClick={() => onModeChange("iptv")}
               className={cn(
                 "flex items-center gap-1.5 rounded px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
-                mode === "iptv" ? "bg-accent/20 text-accent text-glow" : "text-muted-foreground hover:text-foreground"
+                mode === "iptv"
+                  ? "bg-accent/20 text-accent text-glow"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Globe2 className="h-3.5 w-3.5" /> Live TV
@@ -164,7 +186,9 @@ export function Guide({
               onClick={() => onModeChange("radio")}
               className={cn(
                 "flex items-center gap-1.5 rounded px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
-                mode === "radio" ? "bg-secondary/30 text-foreground text-glow" : "text-muted-foreground hover:text-foreground"
+                mode === "radio"
+                  ? "bg-secondary/30 text-foreground text-glow"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <RadioIcon className="h-3.5 w-3.5" /> Radio
@@ -181,76 +205,86 @@ export function Guide({
 
       {mode === "yt" && (
         <>
-      <div className="flex gap-2 overflow-x-auto border-b border-border/60 px-6 py-3">
-        {cats.map((c) => (
-          <button
-            key={c}
-            onClick={() => setCat(c)}
-            className={cn(
-              "rounded-full border px-4 py-1.5 font-mono-tv text-xs uppercase tracking-widest transition-colors",
-              cat === c
-                ? "border-primary bg-primary/20 text-primary text-glow"
-                : "border-border/60 text-muted-foreground hover:border-foreground/40 hover:text-foreground"
-            )}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid flex-1 gap-3 overflow-y-auto p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {list.map((ch) => {
-          const active = ch.id === currentId;
-          const fav = favorites.includes(ch.id);
-          return (
-            <button
-              key={ch.id}
-              onClick={() => onPick(ch)}
-              className={cn(
-                "group relative overflow-hidden rounded-xl border bg-card/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
-                active ? "border-primary shadow-glow" : "border-border/60 hover:border-foreground/30"
-              )}
-              style={{ ["--ch-color" as string]: ch.color }}
-            >
-              <div className="bg-scanlines pointer-events-none absolute inset-0 opacity-30" />
-              {onToggleFavorite && (
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onClick={(e) => { e.stopPropagation(); onToggleFavorite(ch.id); }}
-                  onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); onToggleFavorite(ch.id); } }}
-                  className={cn(
-                    "absolute right-3 top-3 z-10 rounded-md border border-border/60 bg-black/40 p-1.5 transition-colors hover:border-foreground/40",
-                    fav ? "text-accent" : "text-muted-foreground"
-                  )}
-                  aria-label={fav ? "Unfavorite" : "Favorite"}
-                >
-                  <Star className={cn("h-3.5 w-3.5", fav && "fill-current")} />
-                </span>
-              )}
-              <div className="flex items-start justify-between">
-                <div
-                  className="font-mono-tv text-3xl font-bold leading-none text-glow"
-                  style={{ color: ch.color }}
-                >
-                  {ch.number}
-                </div>
-                {active && (
-                  <div className="flex items-center gap-1.5 font-mono-tv text-[10px] uppercase tracking-widest text-primary">
-                    <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-primary shadow-glow" />
-                    on air
-                  </div>
+          <div className="flex gap-2 overflow-x-auto border-b border-border/60 px-6 py-3">
+            {cats.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={cn(
+                  "rounded-full border px-4 py-1.5 font-mono-tv text-xs uppercase tracking-widest transition-colors",
+                  cat === c
+                    ? "border-primary bg-primary/20 text-primary text-glow"
+                    : "border-border/60 text-muted-foreground hover:border-foreground/40 hover:text-foreground",
                 )}
-              </div>
-              <div className="mt-4 text-lg font-bold tracking-tight">{ch.name}</div>
-              <div className="mt-1 text-sm text-muted-foreground">{ch.tagline}</div>
-              <div className="mt-4 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
-                {ch.category} · {ch.videos.length} in rotation
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid flex-1 gap-3 overflow-y-auto p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {list.map((ch) => {
+              const active = ch.id === currentId;
+              const fav = favorites.includes(ch.id);
+              return (
+                <button
+                  key={ch.id}
+                  onClick={() => onPick(ch)}
+                  className={cn(
+                    "group relative overflow-hidden rounded-xl border bg-card/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
+                    active
+                      ? "border-primary shadow-glow"
+                      : "border-border/60 hover:border-foreground/30",
+                  )}
+                  style={{ ["--ch-color" as string]: ch.color }}
+                >
+                  <div className="bg-scanlines pointer-events-none absolute inset-0 opacity-30" />
+                  {onToggleFavorite && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleFavorite(ch.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.stopPropagation();
+                          onToggleFavorite(ch.id);
+                        }
+                      }}
+                      className={cn(
+                        "absolute right-3 top-3 z-10 rounded-md border border-border/60 bg-black/40 p-1.5 transition-colors hover:border-foreground/40",
+                        fav ? "text-accent" : "text-muted-foreground",
+                      )}
+                      aria-label={fav ? "Unfavorite" : "Favorite"}
+                    >
+                      <Star className={cn("h-3.5 w-3.5", fav && "fill-current")} />
+                    </span>
+                  )}
+                  <div className="flex items-start justify-between">
+                    <div
+                      className="font-mono-tv text-3xl font-bold leading-none text-glow"
+                      style={{ color: ch.color }}
+                    >
+                      {ch.number}
+                    </div>
+                    {active && (
+                      <div className="flex items-center gap-1.5 font-mono-tv text-[10px] uppercase tracking-widest text-primary">
+                        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-primary shadow-glow" />
+                        on air
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 text-lg font-bold tracking-tight">{ch.name}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{ch.tagline}</div>
+                  <div className="mt-4 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {ch.category} · {ch.videos.length} in rotation
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </>
       )}
 
@@ -318,19 +352,27 @@ export function Guide({
                       onClick={() => onPickIptv(iptvCountry, ch)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg border bg-card/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
-                        active ? "border-accent shadow-glow" : "border-border/60"
+                        active ? "border-accent shadow-glow" : "border-border/60",
                       )}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-black/50">
                         {ch.logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={ch.logo} alt="" className="h-full w-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                          <img
+                            src={ch.logo}
+                            alt=""
+                            className="h-full w-full object-contain"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
                         ) : (
                           <Tv className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold tracking-tight">{ch.name}</div>
+                        <div className="truncate text-sm font-semibold tracking-tight">
+                          {ch.name}
+                        </div>
                         <div className="truncate font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
                           {ch.group || "general"}
                         </div>
@@ -404,7 +446,7 @@ export function Guide({
                       onClick={() => onPickRadio(radioCountry, st)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg border bg-card/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
-                        active ? "border-primary shadow-glow" : "border-border/60"
+                        active ? "border-primary shadow-glow" : "border-border/60",
                       )}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-black/50">
@@ -422,7 +464,9 @@ export function Guide({
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold tracking-tight">{st.name}</div>
+                        <div className="truncate text-sm font-semibold tracking-tight">
+                          {st.name}
+                        </div>
                         <div className="truncate font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
                           {(st.tags || "general").split(",")[0]} · {st.bitrate || "?"}kbps
                         </div>

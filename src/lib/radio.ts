@@ -64,7 +64,7 @@ export function loadCountryRadio(code: string): Promise<RadioStation[]> {
     for (const base of MIRRORS) {
       try {
         const url = `${base}/json/stations/bycountrycodeexact/${encodeURIComponent(
-          key
+          key,
         )}?hidebroken=true&order=votes&reverse=true&limit=400`;
         const r = await fetch(url, { headers: { Accept: "application/json" } });
         if (!r.ok) throw new Error(`status ${r.status}`);

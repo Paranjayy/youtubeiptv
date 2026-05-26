@@ -40,7 +40,11 @@ export function HlsPlayer({ src, muted, onError, onReady }: Props) {
     }
 
     return () => {
-      try { hls?.destroy(); } catch {}
+      try {
+        hls?.destroy();
+      } catch {
+        // Ignore teardown failures from the HLS engine.
+      }
       video.removeAttribute("src");
       video.load();
     };

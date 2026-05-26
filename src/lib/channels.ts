@@ -33,13 +33,7 @@ export const CHANNELS: Channel[] = [
     tagline: "synthwave & retro futures",
     category: "Music",
     color: "var(--neon-pink)",
-    videos: [
-      "MV_3Dpw-BRY",
-      "4xDzrJKXOOY",
-      "UedTcufyrHc",
-      "ALZHF5UqnU4",
-      "9Ip0sNbtFnk",
-    ],
+    videos: ["MV_3Dpw-BRY", "4xDzrJKXOOY", "UedTcufyrHc", "ALZHF5UqnU4", "9Ip0sNbtFnk"],
   },
   {
     id: "hits",
@@ -64,13 +58,7 @@ export const CHANNELS: Channel[] = [
     tagline: "earth in 4k",
     category: "Nature",
     color: "var(--neon-green)",
-    videos: [
-      "BHACKCNDMW8",
-      "LXb3EKWsInQ",
-      "qochHw8FvWg",
-      "eKFTSSKCzWA",
-      "K3oxs5UJhBE",
-    ],
+    videos: ["BHACKCNDMW8", "LXb3EKWsInQ", "qochHw8FvWg", "eKFTSSKCzWA", "K3oxs5UJhBE"],
   },
   {
     id: "space",
@@ -79,13 +67,7 @@ export const CHANNELS: Channel[] = [
     tagline: "cosmos & telescopes",
     category: "Science",
     color: "var(--neon-purple)",
-    videos: [
-      "0jHsq36_NTU",
-      "GoW8Tf7hTGA",
-      "Wf6tVqYrjpw",
-      "udFxKZRyQt4",
-      "libKVRa01L8",
-    ],
+    videos: ["0jHsq36_NTU", "GoW8Tf7hTGA", "Wf6tVqYrjpw", "udFxKZRyQt4", "libKVRa01L8"],
   },
   {
     id: "comedy",
@@ -94,12 +76,7 @@ export const CHANNELS: Channel[] = [
     tagline: "stand-up & sketches",
     category: "Comedy",
     color: "var(--neon-amber)",
-    videos: [
-      "RBumgq5yVrA",
-      "QH2-TGUlwu4",
-      "ZbZSe6N_BXs",
-      "PYylPRX6z4Q",
-    ],
+    videos: ["RBumgq5yVrA", "QH2-TGUlwu4", "ZbZSe6N_BXs", "PYylPRX6z4Q"],
   },
   {
     id: "gaming",
@@ -108,12 +85,7 @@ export const CHANNELS: Channel[] = [
     tagline: "trailers, speedruns, glitches",
     category: "Gaming",
     color: "var(--neon-pink)",
-    videos: [
-      "1O6Qstncpnc",
-      "8X2kIfS6fb8",
-      "WMweEpGlu_U",
-      "0KSOMA3QBU0",
-    ],
+    videos: ["1O6Qstncpnc", "8X2kIfS6fb8", "WMweEpGlu_U", "0KSOMA3QBU0"],
   },
   {
     id: "tech",
@@ -122,12 +94,7 @@ export const CHANNELS: Channel[] = [
     tagline: "talks & teardowns",
     category: "Tech",
     color: "var(--neon-cyan)",
-    videos: [
-      "kCc8FmEb1nY",
-      "VMj-3S1tku0",
-      "Lz8oCqo7eGo",
-      "8jLOx1hD3_o",
-    ],
+    videos: ["kCc8FmEb1nY", "VMj-3S1tku0", "Lz8oCqo7eGo", "8jLOx1hD3_o"],
   },
   {
     id: "jazz",
@@ -136,12 +103,7 @@ export const CHANNELS: Channel[] = [
     tagline: "smooth jazz & late nights",
     category: "Music",
     color: "var(--neon-cyan)",
-    videos: [
-      "Dx5qFachd3A",
-      "neV3EPgvZ3g",
-      "MOoIRRkOQrk",
-      "DSGyEsJ17cI",
-    ],
+    videos: ["Dx5qFachd3A", "neV3EPgvZ3g", "MOoIRRkOQrk", "DSGyEsJ17cI"],
   },
   {
     id: "workout",
@@ -150,12 +112,7 @@ export const CHANNELS: Channel[] = [
     tagline: "high-energy workout",
     category: "Music",
     color: "var(--neon-pink)",
-    videos: [
-      "gCYcHz2k5x0",
-      "btPJPFnesV4",
-      "RB-RcX5DS5A",
-      "papuvlVeZg8",
-    ],
+    videos: ["gCYcHz2k5x0", "btPJPFnesV4", "RB-RcX5DS5A", "papuvlVeZg8"],
   },
   {
     id: "docs",
@@ -164,12 +121,7 @@ export const CHANNELS: Channel[] = [
     tagline: "deep-dive documentaries",
     category: "Docs",
     color: "var(--neon-amber)",
-    videos: [
-      "iYpHJ8FjbBE",
-      "rStL7niR7gs",
-      "PqEiCu5e8YM",
-      "TYPFenJQciw",
-    ],
+    videos: ["iYpHJ8FjbBE", "rStL7niR7gs", "PqEiCu5e8YM", "TYPFenJQciw"],
   },
   {
     id: "anime",
@@ -178,12 +130,7 @@ export const CHANNELS: Channel[] = [
     tagline: "openings & AMVs",
     category: "Anime",
     color: "var(--neon-purple)",
-    videos: [
-      "QczGoCmX-pI",
-      "5wRWniH7rt8",
-      "G2GvLEXSPDU",
-      "melLnp1FY7Y",
-    ],
+    videos: ["QczGoCmX-pI", "5wRWniH7rt8", "G2GvLEXSPDU", "melLnp1FY7Y"],
   },
 ];
 
@@ -332,7 +279,7 @@ CHANNELS.push(
     category: "Auto",
     color: "var(--neon-pink)",
     videos: ["MFcVjL3VnZw", "C3dPyEoMRzM", "1NfMOh6Yt7c", "MNl6dz9rxxs"],
-  }
+  },
 );
 
 // Mood-as-television: vibes over genres.
@@ -448,10 +395,37 @@ CHANNELS.push(
     category: "Learn",
     color: "var(--neon-cyan)",
     videos: ["zjkBMFhNj_g", "kCc8FmEb1nY", "wjZofJX0v4M", "VMj-3S1tku0"],
-  }
+  },
 );
 
 export const CATEGORIES = Array.from(new Set(CHANNELS.map((c) => c.category)));
+
+const CHANNEL_BY_ID = new Map(CHANNELS.map((channel) => [channel.id, channel] as const));
+
+export function normalizeChannelSlug(slug: string) {
+  return slug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-");
+}
+
+export function getChannelBySlug(slug: string) {
+  const normalized = normalizeChannelSlug(slug);
+  return (
+    CHANNEL_BY_ID.get(normalized) ??
+    CHANNELS.find((channel) => normalizeChannelSlug(channel.name) === normalized) ??
+    null
+  );
+}
+
+export function getChannelPath(channel: Channel) {
+  return `/channels/${channel.id}`;
+}
+
+export function getRandomChannel(currentId?: string) {
+  const pool = currentId ? CHANNELS.filter((channel) => channel.id !== currentId) : CHANNELS;
+  return pool[Math.floor(Math.random() * pool.length)] ?? CHANNELS[0];
+}
 
 export function shuffle<T>(arr: T[], seed = Date.now()): T[] {
   const a = arr.slice();

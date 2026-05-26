@@ -2,10 +2,44 @@ import { useEffect, useRef } from "react";
 
 declare global {
   interface Window {
-    YT?: any;
+    YT?: YouTubeApi;
     onYouTubeIframeAPIReady?: () => void;
   }
 }
+
+type YouTubePlayerInstance = {
+  destroy?: () => void;
+  loadVideoById?: (videoId: string) => void;
+  getCurrentTime?: () => number;
+  getDuration?: () => number;
+  getVideoData?: () => { title?: string };
+  playVideo?: () => void;
+};
+
+type YouTubePlayerEvent = {
+  target: YouTubePlayerInstance;
+  data?: number;
+};
+
+type YouTubeApi = {
+  Player: new (
+    host: HTMLDivElement,
+    config: {
+      videoId: string;
+      host: string;
+      playerVars: Record<string, string | number | undefined>;
+      events: {
+        onReady: (event: YouTubePlayerEvent) => void;
+        onStateChange: (event: YouTubePlayerEvent) => void;
+        onError: () => void;
+      };
+    },
+  ) => YouTubePlayerInstance;
+  PlayerState: {
+    ENDED: number;
+    PLAYING: number;
+  };
+};
 
 let apiPromise: Promise<void> | null = null;
 function loadApi(): Promise<void> {
@@ -24,19 +58,30 @@ function loadApi(): Promise<void> {
 type Props = {
   videoId: string;
   onEnded: () => void;
+  onError?: (videoId: string) => void;
   onReady?: () => void;
   onTitle?: (title: string) => void;
   onProgress?: (elapsed: number, duration: number) => void;
   muted?: boolean;
 };
 
-export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, muted }: Props) {
+export function YouTubePlayer({
+  videoId,
+  onEnded,
+  onError,
+  onReady,
+  onTitle,
+  onProgress,
+  muted,
+}: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YouTubePlayerInstance | null>(null);
   const endedRef = useRef(onEnded);
+  const videoIdRef = useRef(videoId);
   const titleRef = useRef(onTitle);
   const progressRef = useRef(onProgress);
   endedRef.current = onEnded;
+  videoIdRef.current = videoId;
   titleRef.current = onTitle;
   progressRef.current = onProgress;
 
@@ -58,15 +103,17 @@ export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, 
           enablejsapi: 1,
         },
         events: {
-          onReady: (e: any) => {
+          onReady: (e) => {
             e.target.playVideo();
             try {
               const data = e.target.getVideoData();
               titleRef.current?.(data?.title ?? "");
-            } catch {}
+            } catch {
+              // Ignore transient YT API lookup failures.
+            }
             onReady?.();
           },
-          onStateChange: (e: any) => {
+          onStateChange: (e) => {
             if (e.data === window.YT.PlayerState.ENDED) {
               endedRef.current();
             }
@@ -74,16 +121,25 @@ export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, 
               try {
                 const data = e.target.getVideoData();
                 titleRef.current?.(data?.title ?? "");
-              } catch {}
+              } catch {
+                // Ignore transient YT API lookup failures.
+              }
             }
           },
-          onError: () => endedRef.current(),
+          onError: () => {
+            onError?.(videoIdRef.current);
+            endedRef.current();
+          },
         },
       });
     });
     return () => {
       cancelled = true;
-      try { playerRef.current?.destroy?.(); } catch {}
+      try {
+        playerRef.current?.destroy?.();
+      } catch {
+        // Ignore teardown failures from the embedded player.
+      }
       playerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,7 +157,9 @@ export function YouTubePlayer({ videoId, onEnded, onReady, onTitle, onProgress, 
       if (!p || !p.getCurrentTime || !p.getDuration) return;
       try {
         progressRef.current?.(p.getCurrentTime() || 0, p.getDuration() || 0);
-      } catch {}
+      } catch {
+        // Ignore transient progress sampling failures.
+      }
     }, 1000);
     return () => window.clearInterval(id);
   }, []);
