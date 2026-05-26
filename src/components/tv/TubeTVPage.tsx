@@ -174,12 +174,6 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
     }
   }, [channel, iptvCountry, mode, radioCountry]);
 
-  const openRandomChannel = useCallback(() => {
-    const next = getRandomChannel(channel.id);
-    openChannel(next);
-    toast("Surprise channel loaded");
-  }, [channel.id, openChannel]);
-
   // Per-channel persistent shuffled queues plus cursors.
   const queuesRef = useRef<Record<string, { order: string[]; cursor: number }>>({});
   const [, force] = useState(0);
@@ -237,6 +231,12 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
     },
     [navigate, triggerStatic],
   );
+
+  const openRandomChannel = useCallback(() => {
+    const next = getRandomChannel(channel.id);
+    openChannel(next);
+    toast("Surprise channel loaded");
+  }, [channel.id, openChannel]);
 
   const changeChannel = useCallback(
     (delta: number) => {

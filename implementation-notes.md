@@ -27,6 +27,7 @@
 - Vercel deployment protection is currently part of the project setup, so the `.vercel.app` hostname can behave like a protected deployment instead of a public preview. I verified the project and alias wiring, but the live hostname still depends on the team/project protection settings outside the repo.
 - Vercel needed the Nitro `vercel` preset because the app is TanStack Start SSR, not a plain SPA, and the hand-written server shim could not resolve TanStack's generated router entry at runtime.
 - The first Vercel attempt used a hand-written server shim and route rewrite, but the real fix was switching to TanStack Start's official `tanstackStart()` + `nitro({ preset: "vercel" })` flow so the generated `#tanstack-router-entry` import resolves correctly.
+- A render-time crash showed up in `TubeTVPage` because `changeChannel` and `openRandomChannel` read `openChannel` before it was initialized. Reordering those callbacks fixed the TDZ crash and allowed the page to render normally again.
 
 ## Left For Later
 
