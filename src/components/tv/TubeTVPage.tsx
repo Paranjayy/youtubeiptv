@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel } from "@/lib/channels";
+import {
+  getIptvPath,
+  getRadioPath,
+  getTvPath,
+  normalizeIptvCountryCode,
+  normalizeRadioCountryCode,
+} from "@/lib/tv-routes";
 import { YouTubePlayer } from "@/components/tv/YouTubePlayer";
 import { HlsPlayer } from "@/components/tv/HlsPlayer";
 import { RadioPlayer } from "@/components/tv/RadioPlayer";
@@ -28,6 +35,9 @@ import {
 
 type TubeTVPageProps = {
   initialChannelSlug?: string | null;
+  initialMode?: "yt" | "iptv" | "radio";
+  initialIptvCountry?: string | null;
+  initialRadioCountry?: string | null;
 };
 
 const FAVORITES_KEY = "tubetv:favs";
@@ -37,7 +47,12 @@ const CHANNEL_KEY = "tubetv:last-channel";
 const IPTV_COUNTRY_KEY = "tubetv:iptv-country";
 const RADIO_COUNTRY_KEY = "tubetv:radio-country";
 
-export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
+export function TubeTVPage({
+  initialChannelSlug,
+  initialMode,
+  initialIptvCountry,
+  initialRadioCountry,
+}: TubeTVPageProps) {
   const navigate = useNavigate();
   const initialChannel = initialChannelSlug ? getChannelBySlug(initialChannelSlug) : null;
   const initialChannelIdx = useMemo(() => {
@@ -50,12 +65,16 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
   const [guideOpen, setGuideOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [title, setTitle] = useState<string>("");
-  const [mode, setMode] = useState<"yt" | "iptv" | "radio">("yt");
-  const [iptvCountry, setIptvCountry] = useState<string>("us");
+  const [mode, setMode] = useState<"yt" | "iptv" | "radio">(initialMode ?? "yt");
+  const [iptvCountry, setIptvCountry] = useState<string>(
+    normalizeIptvCountryCode(initialIptvCountry ?? "us"),
+  );
   const [iptvChannel, setIptvChannel] = useState<IptvChannel | null>(null);
   const [iptvCandidates, setIptvCandidates] = useState<IptvChannel[]>([]);
   const [iptvError, setIptvError] = useState<string | null>(null);
-  const [radioCountry, setRadioCountry] = useState<string>("US");
+  const [radioCountry, setRadioCountry] = useState<string>(
+    normalizeRadioCountryCode(initialRadioCountry ?? "us"),
+  );
   const [radioStation, setRadioStation] = useState<RadioStation | null>(null);
   const [radioError, setRadioError] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -85,32 +104,38 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
         const idx = CHANNELS.findIndex((c) => c.id === savedChannel);
         if (idx >= 0) setChannelIdx(idx);
       }
-      if (
-        !initialChannelSlug &&
-        (requestedMode === "yt" || requestedMode === "iptv" || requestedMode === "radio")
-      ) {
-        setMode(requestedMode);
-      } else if (
-        !initialChannelSlug &&
-        (savedMode === "yt" || savedMode === "iptv" || savedMode === "radio")
-      ) {
-        setMode(savedMode);
+      if (!initialMode) {
+        if (requestedMode === "yt" || requestedMode === "iptv" || requestedMode === "radio") {
+          setMode(requestedMode);
+        } else if (savedMode === "yt" || savedMode === "iptv" || savedMode === "radio") {
+          setMode(savedMode);
+        }
       }
-      if (requestedMode === "iptv" && requestedCountry) {
-        setIptvCountry(requestedCountry.toLowerCase());
-      } else if (savedIptvCountry) {
-        setIptvCountry(savedIptvCountry);
+      if (!initialIptvCountry) {
+        if (requestedMode === "iptv" && requestedCountry) {
+          setIptvCountry(normalizeIptvCountryCode(requestedCountry));
+        } else if (savedIptvCountry) {
+          setIptvCountry(normalizeIptvCountryCode(savedIptvCountry));
+        }
       }
-      if (requestedMode === "radio" && requestedCountry) {
-        setRadioCountry(requestedCountry.toUpperCase());
-      } else if (savedRadioCountry) {
-        setRadioCountry(savedRadioCountry.toUpperCase());
+      if (!initialRadioCountry) {
+        if (requestedMode === "radio" && requestedCountry) {
+          setRadioCountry(normalizeRadioCountryCode(requestedCountry));
+        } else if (savedRadioCountry) {
+          setRadioCountry(normalizeRadioCountryCode(savedRadioCountry));
+        }
+      }
+      if (!initialMode && requestedMode === "iptv" && requestedCountry) {
+        void navigate({ to: getIptvPath(requestedCountry), replace: true });
+      }
+      if (!initialMode && requestedMode === "radio" && requestedCountry) {
+        void navigate({ to: getRadioPath(requestedCountry), replace: true });
       }
     } catch {
       // Ignore storage and parsing errors, then fall back to defaults.
     }
     hasHydratedRef.current = true;
-  }, [initialChannelSlug]);
+  }, [initialIptvCountry, initialMode, initialRadioCountry, initialChannelSlug, navigate]);
 
   useEffect(() => {
     try {
@@ -162,17 +187,29 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
 
   const copyShareLink = useCallback(async () => {
     try {
-      const url = new URL(mode === "yt" ? getChannelPath(channel) : "/", window.location.origin);
-      if (mode !== "yt") {
-        url.searchParams.set("mode", mode);
-        url.searchParams.set("country", mode === "iptv" ? iptvCountry : radioCountry);
-      }
+      const url = new URL(
+        getTvPath(mode, channel, iptvCountry, radioCountry),
+        window.location.origin,
+      );
       await navigator.clipboard.writeText(url.toString());
       toast.success("Link copied");
     } catch {
       toast.error("Could not copy link");
     }
   }, [channel, iptvCountry, mode, radioCountry]);
+
+  const navigateToMode = useCallback(
+    (nextMode: "yt" | "iptv" | "radio") => {
+      if (nextMode === "yt") {
+        void navigate({ to: getChannelPath(channel), replace: true });
+      } else if (nextMode === "iptv") {
+        void navigate({ to: getIptvPath(iptvCountry), replace: true });
+      } else {
+        void navigate({ to: getRadioPath(radioCountry), replace: true });
+      }
+    },
+    [channel, iptvCountry, navigate, radioCountry],
+  );
 
   // Per-channel persistent shuffled queues plus cursors.
   const queuesRef = useRef<Record<string, { order: string[]; cursor: number }>>({});
@@ -238,6 +275,38 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
     toast("Surprise channel loaded");
   }, [channel.id, openChannel]);
 
+  const handleModeChange = useCallback(
+    (nextMode: "yt" | "iptv" | "radio") => {
+      setMode(nextMode);
+      navigateToMode(nextMode);
+    },
+    [navigateToMode],
+  );
+
+  const handleIptvCountryChange = useCallback(
+    (country: string) => {
+      const next = normalizeIptvCountryCode(country);
+      setIptvCountry(next);
+      setIptvChannel(null);
+      setIptvError(null);
+      setMode("iptv");
+      void navigate({ to: getIptvPath(next), replace: true });
+    },
+    [navigate],
+  );
+
+  const handleRadioCountryChange = useCallback(
+    (country: string) => {
+      const next = normalizeRadioCountryCode(country);
+      setRadioCountry(next);
+      setRadioStation(null);
+      setRadioError(null);
+      setMode("radio");
+      void navigate({ to: getRadioPath(next), replace: true });
+    },
+    [navigate],
+  );
+
   const changeChannel = useCallback(
     (delta: number) => {
       const next = CHANNELS[(channelIdx + delta + CHANNELS.length) % CHANNELS.length];
@@ -246,33 +315,43 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
     [channelIdx, openChannel],
   );
 
-  const pickIptv = useCallback((country: string, ch: IptvChannel) => {
-    setIptvCountry(country);
-    setIptvChannel(ch);
-    setIptvError(null);
-    setMode("iptv");
-    setTitle(ch.name);
-    setGuideOpen(false);
-    loadCountryChannels(country)
-      .then((list) => {
-        const pool = list.filter((c) => c.url !== ch.url && (!ch.group || c.group === ch.group));
-        for (let i = pool.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [pool[i], pool[j]] = [pool[j], pool[i]];
-        }
-        setIptvCandidates(pool.slice(0, 12));
-      })
-      .catch(() => setIptvCandidates([]));
-  }, []);
+  const pickIptv = useCallback(
+    (country: string, ch: IptvChannel) => {
+      const nextCountry = normalizeIptvCountryCode(country);
+      setIptvCountry(nextCountry);
+      setIptvChannel(ch);
+      setIptvError(null);
+      setMode("iptv");
+      setTitle(ch.name);
+      setGuideOpen(false);
+      void navigate({ to: getIptvPath(nextCountry), replace: true });
+      loadCountryChannels(nextCountry)
+        .then((list) => {
+          const pool = list.filter((c) => c.url !== ch.url && (!ch.group || c.group === ch.group));
+          for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+          }
+          setIptvCandidates(pool.slice(0, 12));
+        })
+        .catch(() => setIptvCandidates([]));
+    },
+    [navigate],
+  );
 
-  const pickRadio = useCallback((country: string, st: RadioStation) => {
-    setRadioCountry(country);
-    setRadioStation(st);
-    setRadioError(null);
-    setMode("radio");
-    setTitle(st.name);
-    setGuideOpen(false);
-  }, []);
+  const pickRadio = useCallback(
+    (country: string, st: RadioStation) => {
+      const nextCountry = normalizeRadioCountryCode(country);
+      setRadioCountry(nextCountry);
+      setRadioStation(st);
+      setRadioError(null);
+      setMode("radio");
+      setTitle(st.name);
+      setGuideOpen(false);
+      void navigate({ to: getRadioPath(nextCountry), replace: true });
+    },
+    [navigate],
+  );
 
   const handleIptvError = useCallback((msg: string) => {
     setIptvCandidates((rest) => {
@@ -370,7 +449,7 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
           <div className="h-[calc(100vh-180px)] overflow-y-auto py-2">
             <button
               onClick={() => {
-                setMode("iptv");
+                handleModeChange("iptv");
                 setGuideOpen(true);
               }}
               className={
@@ -393,7 +472,7 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
             </button>
             <button
               onClick={() => {
-                setMode("radio");
+                handleModeChange("radio");
                 setGuideOpen(true);
               }}
               className={
@@ -693,16 +772,16 @@ export function TubeTVPage({ initialChannelSlug }: TubeTVPageProps) {
         <Guide
           open={guideOpen}
           mode={mode}
-          onModeChange={setMode}
+          onModeChange={handleModeChange}
           currentId={channel.id}
           onPick={openChannel}
           onPickIptv={pickIptv}
           iptvCountry={iptvCountry}
-          onCountryChange={setIptvCountry}
+          onCountryChange={handleIptvCountryChange}
           iptvCurrentUrl={iptvChannel?.url ?? null}
           onPickRadio={pickRadio}
           radioCountry={radioCountry}
-          onRadioCountryChange={setRadioCountry}
+          onRadioCountryChange={handleRadioCountryChange}
           radioCurrentUrl={radioStation?.url_resolved || radioStation?.url || null}
           onClose={() => setGuideOpen(false)}
           favorites={favorites}
