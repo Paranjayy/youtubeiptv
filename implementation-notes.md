@@ -24,6 +24,7 @@
 - The share link now restores IPTV/radio mode and country, but still does not pin a single stream because that would be fragile.
 - The shared page component is larger now, but it keeps the behavior in one place and avoids route-specific duplication.
 - The app still ships a large client bundle because the existing player stack is heavy and feature-rich.
+- Vercel deployment protection is currently part of the project setup, so the `.vercel.app` hostname can behave like a protected deployment instead of a public preview. I verified the project and alias wiring, but the live hostname still depends on the team/project protection settings outside the repo.
 
 ## Left For Later
 
