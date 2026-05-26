@@ -25,6 +25,8 @@
 - The shared page component is larger now, but it keeps the behavior in one place and avoids route-specific duplication.
 - The app still ships a large client bundle because the existing player stack is heavy and feature-rich.
 - Vercel deployment protection is currently part of the project setup, so the `.vercel.app` hostname can behave like a protected deployment instead of a public preview. I verified the project and alias wiring, but the live hostname still depends on the team/project protection settings outside the repo.
+- Vercel needed the Nitro `vercel` preset because the app is TanStack Start SSR, not a plain SPA, and the hand-written server shim could not resolve TanStack's generated router entry at runtime.
+- The first Vercel attempt used a hand-written server shim and route rewrite, but the real fix was switching to TanStack Start's official `tanstackStart()` + `nitro({ preset: "vercel" })` flow so the generated `#tanstack-router-entry` import resolves correctly.
 
 ## Left For Later
 
