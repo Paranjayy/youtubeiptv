@@ -574,14 +574,15 @@ export function TubeTVPage({
 
   return (
     <main className="relative flex min-h-screen flex-col overflow-hidden">
-      <header className="flex items-center justify-between gap-4 border-b border-border/60 bg-black/40 px-6 py-3">
+      <header className="relative flex items-center justify-between gap-4 overflow-hidden border-b border-border/60 bg-[linear-gradient(90deg,rgba(8,12,16,0.98),rgba(10,16,15,0.94)_42%,rgba(18,13,8,0.95))] px-6 py-3">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(112,239,183,0.68),rgba(255,196,92,0.58),transparent)]" />
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/70 bg-card/60 text-foreground/90">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-primary/30 bg-[linear-gradient(135deg,rgba(79,174,123,0.18),rgba(226,174,74,0.12))] text-primary shadow-glow">
             <Tv className="h-4.5 w-4.5" />
           </div>
           <div>
             <h1 className="font-mono-tv text-lg font-semibold tracking-[0.12em] text-foreground">
-              TubeTV
+              Tube<span className="text-primary">TV</span>
             </h1>
             <p className="font-mono-tv text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               broadcast desk
@@ -594,7 +595,7 @@ export function TubeTVPage({
       <Ticker />
 
       <section className="relative flex flex-1 flex-col lg:flex-row">
-        <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-black/30 lg:block">
+        <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(9,12,15,0.96),rgba(6,8,10,0.98))] lg:block">
           <div className="border-b border-border/60 px-4 py-3 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
             Sources
           </div>
@@ -607,11 +608,11 @@ export function TubeTVPage({
               className={
                 "flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
                 (mode === "iptv"
-                  ? "border-accent bg-accent/10"
-                  : "border-transparent hover:bg-card/60")
+                  ? "border-primary bg-primary/10"
+                  : "border-transparent hover:bg-primary/8")
               }
             >
-              <Globe2 className="h-5 w-5 text-accent" />
+              <Globe2 className="h-5 w-5 text-primary" />
               <span className="flex-1">
                 <span className="block text-sm font-semibold tracking-tight">LIVE TV - WORLD</span>
                 <span className="block text-[11px] text-muted-foreground">
@@ -630,11 +631,11 @@ export function TubeTVPage({
               className={
                 "flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
                 (mode === "radio"
-                  ? "border-primary bg-primary/10"
-                  : "border-transparent hover:bg-card/60")
+                  ? "border-accent bg-accent/10"
+                  : "border-transparent hover:bg-accent/8")
               }
             >
-              <RadioIcon className="h-5 w-5 text-primary" />
+              <RadioIcon className="h-5 w-5 text-accent" />
               <span className="flex-1">
                 <span className="block text-sm font-semibold tracking-tight">RADIO - WORLD</span>
                 <span className="block text-[11px] text-muted-foreground">
@@ -658,7 +659,7 @@ export function TubeTVPage({
                     "flex w-full items-center gap-3 border-l-2 px-4 py-2.5 text-left transition-colors " +
                     (active
                       ? "border-primary bg-primary/10"
-                      : "border-transparent hover:bg-card/60")
+                      : "border-transparent hover:bg-primary/8")
                   }
                 >
                   <span
@@ -685,7 +686,7 @@ export function TubeTVPage({
         <div className="relative flex flex-1 flex-col">
           <div
             className={
-              "relative aspect-video w-full bg-black lg:aspect-auto lg:flex-1 " +
+              "relative aspect-video w-full bg-[radial-gradient(circle_at_top_left,rgba(79,174,123,0.11),transparent_28%),radial-gradient(circle_at_top_right,rgba(104,145,255,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(226,174,74,0.1),transparent_22%),#050608] lg:aspect-auto lg:flex-1 " +
               (crt ? "crt-screen" : "")
             }
           >
@@ -709,8 +710,8 @@ export function TubeTVPage({
                 onError={handleIptvError}
               />
             ) : mode === "radio" && radioStation ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-black via-card to-black text-center">
-                <RadioIcon className="h-16 w-16 animate-pulse-dot text-primary" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[linear-gradient(135deg,rgba(6,8,10,0.96),rgba(10,14,16,0.95),rgba(13,10,8,0.96))] text-center">
+                <RadioIcon className="h-16 w-16 animate-pulse-dot text-accent" />
                 <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   Radio - {radioCountryLabel?.name}
                 </div>
@@ -726,11 +727,11 @@ export function TubeTVPage({
                 />
               </div>
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black text-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[linear-gradient(135deg,rgba(5,7,9,0.98),rgba(10,12,15,0.96))] text-center">
                 {mode === "radio" ? (
-                  <RadioIcon className="h-10 w-10 text-primary" />
+                  <RadioIcon className="h-10 w-10 text-accent" />
                 ) : (
-                  <Globe2 className="h-10 w-10 text-accent" />
+                  <Globe2 className="h-10 w-10 text-primary" />
                 )}
                 <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-muted-foreground">
                   {mode === "radio"
@@ -739,7 +740,7 @@ export function TubeTVPage({
                 </div>
                 <button
                   onClick={() => setGuideOpen(true)}
-                  className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-glow"
+                  className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground shadow-glow-accent"
                 >
                   Open guide
                 </button>
@@ -754,14 +755,14 @@ export function TubeTVPage({
               />
             )}
 
-            <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-3 rounded-md border border-border/60 bg-background/70 px-3 py-2 backdrop-blur">
+            <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-3 rounded-md border border-border/60 bg-background/75 px-3 py-2 backdrop-blur">
               <span className="flex items-center gap-1.5 font-mono-tv text-[10px] uppercase tracking-widest text-primary">
                 <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-primary" />
                 Live
               </span>
               {mode === "yt" && currentMeta && (
                 <>
-                  <span className="font-mono-tv text-lg font-bold leading-none text-foreground/85">
+                  <span className="font-mono-tv text-lg font-bold leading-none text-primary">
                     {currentMeta.number}
                   </span>
                   <span className="text-sm font-semibold tracking-tight">{currentMeta.name}</span>
@@ -769,7 +770,9 @@ export function TubeTVPage({
               )}
               {mode === "iptv" && (
                 <>
-                  <span className="font-mono-tv text-lg leading-none">{countryLabel?.flag}</span>
+                  <span className="font-mono-tv text-lg leading-none text-primary">
+                    {countryLabel?.flag}
+                  </span>
                   <span className="text-sm font-semibold tracking-tight">
                     {iptvChannel?.name ?? "Live TV"}
                   </span>
@@ -777,7 +780,7 @@ export function TubeTVPage({
               )}
               {mode === "radio" && (
                 <>
-                  <span className="font-mono-tv text-lg leading-none">
+                  <span className="font-mono-tv text-lg leading-none text-accent">
                     {radioCountryLabel?.flag}
                   </span>
                   <span className="text-sm font-semibold tracking-tight">
@@ -805,7 +808,7 @@ export function TubeTVPage({
             )}
           </div>
 
-          <div className="border-t border-border/60 bg-black/60 px-6 py-4">
+          <div className="border-t border-border/60 bg-[linear-gradient(180deg,rgba(8,10,12,0.72),rgba(4,5,7,0.96))] px-6 py-4">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="font-mono-tv text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
@@ -834,21 +837,21 @@ export function TubeTVPage({
                   <>
                     <button
                       onClick={() => changeChannel(-1)}
-                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                       aria-label="Previous channel"
                     >
                       <ChevronDown className="h-4 w-4" /> CH-
                     </button>
                     <button
                       onClick={() => changeChannel(1)}
-                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                       aria-label="Next channel"
                     >
                       <ChevronUp className="h-4 w-4" /> CH+
                     </button>
                     <button
                       onClick={advance}
-                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:text-accent"
+                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
                       aria-label="Skip to next video"
                     >
                       <SkipForward className="h-4 w-4" /> Skip
@@ -857,21 +860,21 @@ export function TubeTVPage({
                 )}
                 <button
                   onClick={() => setMuted((m) => !m)}
-                  className="rounded-md border border-border/60 bg-card/50 p-2 hover:border-primary/60 hover:text-primary"
+                  className="rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label={muted ? "Unmute" : "Mute"}
                 >
                   {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </button>
                 <button
                   onClick={() => setGuideOpen(true)}
-                  className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90"
+                  className="flex items-center gap-1.5 rounded-md bg-[linear-gradient(135deg,rgba(79,174,123,0.95),rgba(58,143,104,0.95))] px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
                 >
                   <Grid3x3 className="h-4 w-4" /> Guide
                 </button>
                 {history[0] && (
                   <button
                     onClick={resumeLatest}
-                    className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                    className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                     aria-label="Resume latest"
                   >
                     <SkipForward className="h-4 w-4" /> Resume
@@ -879,35 +882,35 @@ export function TubeTVPage({
                 )}
                 <button
                   onClick={openRandomChannel}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:text-accent"
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
                   aria-label="Surprise me"
                 >
                   <Sparkles className="h-4 w-4" /> Surprise
                 </button>
                 <button
                   onClick={copyShareLink}
-                  className="rounded-md border border-border/60 bg-card/50 p-2 hover:border-primary/60 hover:text-primary"
+                  className="rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Copy current link"
                 >
                   <Link2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={openDiscoveryDesk}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Open discovery desk"
                 >
                   <Compass className="h-4 w-4" /> Discover
                 </button>
                 <button
                   onClick={openPlayground}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:text-accent"
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
                   aria-label="Open playground"
                 >
                   <Gamepad2 className="h-4 w-4" /> Play
                 </button>
                 <button
                   onClick={openFocusRoom}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Open focus room"
                 >
                   <Timer className="h-4 w-4" /> Focus
@@ -974,7 +977,7 @@ export function TubeTVPage({
 
       {helpOpen && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-xl border border-border/60 bg-card p-6 shadow-2xl">
+          <div className="w-full max-w-lg rounded-md border border-border/60 bg-[linear-gradient(180deg,rgba(12,15,18,0.96),rgba(7,9,12,0.98))] p-6 shadow-2xl">
             <div className="text-lg font-bold tracking-tight">Keyboard shortcuts</div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div>G open guide</div>

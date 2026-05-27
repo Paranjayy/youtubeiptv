@@ -150,8 +150,8 @@ export function Guide({
   const recentHistory = history.slice(0, 8);
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col bg-background/85 backdrop-blur-md animate-flicker">
-      <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
+    <div className="absolute inset-0 z-30 flex flex-col bg-[linear-gradient(180deg,rgba(10,13,16,0.93),rgba(7,9,12,0.98))] backdrop-blur-md animate-flicker">
+      <div className="flex items-center justify-between border-b border-border/60 bg-[linear-gradient(90deg,rgba(79,174,123,0.05),rgba(226,174,74,0.04),transparent)] px-6 py-4">
         <div>
           <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-primary text-glow">
             ▎ Channel Guide
@@ -165,13 +165,13 @@ export function Guide({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-md border border-border/60 bg-card/40 p-0.5">
+          <div className="flex rounded-md border border-border/60 bg-background/30 p-0.5">
             <button
               onClick={() => onModeChange("yt")}
               className={cn(
-                "flex items-center gap-1.5 rounded px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
                 mode === "yt"
-                  ? "bg-primary/20 text-primary text-glow"
+                  ? "bg-primary/15 text-primary"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -180,9 +180,9 @@ export function Guide({
             <button
               onClick={() => onModeChange("iptv")}
               className={cn(
-                "flex items-center gap-1.5 rounded px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
                 mode === "iptv"
-                  ? "bg-accent/20 text-accent text-glow"
+                  ? "bg-primary/15 text-primary"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -191,9 +191,9 @@ export function Guide({
             <button
               onClick={() => onModeChange("radio")}
               className={cn(
-                "flex items-center gap-1.5 rounded px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
                 mode === "radio"
-                  ? "bg-secondary/30 text-foreground text-glow"
+                  ? "bg-accent/15 text-accent"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -233,12 +233,12 @@ export function Guide({
                   key={entry.path}
                   onClick={() => onPickHistory?.(entry)}
                   className={cn(
-                    "min-w-[220px] rounded-xl border bg-card/60 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
+                    "min-w-[220px] rounded-md border border-l-4 bg-background/25 p-3 text-left transition-colors hover:bg-background/40",
                     entry.mode === "yt"
-                      ? "border-primary/40 hover:border-primary/70"
+                      ? "border-l-primary/40 hover:border-l-primary/70"
                       : entry.mode === "iptv"
-                        ? "border-accent/40 hover:border-accent/70"
-                        : "border-secondary/40 hover:border-secondary/70",
+                        ? "border-l-accent/40 hover:border-l-accent/70"
+                        : "border-l-secondary/40 hover:border-l-secondary/70",
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -267,9 +267,9 @@ export function Guide({
                 key={c}
                 onClick={() => setCat(c)}
                 className={cn(
-                  "rounded-full border px-4 py-1.5 font-mono-tv text-xs uppercase tracking-widest transition-colors",
+                  "rounded-md border px-4 py-1.5 font-mono-tv text-xs uppercase tracking-widest transition-colors",
                   cat === c
-                    ? "border-primary bg-primary/20 text-primary text-glow"
+                    ? "border-primary bg-primary/12 text-primary"
                     : "border-border/60 text-muted-foreground hover:border-foreground/40 hover:text-foreground",
                 )}
               >
@@ -287,10 +287,10 @@ export function Guide({
                   key={ch.id}
                   onClick={() => onPick(ch)}
                   className={cn(
-                    "group relative overflow-hidden rounded-xl border bg-card/60 p-5 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
+                    "group relative overflow-hidden rounded-sm border border-border/60 bg-background/25 p-5 text-left transition-colors hover:bg-background/40",
                     active
-                      ? "border-primary shadow-glow"
-                      : "border-border/60 hover:border-foreground/30",
+                      ? "border-l-4 border-l-primary bg-primary/10"
+                      : "hover:border-foreground/30",
                   )}
                 >
                   <div className="bg-scanlines pointer-events-none absolute inset-0 opacity-30" />
@@ -309,7 +309,7 @@ export function Guide({
                         }
                       }}
                       className={cn(
-                        "absolute right-3 top-3 z-10 rounded-md border border-border/60 bg-black/40 p-1.5 transition-colors hover:border-foreground/40",
+                        "absolute right-3 top-3 z-10 rounded-md border border-border/60 bg-background/45 p-1.5 transition-colors hover:border-foreground/40",
                         fav ? "text-accent" : "text-muted-foreground",
                       )}
                       aria-label={fav ? "Unfavorite" : "Favorite"}
@@ -346,7 +346,7 @@ export function Guide({
             <select
               value={iptvCountry}
               onChange={(e) => onCountryChange(e.target.value)}
-              className="rounded-md border border-border/60 bg-card/60 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
+              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
             >
               {IPTV_COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -357,7 +357,7 @@ export function Guide({
             <select
               value={group}
               onChange={(e) => setGroup(e.target.value)}
-              className="rounded-md border border-border/60 bg-card/60 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
+              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
             >
               {iptvGroups.map((g) => (
                 <option key={g} value={g}>
@@ -368,7 +368,7 @@ export function Guide({
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as "default" | "name")}
-              className="rounded-md border border-border/60 bg-card/60 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
+              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
             >
               <option value="default">Sort: default</option>
               <option value="name">Sort: A–Z</option>
@@ -377,7 +377,7 @@ export function Guide({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search channels…"
-              className="flex-1 min-w-[180px] rounded-md border border-border/60 bg-card/60 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-accent/60 focus:outline-none"
+              className="flex-1 min-w-[180px] rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-accent/60 focus:outline-none"
             />
             <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
               {loading ? "loading…" : `${filteredIptv.length} streams`}
@@ -403,11 +403,13 @@ export function Guide({
                       key={ch.id + ch.url}
                       onClick={() => onPickIptv(iptvCountry, ch)}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border bg-card/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
-                        active ? "border-accent shadow-glow" : "border-border/60",
+                        "flex items-center gap-3 rounded-sm border border-border/60 bg-background/25 p-3 text-left transition-colors hover:bg-background/40",
+                        active
+                          ? "border-l-4 border-l-primary bg-primary/10"
+                          : "hover:border-foreground/30",
                       )}
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-black/50">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background/40">
                         {ch.logo ? (
                           <img
                             src={ch.logo}
@@ -430,7 +432,7 @@ export function Guide({
                         </div>
                       </div>
                       {active && (
-                        <span className="h-2 w-2 animate-pulse-dot rounded-full bg-accent shadow-glow" />
+                        <span className="h-2 w-2 animate-pulse-dot rounded-full bg-primary shadow-glow" />
                       )}
                     </button>
                   );
@@ -447,7 +449,7 @@ export function Guide({
             <select
               value={radioCountry}
               onChange={(e) => onRadioCountryChange(e.target.value)}
-              className="rounded-md border border-border/60 bg-card/60 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60"
+              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60"
             >
               {RADIO_COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -458,7 +460,7 @@ export function Guide({
             <select
               value={radioTag}
               onChange={(e) => setRadioTag(e.target.value)}
-              className="rounded-md border border-border/60 bg-card/60 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60"
+              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60"
             >
               {radioTags.map((t) => (
                 <option key={t} value={t}>
@@ -470,7 +472,7 @@ export function Guide({
               value={radioSearch}
               onChange={(e) => setRadioSearch(e.target.value)}
               placeholder="Search stations…"
-              className="flex-1 min-w-[180px] rounded-md border border-border/60 bg-card/60 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-foreground/60 focus:outline-none"
+              className="flex-1 min-w-[180px] rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-foreground/60 focus:outline-none"
             />
             <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
               {radioLoading ? "loading…" : `${filteredRadio.length} stations`}
@@ -497,11 +499,13 @@ export function Guide({
                       key={st.stationuuid}
                       onClick={() => onPickRadio(radioCountry, st)}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border bg-card/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
-                        active ? "border-primary shadow-glow" : "border-border/60",
+                        "flex items-center gap-3 rounded-sm border border-border/60 bg-background/25 p-3 text-left transition-colors hover:bg-background/40",
+                        active
+                          ? "border-l-4 border-l-primary bg-primary/10"
+                          : "hover:border-foreground/30",
                       )}
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-black/50">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background/40">
                         {st.favicon ? (
                           <img
                             src={st.favicon}

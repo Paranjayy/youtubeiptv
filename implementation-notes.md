@@ -40,6 +40,7 @@
 - I kept the Focus Room local-first on purpose. Shared rooms, faces, invites, and live co-study presence are better as a later backend-backed feature so the first version stays fast and dependable.
 - I added launch points for Focus Room from the TV shell, Discovery Desk, and Playground so the new lane stays discoverable without turning any single page into a junk drawer.
 - I softened the brand palette and removed per-channel index colors so the TV shell reads more like a professional product and less like a demo mashup.
+- I then pushed the shell further toward a broadcast-console look: a richer dark background, a tighter green/amber brand system, flatter list rows, and fewer card-like surfaces so the UI feels more like an instrument than a dashboard of panels.
 - I could not complete a local Vite production build in this shell because the Rollup native binary in `node_modules` hit a macOS code-signing mismatch. TypeScript and ESLint still pass for the touched files, and Vercel remote builds should be able to validate the production bundle once the commit is pushed.
 
 ## Left For Later
