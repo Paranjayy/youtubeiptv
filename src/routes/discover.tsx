@@ -204,6 +204,13 @@ function DiscoveryPage() {
               <Tv className="h-4 w-4" />
               Back to TV
             </Link>
+            <Link
+              to="/playground"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
+            >
+              <Gamepad2 className="h-4 w-4" />
+              Playground
+            </Link>
             <button
               onClick={() => {
                 void loadRandom();

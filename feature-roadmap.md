@@ -6,6 +6,7 @@
 Core TV / IPTV / Radio      ████████████████████ 95%
 Recent history / resume     ██████████████████░░ 80%
 Discovery / timepass        ███████░░░░░░░░░░░░░ 35%
+Playground / mini-games     ██████░░░░░░░░░░░░░░ 30%
 Mobile experience           ████████░░░░░░░░░░░░ 40%
 Mini-games / experiments    ███░░░░░░░░░░░░░░░░░ 15%
 Sharing / SEO               ████████████████░░░░ 80%
@@ -19,6 +20,14 @@ Sharing / SEO               ████████████████░�
 - Artist trail / discoverography
 - Search for topics, people, and bands
 - One-click "surprise me" resurfacing
+
+### Playground
+- Geo daily challenge
+- Music guesser
+- Movies / shows clue cards
+- Anime guesser
+- Books / literature rounds
+- Streaks, saved answers, and future daily mode expansion
 
 ### Timepass Games
 - GeoGuessr-style browser game
@@ -36,8 +45,8 @@ Sharing / SEO               ████████████████░�
 ## Build Order
 
 1. Discovery Desk
-2. Wiki/artist search polish
-3. One mini-game at a time
+2. Playground daily deck
+3. Wiki/artist search polish
 4. Mobile cleanup
 5. Sharing and metadata polish
 

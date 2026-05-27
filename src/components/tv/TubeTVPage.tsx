@@ -43,6 +43,7 @@ import {
   Sparkles,
   Link2,
   Compass,
+  Gamepad2,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -395,6 +396,10 @@ export function TubeTVPage({
 
   const openDiscoveryDesk = useCallback(() => {
     void navigate({ to: "/discover" });
+  }, [navigate]);
+
+  const openPlayground = useCallback(() => {
+    void navigate({ to: "/playground" });
   }, [navigate]);
 
   const resumeLatest = useCallback(() => {
@@ -887,6 +892,13 @@ export function TubeTVPage({
                   aria-label="Open discovery desk"
                 >
                   <Compass className="h-4 w-4" /> Discover
+                </button>
+                <button
+                  onClick={openPlayground}
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:text-accent"
+                  aria-label="Open playground"
+                >
+                  <Gamepad2 className="h-4 w-4" /> Play
                 </button>
               </div>
             </div>
