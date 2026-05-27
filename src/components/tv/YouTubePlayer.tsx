@@ -88,8 +88,9 @@ export function YouTubePlayer({
   useEffect(() => {
     let cancelled = false;
     loadApi().then(() => {
-      if (cancelled || !hostRef.current) return;
-      playerRef.current = new window.YT.Player(hostRef.current, {
+      const yt = window.YT;
+      if (cancelled || !hostRef.current || !yt?.Player) return;
+      playerRef.current = new yt.Player(hostRef.current, {
         videoId,
         host: "https://www.youtube-nocookie.com",
         playerVars: {
@@ -104,9 +105,9 @@ export function YouTubePlayer({
         },
         events: {
           onReady: (e) => {
-            e.target.playVideo();
+            e.target.playVideo?.();
             try {
-              const data = e.target.getVideoData();
+              const data = e.target.getVideoData?.();
               titleRef.current?.(data?.title ?? "");
             } catch {
               // Ignore transient YT API lookup failures.
@@ -114,12 +115,13 @@ export function YouTubePlayer({
             onReady?.();
           },
           onStateChange: (e) => {
-            if (e.data === window.YT.PlayerState.ENDED) {
+            const playerState = window.YT?.PlayerState;
+            if (e.data === playerState?.ENDED) {
               endedRef.current();
             }
-            if (e.data === window.YT.PlayerState.PLAYING) {
+            if (e.data === playerState?.PLAYING) {
               try {
-                const data = e.target.getVideoData();
+                const data = e.target.getVideoData?.();
                 titleRef.current?.(data?.title ?? "");
               } catch {
                 // Ignore transient YT API lookup failures.

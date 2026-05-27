@@ -3,8 +3,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel } from "@/lib/channels";
 import {
   getIptvPath,
+  getIptvItemPath,
+  getIptvItemSlug,
   getRadioPath,
+  getRadioItemPath,
+  getRadioItemSlug,
   getTvPath,
+  findIptvChannelBySlug,
+  findRadioStationBySlug,
   normalizeIptvCountryCode,
   normalizeRadioCountryCode,
 } from "@/lib/tv-routes";
@@ -37,7 +43,9 @@ type TubeTVPageProps = {
   initialChannelSlug?: string | null;
   initialMode?: "yt" | "iptv" | "radio";
   initialIptvCountry?: string | null;
+  initialIptvItemSlug?: string | null;
   initialRadioCountry?: string | null;
+  initialRadioItemSlug?: string | null;
 };
 
 const FAVORITES_KEY = "tubetv:favs";
@@ -51,7 +59,9 @@ export function TubeTVPage({
   initialChannelSlug,
   initialMode,
   initialIptvCountry,
+  initialIptvItemSlug,
   initialRadioCountry,
+  initialRadioItemSlug,
 }: TubeTVPageProps) {
   const navigate = useNavigate();
   const initialChannel = initialChannelSlug ? getChannelBySlug(initialChannelSlug) : null;
@@ -85,6 +95,8 @@ export function TubeTVPage({
   const [favorites, setFavorites] = useState<string[]>([]);
   const failedVideosRef = useRef<Record<string, Set<string>>>({});
   const hasHydratedRef = useRef(false);
+  const initialIptvItemSlugRef = useRef(initialIptvItemSlug);
+  const initialRadioItemSlugRef = useRef(initialRadioItemSlug);
 
   const channel: Channel = CHANNELS[channelIdx];
 
@@ -93,6 +105,8 @@ export function TubeTVPage({
       const urlParams = new URLSearchParams(window.location.search);
       const requestedMode = urlParams.get("mode");
       const requestedCountry = urlParams.get("country");
+      const requestedItem =
+        urlParams.get("item") || urlParams.get("stream") || urlParams.get("station");
       const savedChannel = initialChannelSlug ? null : localStorage.getItem(CHANNEL_KEY);
       const savedMode = localStorage.getItem(MODE_KEY);
       const savedIptvCountry = localStorage.getItem(IPTV_COUNTRY_KEY);
@@ -126,10 +140,20 @@ export function TubeTVPage({
         }
       }
       if (!initialMode && requestedMode === "iptv" && requestedCountry) {
-        void navigate({ to: getIptvPath(requestedCountry), replace: true });
+        void navigate({
+          to: requestedItem
+            ? `${getIptvPath(requestedCountry)}/${requestedItem}`
+            : getIptvPath(requestedCountry),
+          replace: true,
+        });
       }
       if (!initialMode && requestedMode === "radio" && requestedCountry) {
-        void navigate({ to: getRadioPath(requestedCountry), replace: true });
+        void navigate({
+          to: requestedItem
+            ? `${getRadioPath(requestedCountry)}/${requestedItem}`
+            : getRadioPath(requestedCountry),
+          replace: true,
+        });
       }
     } catch {
       // Ignore storage and parsing errors, then fall back to defaults.
@@ -177,6 +201,60 @@ export function TubeTVPage({
     }
   }, [channelIdx, initialChannelSlug]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    if (initialIptvItemSlugRef.current && mode === "iptv" && !iptvChannel) {
+      loadCountryChannels(iptvCountry)
+        .then((list) => {
+          if (cancelled) return;
+          const found = findIptvChannelBySlug(list, initialIptvItemSlugRef.current!);
+          initialIptvItemSlugRef.current = null;
+          if (found) {
+            setIptvChannel(found);
+            setTitle(found.name);
+            setIptvError(null);
+            void navigate({
+              to: getIptvItemPath(iptvCountry, found),
+              replace: true,
+            });
+          } else {
+            void navigate({ to: getIptvPath(iptvCountry), replace: true });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) initialIptvItemSlugRef.current = null;
+        });
+    }
+
+    if (initialRadioItemSlugRef.current && mode === "radio" && !radioStation) {
+      loadCountryRadio(radioCountry)
+        .then((list) => {
+          if (cancelled) return;
+          const found = findRadioStationBySlug(list, initialRadioItemSlugRef.current!);
+          initialRadioItemSlugRef.current = null;
+          if (found) {
+            setRadioStation(found);
+            setTitle(found.name);
+            setRadioError(null);
+            void navigate({
+              to: getRadioItemPath(radioCountry, found),
+              replace: true,
+            });
+          } else {
+            void navigate({ to: getRadioPath(radioCountry), replace: true });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) initialRadioItemSlugRef.current = null;
+        });
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [iptvChannel, iptvCountry, mode, navigate, radioCountry, radioStation]);
+
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
   }, []);
@@ -188,7 +266,14 @@ export function TubeTVPage({
   const copyShareLink = useCallback(async () => {
     try {
       const url = new URL(
-        getTvPath(mode, channel, iptvCountry, radioCountry),
+        getTvPath(
+          mode,
+          channel,
+          iptvCountry,
+          radioCountry,
+          iptvChannel ? getIptvItemSlug(iptvChannel) : null,
+          radioStation ? getRadioItemSlug(radioStation) : null,
+        ),
         window.location.origin,
       );
       await navigator.clipboard.writeText(url.toString());
@@ -196,19 +281,27 @@ export function TubeTVPage({
     } catch {
       toast.error("Could not copy link");
     }
-  }, [channel, iptvCountry, mode, radioCountry]);
+  }, [channel, iptvChannel, iptvCountry, mode, radioCountry, radioStation]);
 
   const navigateToMode = useCallback(
     (nextMode: "yt" | "iptv" | "radio") => {
       if (nextMode === "yt") {
         void navigate({ to: getChannelPath(channel), replace: true });
       } else if (nextMode === "iptv") {
-        void navigate({ to: getIptvPath(iptvCountry), replace: true });
+        void navigate({
+          to: iptvChannel ? getIptvItemPath(iptvCountry, iptvChannel) : getIptvPath(iptvCountry),
+          replace: true,
+        });
       } else {
-        void navigate({ to: getRadioPath(radioCountry), replace: true });
+        void navigate({
+          to: radioStation
+            ? getRadioItemPath(radioCountry, radioStation)
+            : getRadioPath(radioCountry),
+          replace: true,
+        });
       }
     },
-    [channel, iptvCountry, navigate, radioCountry],
+    [channel, iptvChannel, iptvCountry, navigate, radioCountry, radioStation],
   );
 
   // Per-channel persistent shuffled queues plus cursors.
@@ -324,7 +417,7 @@ export function TubeTVPage({
       setMode("iptv");
       setTitle(ch.name);
       setGuideOpen(false);
-      void navigate({ to: getIptvPath(nextCountry), replace: true });
+      void navigate({ to: getIptvItemPath(nextCountry, ch), replace: true });
       loadCountryChannels(nextCountry)
         .then((list) => {
           const pool = list.filter((c) => c.url !== ch.url && (!ch.group || c.group === ch.group));
@@ -348,7 +441,7 @@ export function TubeTVPage({
       setMode("radio");
       setTitle(st.name);
       setGuideOpen(false);
-      void navigate({ to: getRadioPath(nextCountry), replace: true });
+      void navigate({ to: getRadioItemPath(nextCountry, st), replace: true });
     },
     [navigate],
   );

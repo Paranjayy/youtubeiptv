@@ -30,6 +30,8 @@
 - A render-time crash showed up in `TubeTVPage` because `changeChannel` and `openRandomChannel` read `openChannel` before it was initialized. Reordering those callbacks fixed the TDZ crash and allowed the page to render normally again.
 - IPTV and radio were originally state-only, so I added canonical `/iptv/:country` and `/radio/:country` routes and made old `?mode=&country=` links self-canonicalize when they appear.
 - Radio uses uppercase country codes in app state because the existing country labels and API helpers expect that shape, but the public URL stays lowercase for consistency with the other slugs.
+- IPTV and radio item selection now has a canonical second slug segment too, so exact picks can live at `/iptv/:country/:stream` and `/radio/:country/:station` while still falling back cleanly to the country-level page if the item can no longer be resolved.
+- I could not complete a local Vite production build in this shell because the Rollup native binary in `node_modules` hit a macOS code-signing mismatch. TypeScript and ESLint still pass for the touched files, and Vercel remote builds should be able to validate the production bundle once the commit is pushed.
 
 ## Left For Later
 
