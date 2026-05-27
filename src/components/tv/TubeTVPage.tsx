@@ -29,6 +29,7 @@ import { Schedule } from "@/components/tv/Schedule";
 import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/iptv";
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { getRandomChannel } from "@/lib/channels";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   ChevronUp,
