@@ -5,14 +5,19 @@ import {
   getIptvPath,
   getIptvItemPath,
   getIptvItemSlug,
+  dedupeHistory,
   getRadioPath,
   getRadioItemPath,
   getRadioItemSlug,
   getTvPath,
   findIptvChannelBySlug,
   findRadioStationBySlug,
+  makeIptvHistoryEntry,
+  makeRadioHistoryEntry,
+  makeYtHistoryEntry,
   normalizeIptvCountryCode,
   normalizeRadioCountryCode,
+  type TvHistoryEntry,
 } from "@/lib/tv-routes";
 import { YouTubePlayer } from "@/components/tv/YouTubePlayer";
 import { HlsPlayer } from "@/components/tv/HlsPlayer";
@@ -54,6 +59,7 @@ const MODE_KEY = "tubetv:last-mode";
 const CHANNEL_KEY = "tubetv:last-channel";
 const IPTV_COUNTRY_KEY = "tubetv:iptv-country";
 const RADIO_COUNTRY_KEY = "tubetv:radio-country";
+const HISTORY_KEY = "tubetv:history";
 
 export function TubeTVPage({
   initialChannelSlug,
@@ -93,6 +99,7 @@ export function TubeTVPage({
   const [staticBurst, setStaticBurst] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [history, setHistory] = useState<TvHistoryEntry[]>([]);
   const failedVideosRef = useRef<Record<string, Set<string>>>({});
   const hasHydratedRef = useRef(false);
   const initialIptvItemSlugRef = useRef(initialIptvItemSlug);
@@ -111,7 +118,9 @@ export function TubeTVPage({
       const savedMode = localStorage.getItem(MODE_KEY);
       const savedIptvCountry = localStorage.getItem(IPTV_COUNTRY_KEY);
       const savedRadioCountry = localStorage.getItem(RADIO_COUNTRY_KEY);
+      const savedHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
       const savedFavs = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+      if (Array.isArray(savedHistory)) setHistory(savedHistory);
       if (Array.isArray(savedFavs)) setFavorites(savedFavs);
       if (localStorage.getItem(CRT_KEY) === "1") setCrt(true);
       if (!initialChannelSlug && savedChannel) {
@@ -171,6 +180,18 @@ export function TubeTVPage({
 
   useEffect(() => {
     try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    } catch {
+      // Ignore storage quota or privacy-mode failures.
+    }
+  }, [history]);
+
+  const pushHistory = useCallback((entry: TvHistoryEntry) => {
+    setHistory((entries) => dedupeHistory(entries, entry));
+  }, []);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(CRT_KEY, crt ? "1" : "0");
     } catch {
       // Ignore storage quota or privacy-mode failures.
@@ -214,6 +235,7 @@ export function TubeTVPage({
             setIptvChannel(found);
             setTitle(found.name);
             setIptvError(null);
+            pushHistory(makeIptvHistoryEntry(iptvCountry, found));
             void navigate({
               to: getIptvItemPath(iptvCountry, found),
               replace: true,
@@ -237,6 +259,7 @@ export function TubeTVPage({
             setRadioStation(found);
             setTitle(found.name);
             setRadioError(null);
+            pushHistory(makeRadioHistoryEntry(radioCountry, found));
             void navigate({
               to: getRadioItemPath(radioCountry, found),
               replace: true,
@@ -253,7 +276,7 @@ export function TubeTVPage({
     return () => {
       cancelled = true;
     };
-  }, [iptvChannel, iptvCountry, mode, navigate, radioCountry, radioStation]);
+  }, [iptvChannel, iptvCountry, mode, navigate, pushHistory, radioCountry, radioStation]);
 
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
@@ -353,13 +376,14 @@ export function TubeTVPage({
         setMode("yt");
         setGuideOpen(false);
         triggerStatic();
+        pushHistory(makeYtHistoryEntry(ch));
         void navigate({
           to: getChannelPath(ch),
           replace: true,
         });
       }
     },
-    [navigate, triggerStatic],
+    [navigate, pushHistory, triggerStatic],
   );
 
   const openRandomChannel = useCallback(() => {
@@ -367,6 +391,23 @@ export function TubeTVPage({
     openChannel(next);
     toast("Surprise channel loaded");
   }, [channel.id, openChannel]);
+
+  const resumeLatest = useCallback(() => {
+    const latest = history[0];
+    if (!latest) return;
+    setGuideOpen(false);
+    setMode(latest.mode);
+    void navigate({ to: latest.path, replace: true });
+  }, [history, navigate]);
+
+  const openHistoryEntry = useCallback(
+    (entry: TvHistoryEntry) => {
+      setGuideOpen(false);
+      setMode(entry.mode);
+      void navigate({ to: entry.path, replace: true });
+    },
+    [navigate],
+  );
 
   const handleModeChange = useCallback(
     (nextMode: "yt" | "iptv" | "radio") => {
@@ -417,6 +458,7 @@ export function TubeTVPage({
       setMode("iptv");
       setTitle(ch.name);
       setGuideOpen(false);
+      pushHistory(makeIptvHistoryEntry(nextCountry, ch));
       void navigate({ to: getIptvItemPath(nextCountry, ch), replace: true });
       loadCountryChannels(nextCountry)
         .then((list) => {
@@ -429,7 +471,7 @@ export function TubeTVPage({
         })
         .catch(() => setIptvCandidates([]));
     },
-    [navigate],
+    [navigate, pushHistory],
   );
 
   const pickRadio = useCallback(
@@ -441,9 +483,10 @@ export function TubeTVPage({
       setMode("radio");
       setTitle(st.name);
       setGuideOpen(false);
+      pushHistory(makeRadioHistoryEntry(nextCountry, st));
       void navigate({ to: getRadioItemPath(nextCountry, st), replace: true });
     },
-    [navigate],
+    [navigate, pushHistory],
   );
 
   const handleIptvError = useCallback((msg: string) => {
@@ -810,6 +853,15 @@ export function TubeTVPage({
                 >
                   <Grid3x3 className="h-4 w-4" /> Guide
                 </button>
+                {history[0] && (
+                  <button
+                    onClick={resumeLatest}
+                    className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                    aria-label="Resume latest"
+                  >
+                    <SkipForward className="h-4 w-4" /> Resume
+                  </button>
+                )}
                 <button
                   onClick={openRandomChannel}
                   className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:text-accent"
@@ -879,6 +931,8 @@ export function TubeTVPage({
           onClose={() => setGuideOpen(false)}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
+          history={history}
+          onPickHistory={openHistoryEntry}
         />
       </section>
 

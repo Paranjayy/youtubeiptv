@@ -10,11 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as IptvCountryRouteImport } from './routes/iptv/$country'
-import { Route as IptvCountryStreamRouteImport } from './routes/iptv/$country/$stream'
 import { Route as RadioCountryRouteImport } from './routes/radio/$country'
-import { Route as RadioCountryStationRouteImport } from './routes/radio/$country/$station'
+import { Route as IptvCountryRouteImport } from './routes/iptv/$country'
 import { Route as ChannelsSlugRouteImport } from './routes/channels/$slug'
+import { Route as RadioCountryStationRouteImport } from './routes/radio/$country/$station'
+import { Route as IptvCountryStreamRouteImport } from './routes/iptv/$country/$stream'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -31,46 +31,46 @@ const IptvCountryRoute = IptvCountryRouteImport.update({
   path: '/iptv/$country',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IptvCountryStreamRoute = IptvCountryStreamRouteImport.update({
-  id: '/iptv/$country/$stream',
-  path: '/$stream',
-  getParentRoute: () => IptvCountryRoute,
-} as any)
 const ChannelsSlugRoute = ChannelsSlugRouteImport.update({
   id: '/channels/$slug',
   path: '/channels/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RadioCountryStationRoute = RadioCountryStationRouteImport.update({
-  id: '/radio/$country/$station',
+  id: '/$station',
   path: '/$station',
   getParentRoute: () => RadioCountryRoute,
+} as any)
+const IptvCountryStreamRoute = IptvCountryStreamRouteImport.update({
+  id: '/$stream',
+  path: '/$stream',
+  getParentRoute: () => IptvCountryRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/channels/$slug': typeof ChannelsSlugRoute
+  '/iptv/$country': typeof IptvCountryRouteWithChildren
+  '/radio/$country': typeof RadioCountryRouteWithChildren
   '/iptv/$country/$stream': typeof IptvCountryStreamRoute
-  '/iptv/$country': typeof IptvCountryRoute
   '/radio/$country/$station': typeof RadioCountryStationRoute
-  '/radio/$country': typeof RadioCountryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/channels/$slug': typeof ChannelsSlugRoute
+  '/iptv/$country': typeof IptvCountryRouteWithChildren
+  '/radio/$country': typeof RadioCountryRouteWithChildren
   '/iptv/$country/$stream': typeof IptvCountryStreamRoute
-  '/iptv/$country': typeof IptvCountryRoute
   '/radio/$country/$station': typeof RadioCountryStationRoute
-  '/radio/$country': typeof RadioCountryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/channels/$slug': typeof ChannelsSlugRoute
+  '/iptv/$country': typeof IptvCountryRouteWithChildren
+  '/radio/$country': typeof RadioCountryRouteWithChildren
   '/iptv/$country/$stream': typeof IptvCountryStreamRoute
-  '/iptv/$country': typeof IptvCountryRoute
   '/radio/$country/$station': typeof RadioCountryStationRoute
-  '/radio/$country': typeof RadioCountryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,24 +78,24 @@ export interface FileRouteTypes {
     | '/'
     | '/channels/$slug'
     | '/iptv/$country'
-    | '/iptv/$country/$stream'
     | '/radio/$country'
+    | '/iptv/$country/$stream'
     | '/radio/$country/$station'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/channels/$slug'
     | '/iptv/$country'
-    | '/iptv/$country/$stream'
     | '/radio/$country'
+    | '/iptv/$country/$stream'
     | '/radio/$country/$station'
   id:
     | '__root__'
     | '/'
     | '/channels/$slug'
     | '/iptv/$country'
-    | '/iptv/$country/$stream'
     | '/radio/$country'
+    | '/iptv/$country/$stream'
     | '/radio/$country/$station'
   fileRoutesById: FileRoutesById
 }
@@ -104,14 +104,6 @@ export interface RootRouteChildren {
   ChannelsSlugRoute: typeof ChannelsSlugRoute
   IptvCountryRoute: typeof IptvCountryRouteWithChildren
   RadioCountryRoute: typeof RadioCountryRouteWithChildren
-}
-
-export interface IptvCountryRouteChildren {
-  IptvCountryStreamRoute: typeof IptvCountryStreamRoute
-}
-
-export interface RadioCountryRouteChildren {
-  RadioCountryStationRoute: typeof RadioCountryStationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -137,13 +129,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IptvCountryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/iptv/$country/$stream': {
-      id: '/iptv/$country/$stream'
-      path: '/$stream'
-      fullPath: '/iptv/$country/$stream'
-      preLoaderRoute: typeof IptvCountryStreamRouteImport
-      parentRoute: typeof IptvCountryRouteImport
-    }
     '/channels/$slug': {
       id: '/channels/$slug'
       path: '/channels/$slug'
@@ -156,32 +141,47 @@ declare module '@tanstack/react-router' {
       path: '/$station'
       fullPath: '/radio/$country/$station'
       preLoaderRoute: typeof RadioCountryStationRouteImport
-      parentRoute: typeof RadioCountryRouteImport
+      parentRoute: typeof RadioCountryRoute
+    }
+    '/iptv/$country/$stream': {
+      id: '/iptv/$country/$stream'
+      path: '/$stream'
+      fullPath: '/iptv/$country/$stream'
+      preLoaderRoute: typeof IptvCountryStreamRouteImport
+      parentRoute: typeof IptvCountryRoute
     }
   }
 }
 
-const iptvCountryRouteChildren: IptvCountryRouteChildren = {
+interface IptvCountryRouteChildren {
+  IptvCountryStreamRoute: typeof IptvCountryStreamRoute
+}
+
+const IptvCountryRouteChildren: IptvCountryRouteChildren = {
   IptvCountryStreamRoute: IptvCountryStreamRoute,
 }
 
-const iptvCountryRouteWithChildren = IptvCountryRoute._addFileChildren(
-  iptvCountryRouteChildren,
+const IptvCountryRouteWithChildren = IptvCountryRoute._addFileChildren(
+  IptvCountryRouteChildren,
 )
 
-const radioCountryRouteChildren: RadioCountryRouteChildren = {
+interface RadioCountryRouteChildren {
+  RadioCountryStationRoute: typeof RadioCountryStationRoute
+}
+
+const RadioCountryRouteChildren: RadioCountryRouteChildren = {
   RadioCountryStationRoute: RadioCountryStationRoute,
 }
 
-const radioCountryRouteWithChildren = RadioCountryRoute._addFileChildren(
-  radioCountryRouteChildren,
+const RadioCountryRouteWithChildren = RadioCountryRoute._addFileChildren(
+  RadioCountryRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChannelsSlugRoute: ChannelsSlugRoute,
-  IptvCountryRoute: iptvCountryRouteWithChildren,
-  RadioCountryRoute: radioCountryRouteWithChildren,
+  IptvCountryRoute: IptvCountryRouteWithChildren,
+  RadioCountryRoute: RadioCountryRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

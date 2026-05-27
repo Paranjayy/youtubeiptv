@@ -1,6 +1,7 @@
 import { CATEGORIES, CHANNELS, type Channel } from "@/lib/channels";
 import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/iptv";
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
+import { type TvHistoryEntry } from "@/lib/tv-routes";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2, Globe2, Tv, Radio as RadioIcon, Star } from "lucide-react";
@@ -22,6 +23,8 @@ type Props = {
   onClose: () => void;
   favorites?: string[];
   onToggleFavorite?: (id: string) => void;
+  history?: TvHistoryEntry[];
+  onPickHistory?: (entry: TvHistoryEntry) => void;
 };
 
 export function Guide({
@@ -41,6 +44,8 @@ export function Guide({
   onClose,
   favorites = [],
   onToggleFavorite,
+  history = [],
+  onPickHistory,
 }: Props) {
   const [cat, setCat] = useState<string>("All");
   const [iptvList, setIptvList] = useState<IptvChannel[]>([]);
@@ -142,6 +147,7 @@ export function Guide({
     filteredRadio = filteredRadio.filter((s) =>
       s.name.toLowerCase().includes(radioSearch.toLowerCase()),
     );
+  const recentHistory = history.slice(0, 8);
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col bg-background/85 backdrop-blur-md animate-flicker">
@@ -202,6 +208,56 @@ export function Guide({
           </button>
         </div>
       </div>
+
+      {recentHistory.length > 0 && (
+        <div className="border-b border-border/60 px-6 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-mono-tv text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                Recent
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Jump back to the last places you were watching or listening.
+              </div>
+            </div>
+            <div className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+              {recentHistory.length} saved
+            </div>
+          </div>
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {recentHistory.map((entry) => {
+              const modeLabel =
+                entry.mode === "yt" ? "YouTube" : entry.mode === "iptv" ? "Live TV" : "Radio";
+              return (
+                <button
+                  key={entry.path}
+                  onClick={() => onPickHistory?.(entry)}
+                  className={cn(
+                    "min-w-[220px] rounded-xl border bg-card/60 p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-card",
+                    entry.mode === "yt"
+                      ? "border-primary/40 hover:border-primary/70"
+                      : entry.mode === "iptv"
+                        ? "border-accent/40 hover:border-accent/70"
+                        : "border-secondary/40 hover:border-secondary/70",
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="truncate text-sm font-semibold tracking-tight">
+                      {entry.title}
+                    </div>
+                    <div className="rounded-full border border-border/60 px-2 py-0.5 font-mono-tv text-[9px] uppercase tracking-widest text-muted-foreground">
+                      {modeLabel}
+                    </div>
+                  </div>
+                  <div className="mt-1 truncate text-xs text-muted-foreground">
+                    {entry.subtitle}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {mode === "yt" && (
         <>

@@ -4,6 +4,13 @@ import { type RadioStation } from "@/lib/radio";
 
 export type TvMode = "yt" | "iptv" | "radio";
 
+export type TvHistoryEntry = {
+  mode: TvMode;
+  title: string;
+  subtitle: string;
+  path: string;
+};
+
 export function normalizeIptvCountryCode(code: string) {
   return code.trim().toLowerCase();
 }
@@ -71,4 +78,35 @@ export function getTvPath(
       ? `${getRadioPath(radioCountry)}/${radioItemSlug}`
       : getRadioPath(radioCountry);
   return getChannelPath(channel);
+}
+
+export function makeYtHistoryEntry(channel: Channel): TvHistoryEntry {
+  return {
+    mode: "yt",
+    title: channel.name,
+    subtitle: channel.tagline,
+    path: getChannelPath(channel),
+  };
+}
+
+export function makeIptvHistoryEntry(country: string, channel: IptvChannel): TvHistoryEntry {
+  return {
+    mode: "iptv",
+    title: channel.name,
+    subtitle: `${country.toLowerCase()} · ${channel.group || "general"}`,
+    path: getIptvItemPath(country, channel),
+  };
+}
+
+export function makeRadioHistoryEntry(country: string, station: RadioStation): TvHistoryEntry {
+  return {
+    mode: "radio",
+    title: station.name,
+    subtitle: `${country.toUpperCase()} · ${(station.tags || "general").split(",")[0]}`,
+    path: getRadioItemPath(country, station),
+  };
+}
+
+export function dedupeHistory(entries: TvHistoryEntry[], next: TvHistoryEntry, limit = 8) {
+  return [next, ...entries.filter((entry) => entry.path !== next.path)].slice(0, limit);
 }
