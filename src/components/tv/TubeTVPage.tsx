@@ -42,6 +42,7 @@ import {
   Radio as RadioIcon,
   Sparkles,
   Link2,
+  Compass,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -391,6 +392,10 @@ export function TubeTVPage({
     openChannel(next);
     toast("Surprise channel loaded");
   }, [channel.id, openChannel]);
+
+  const openDiscoveryDesk = useCallback(() => {
+    void navigate({ to: "/discover" });
+  }, [navigate]);
 
   const resumeLatest = useCallback(() => {
     const latest = history[0];
@@ -875,6 +880,13 @@ export function TubeTVPage({
                   aria-label="Copy current link"
                 >
                   <Link2 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={openDiscoveryDesk}
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                  aria-label="Open discovery desk"
+                >
+                  <Compass className="h-4 w-4" /> Discover
                 </button>
               </div>
             </div>

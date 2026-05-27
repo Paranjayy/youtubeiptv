@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RadioCountryRouteImport } from './routes/radio/$country'
 import { Route as IptvCountryRouteImport } from './routes/iptv/$country'
@@ -16,6 +17,11 @@ import { Route as ChannelsSlugRouteImport } from './routes/channels/$slug'
 import { Route as RadioCountryStationRouteImport } from './routes/radio/$country/$station'
 import { Route as IptvCountryStreamRouteImport } from './routes/iptv/$country/$stream'
 
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +55,7 @@ const IptvCountryStreamRoute = IptvCountryStreamRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/discover': typeof DiscoverRoute
   '/channels/$slug': typeof ChannelsSlugRoute
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/discover': typeof DiscoverRoute
   '/channels/$slug': typeof ChannelsSlugRoute
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/discover': typeof DiscoverRoute
   '/channels/$slug': typeof ChannelsSlugRoute
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
@@ -76,6 +85,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/discover'
     | '/channels/$slug'
     | '/iptv/$country'
     | '/radio/$country'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/discover'
     | '/channels/$slug'
     | '/iptv/$country'
     | '/radio/$country'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/discover'
     | '/channels/$slug'
     | '/iptv/$country'
     | '/radio/$country'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DiscoverRoute: typeof DiscoverRoute
   ChannelsSlugRoute: typeof ChannelsSlugRoute
   IptvCountryRoute: typeof IptvCountryRouteWithChildren
   RadioCountryRoute: typeof RadioCountryRouteWithChildren
@@ -108,6 +121,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -179,6 +199,7 @@ const RadioCountryRouteWithChildren = RadioCountryRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DiscoverRoute: DiscoverRoute,
   ChannelsSlugRoute: ChannelsSlugRoute,
   IptvCountryRoute: IptvCountryRouteWithChildren,
   RadioCountryRoute: RadioCountryRouteWithChildren,
