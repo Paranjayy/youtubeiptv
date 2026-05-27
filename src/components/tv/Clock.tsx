@@ -18,7 +18,7 @@ export function Clock() {
   return (
     <div suppressHydrationWarning className="flex items-baseline gap-3 font-mono-tv">
       <span className="text-sm uppercase text-muted-foreground">{date}</span>
-      <span className="text-base text-primary text-glow">{time}</span>
+      <span className="text-base font-medium text-foreground/85">{time}</span>
     </div>
   );
 }

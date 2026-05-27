@@ -292,7 +292,6 @@ export function Guide({
                       ? "border-primary shadow-glow"
                       : "border-border/60 hover:border-foreground/30",
                   )}
-                  style={{ ["--ch-color" as string]: ch.color }}
                 >
                   <div className="bg-scanlines pointer-events-none absolute inset-0 opacity-30" />
                   {onToggleFavorite && (
@@ -319,10 +318,7 @@ export function Guide({
                     </span>
                   )}
                   <div className="flex items-start justify-between">
-                    <div
-                      className="font-mono-tv text-3xl font-bold leading-none text-glow"
-                      style={{ color: ch.color }}
-                    >
+                    <div className="font-mono-tv text-3xl font-bold leading-none text-foreground/85">
                       {ch.number}
                     </div>
                     {active && (

@@ -575,15 +575,15 @@ export function TubeTVPage({
     <main className="relative flex min-h-screen flex-col overflow-hidden">
       <header className="flex items-center justify-between gap-4 border-b border-border/60 bg-black/40 px-6 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/20 text-primary shadow-glow">
-            <Tv className="h-5 w-5" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-border/70 bg-card/60 text-foreground/90">
+            <Tv className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h1 className="font-mono-tv text-lg font-bold tracking-[0.2em] text-glow text-primary">
-              TUBE<span className="text-accent">TV</span>
+            <h1 className="font-mono-tv text-lg font-semibold tracking-[0.12em] text-foreground">
+              TubeTV
             </h1>
-            <p className="font-mono-tv text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-              YouTube - 24/7 broadcast
+            <p className="font-mono-tv text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              broadcast desk
             </p>
           </div>
         </div>
@@ -661,8 +661,10 @@ export function TubeTVPage({
                   }
                 >
                   <span
-                    className="font-mono-tv text-lg font-bold"
-                    style={{ color: active ? "var(--primary)" : ch.color }}
+                    className={cn(
+                      "font-mono-tv text-lg font-bold tabular-nums",
+                      active ? "text-foreground" : "text-muted-foreground/80",
+                    )}
                   >
                     {ch.number}
                   </span>
@@ -758,10 +760,7 @@ export function TubeTVPage({
               </span>
               {mode === "yt" && currentMeta && (
                 <>
-                  <span
-                    className="font-mono-tv text-lg font-bold leading-none"
-                    style={{ color: currentMeta.color }}
-                  >
+                  <span className="font-mono-tv text-lg font-bold leading-none text-foreground/85">
                     {currentMeta.number}
                   </span>
                   <span className="text-sm font-semibold tracking-tight">{currentMeta.name}</span>
