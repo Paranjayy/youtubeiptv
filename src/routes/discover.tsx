@@ -11,6 +11,7 @@ import {
   RefreshCcw,
   Search,
   Sparkles,
+  Timer,
   Tv,
 } from "lucide-react";
 import {
@@ -210,6 +211,13 @@ function DiscoveryPage() {
             >
               <Gamepad2 className="h-4 w-4" />
               Playground
+            </Link>
+            <Link
+              to="/focus"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
+            >
+              <Timer className="h-4 w-4" />
+              Focus
             </Link>
             <button
               onClick={() => {

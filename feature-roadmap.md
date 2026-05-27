@@ -29,6 +29,11 @@ Sharing / SEO               ████████████████░�
 - Books / literature rounds
 - Streaks, saved answers, and future daily mode expansion
 
+### Focus Room
+- Pomodoro / study-with-me room with timer, sticky notes, and a sketch canvas
+- Local-first persistence for solo prep sessions
+- Future shared-room mode with invites, avatars, and co-study presence once auth/db exists
+
 ### Timepass Games
 - GeoGuessr-style browser game
 - Wordle-style daily puzzle
@@ -46,9 +51,10 @@ Sharing / SEO               ████████████████░�
 
 1. Discovery Desk
 2. Playground daily deck
-3. Wiki/artist search polish
-4. Mobile cleanup
-5. Sharing and metadata polish
+3. Focus Room / study mode
+4. Wiki/artist search polish
+5. Mobile cleanup
+6. Sharing and metadata polish
 
 ## Notes
 

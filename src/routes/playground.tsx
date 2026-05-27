@@ -11,6 +11,7 @@ import {
   Music4,
   RotateCcw,
   Sparkles,
+  Timer,
   Tv,
 } from "lucide-react";
 import {
@@ -137,6 +138,12 @@ function PlaygroundPage() {
               className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
             >
               <Sparkles className="h-4 w-4" /> Discover
+            </Link>
+            <Link
+              to="/focus"
+              className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+            >
+              <Timer className="h-4 w-4" /> Focus
             </Link>
             <button
               onClick={() => setAnswers({})}

@@ -44,6 +44,7 @@ import {
   Link2,
   Compass,
   Gamepad2,
+  Timer,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -400,6 +401,10 @@ export function TubeTVPage({
 
   const openPlayground = useCallback(() => {
     void navigate({ to: "/playground" });
+  }, [navigate]);
+
+  const openFocusRoom = useCallback(() => {
+    void navigate({ to: "/focus" });
   }, [navigate]);
 
   const resumeLatest = useCallback(() => {
@@ -899,6 +904,13 @@ export function TubeTVPage({
                   aria-label="Open playground"
                 >
                   <Gamepad2 className="h-4 w-4" /> Play
+                </button>
+                <button
+                  onClick={openFocusRoom}
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-card/50 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:text-primary"
+                  aria-label="Open focus room"
+                >
+                  <Timer className="h-4 w-4" /> Focus
                 </button>
               </div>
             </div>

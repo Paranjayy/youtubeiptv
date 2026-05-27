@@ -34,8 +34,11 @@
 - I added a persistent recent-history stack so YouTube, IPTV, and radio picks can be resumed across sessions from localStorage, with a visible recent strip in the guide and a quick Resume action in the bottom bar.
 - I added a separate `/discover` route for a timepass / discovery desk with Wikipedia on-this-day items, random article cards, and MusicBrainz artist search so the app can grow into news/wiki/music exploration without bloating the TV shell.
 - I added a `/playground` route with a daily pack of Geo, Music, Screen, Anime, and Books guesser rounds so the mini-game idea has a real home and the future game lanes stay modular.
+- I added a separate `/focus` route for a local-first study-with-me room with a Pomodoro timer, sticky notes, and a sketch canvas so the prep-mode idea has its own lane without bloating the TV shell.
 - I saved the broader feature direction in [feature-roadmap.md](/Users/paranjay/Developer/youtubeiptv/feature-roadmap.md) so the GeoGuessr / Wordle / music guesser ideas do not get lost between sessions.
 - I kept the discovery surface on public endpoints that do not need a backend or auth for the first pass, which makes it easy to ship but means the experience can still be a little rate-limit or network dependent.
+- I kept the Focus Room local-first on purpose. Shared rooms, faces, invites, and live co-study presence are better as a later backend-backed feature so the first version stays fast and dependable.
+- I added launch points for Focus Room from the TV shell, Discovery Desk, and Playground so the new lane stays discoverable without turning any single page into a junk drawer.
 - I could not complete a local Vite production build in this shell because the Rollup native binary in `node_modules` hit a macOS code-signing mismatch. TypeScript and ESLint still pass for the touched files, and Vercel remote builds should be able to validate the production bundle once the commit is pushed.
 
 ## Left For Later
