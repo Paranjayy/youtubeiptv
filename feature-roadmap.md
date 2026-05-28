@@ -46,6 +46,7 @@ Sharing / SEO               ████████████████░�
 - Custom 404 page with a proper way back in
 - Sharper social/share previews
 - Search history and saved searches
+- Searchable jump palette for routes, channels, and recent items
 
 ## Build Order
 

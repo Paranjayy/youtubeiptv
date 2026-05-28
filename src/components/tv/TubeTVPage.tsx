@@ -46,6 +46,7 @@ import {
   Compass,
   Gamepad2,
   Timer,
+  Search,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -102,6 +103,8 @@ export function TubeTVPage({
   const [crt, setCrt] = useState(false);
   const [staticBurst, setStaticBurst] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [jumpOpen, setJumpOpen] = useState(false);
+  const [jumpQuery, setJumpQuery] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
   const [history, setHistory] = useState<TvHistoryEntry[]>([]);
   const failedVideosRef = useRef<Record<string, Set<string>>>({});
@@ -408,6 +411,18 @@ export function TubeTVPage({
     void navigate({ to: "/focus" });
   }, [navigate]);
 
+  const openJumpPalette = useCallback(() => {
+    setJumpQuery("");
+    setGuideOpen(false);
+    setHelpOpen(false);
+    setJumpOpen(true);
+  }, []);
+
+  const closeJumpPalette = useCallback(() => {
+    setJumpOpen(false);
+    setJumpQuery("");
+  }, []);
+
   const resumeLatest = useCallback(() => {
     const latest = history[0];
     if (!latest) return;
@@ -529,6 +544,94 @@ export function TubeTVPage({
     [advance, channel.id],
   );
 
+  const jumpTargets = useMemo(() => {
+    const items: Array<{
+      id: string;
+      title: string;
+      subtitle: string;
+      kind: string;
+      run: () => void;
+    }> = [
+      {
+        id: "route-home",
+        title: "TubeTV",
+        subtitle: "Return to the current broadcast desk",
+        kind: "route",
+        run: () => {
+          setMode("yt");
+          setJumpOpen(false);
+          void navigate({ to: getChannelPath(channel), replace: true });
+        },
+      },
+      {
+        id: "route-discover",
+        title: "Discovery Desk",
+        subtitle: "News, wiki, and artist trail",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/discover" });
+        },
+      },
+      {
+        id: "route-play",
+        title: "Playground",
+        subtitle: "Geo, music, screen, anime, and books",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/playground" });
+        },
+      },
+      {
+        id: "route-focus",
+        title: "Focus Room",
+        subtitle: "Pomodoro, notes, and sketch canvas",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/focus" });
+        },
+      },
+      ...history.slice(0, 6).map((entry) => ({
+        id: `history-${entry.path}`,
+        title: entry.title,
+        subtitle: entry.subtitle,
+        kind:
+          entry.mode === "yt"
+            ? "recent yt"
+            : entry.mode === "iptv"
+              ? "recent iptv"
+              : "recent radio",
+        run: () => {
+          setJumpOpen(false);
+          openHistoryEntry(entry);
+        },
+      })),
+      ...CHANNELS.map((ch) => ({
+        id: `channel-${ch.id}`,
+        title: `${ch.number}. ${ch.name}`,
+        subtitle: ch.tagline,
+        kind: ch.category,
+        run: () => {
+          setJumpOpen(false);
+          openChannel(ch);
+        },
+      })),
+    ];
+
+    const query = jumpQuery.trim().toLowerCase();
+    const filtered = query
+      ? items.filter((item) =>
+          [item.title, item.subtitle, item.kind].some((value) =>
+            value.toLowerCase().includes(query),
+          ),
+        )
+      : items;
+
+    return filtered.slice(0, 32);
+  }, [channel, history, jumpQuery, navigate, openChannel, openHistoryEntry]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
@@ -546,6 +649,7 @@ export function TubeTVPage({
       } else if (e.key === "Escape") {
         setGuideOpen(false);
         setHelpOpen(false);
+        setJumpOpen(false);
       } else if (e.key.toLowerCase() === "m") {
         setMuted((m) => !m);
       } else if (e.key.toLowerCase() === "c") {
@@ -553,6 +657,9 @@ export function TubeTVPage({
       } else if (e.key === "?" || e.key === "/") {
         e.preventDefault();
         setHelpOpen((o) => !o);
+      } else if (e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setJumpOpen((o) => !o);
       } else if (e.key.toLowerCase() === "f" && mode === "yt") {
         toggleFavorite(CHANNELS[channelIdx].id);
       }
@@ -915,6 +1022,13 @@ export function TubeTVPage({
                 >
                   <Timer className="h-4 w-4" /> Focus
                 </button>
+                <button
+                  onClick={openJumpPalette}
+                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  aria-label="Open jump palette"
+                >
+                  <Search className="h-4 w-4" /> Jump
+                </button>
               </div>
             </div>
 
@@ -922,6 +1036,7 @@ export function TubeTVPage({
               {mode === "yt" && <span>↑/↓ change channel</span>}
               {mode === "yt" && <span>→ skip</span>}
               <span>G guide</span>
+              <span>J jump</span>
               <span>M mute</span>
               <span>C crt {crt ? "on" : "off"}</span>
               {mode === "yt" && <span>F fav</span>}
@@ -995,6 +1110,58 @@ export function TubeTVPage({
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {jumpOpen && (
+        <div className="absolute inset-0 z-40 flex items-start justify-center bg-black/65 px-4 pt-16 backdrop-blur-sm">
+          <div className="w-full max-w-2xl overflow-hidden rounded-md border border-border/60 bg-[linear-gradient(180deg,rgba(12,15,18,0.98),rgba(7,9,12,0.98))] shadow-2xl">
+            <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
+              <Search className="h-4 w-4 text-primary" />
+              <input
+                autoFocus
+                value={jumpQuery}
+                onChange={(e) => setJumpQuery(e.target.value)}
+                placeholder="Jump to a channel, route, or recent item…"
+                className="h-10 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
+              <button
+                onClick={closeJumpPalette}
+                className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+              >
+                Esc
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {jumpTargets.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={item.run}
+                  className="flex w-full items-center gap-3 border-b border-border/50 px-4 py-3 text-left transition-colors hover:bg-primary/8"
+                >
+                  <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {item.kind}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold tracking-tight">
+                      {item.title}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {item.subtitle}
+                    </span>
+                  </span>
+                  <span className="font-mono-tv text-[10px] uppercase tracking-widest text-primary">
+                    Enter
+                  </span>
+                </button>
+              ))}
+              {jumpTargets.length === 0 && (
+                <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  Nothing matches that search.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
