@@ -308,13 +308,185 @@ const BOOK_ROUNDS: PlaygroundRound[] = [
     explanation:
       "Satyajit Ray was both a major filmmaker and a writer of detective fiction like Feluda.",
   },
+  {
+    id: "books-dune",
+    category: "books",
+    title: "Desert epic",
+    prompt: "Which sci-fi novel follows Paul Atreides on the desert planet Arrakis?",
+    hint: "Spice, sandworms, and prophecy.",
+    sourceLabel: "Sci-fi shelf",
+    choices: [
+      { label: "Dune" },
+      { label: "Foundation" },
+      { label: "Hyperion" },
+      { label: "Ender's Game" },
+    ],
+    answerIndex: 0,
+    explanation: "Dune by Frank Herbert is set on Arrakis and follows Paul Atreides's rise to power.",
+  },
+  {
+    id: "books-kafka",
+    category: "books",
+    title: "Metamorphosis",
+    prompt: "Which author wrote the novella in which Gregor Samsa wakes up as an insect?",
+    hint: "Surreal, existential, and very famous opening line.",
+    sourceLabel: "Classic shelf",
+    choices: [
+      { label: "Franz Kafka" },
+      { label: "Albert Camus" },
+      { label: "Jean-Paul Sartre" },
+      { label: "Fyodor Dostoevsky" },
+    ],
+    answerIndex: 0,
+    explanation: "Franz Kafka's The Metamorphosis opens with Gregor Samsa's bizarre transformation.",
+  },
+];
+
+const MORE_GEO_ROUNDS: PlaygroundRound[] = [
+  {
+    id: "geo-machu-picchu",
+    category: "geo",
+    title: "Lost city",
+    prompt: "Which ancient Incan citadel sits high in the Andes mountains of Peru?",
+    hint: "Clouds, clouds, and a famous citadel.",
+    sourceLabel: "World heritage",
+    choices: [
+      { label: "Machu Picchu" },
+      { label: "Chichen Itza" },
+      { label: "Petra" },
+      { label: "Angkor Wat" },
+    ],
+    answerIndex: 0,
+    explanation: "Machu Picchu is the 15th-century Inca citadel perched high in the Peruvian Andes.",
+  },
+  {
+    id: "geo-iceland",
+    category: "geo",
+    title: "Northern lights",
+    prompt: "Which island nation has the most active volcanoes per capita and the Northern Lights?",
+    hint: "It's not as cold as it sounds.",
+    sourceLabel: "Nordic clue",
+    choices: [
+      { label: "Iceland" },
+      { label: "Greenland" },
+      { label: "Faroe Islands" },
+      { label: "Norway" },
+    ],
+    answerIndex: 0,
+    explanation: "Iceland sits on the Mid-Atlantic Ridge and has some of the world's most active volcanic systems.",
+  },
+];
+
+const MORE_SCREEN_ROUNDS: PlaygroundRound[] = [
+  {
+    id: "screen-parasite",
+    category: "screen",
+    title: "Class tension",
+    prompt: "Which film by Bong Joon-ho won the Palme d'Or and Best Picture at the 2020 Oscars?",
+    hint: "Two families, one house, one unforgettable twist.",
+    sourceLabel: "World cinema",
+    choices: [
+      { label: "Parasite" },
+      { label: "Burning" },
+      { label: "Oldboy" },
+      { label: "The Handmaiden" },
+    ],
+    answerIndex: 0,
+    explanation: "Parasite became the first non-English film to win Best Picture at the Academy Awards.",
+  },
+  {
+    id: "screen-dark",
+    category: "screen",
+    title: "Time loops",
+    prompt: "Which German Netflix series deals with a small town, a wormhole, and four interlinked families across time?",
+    hint: "Cycles, caves, and Knoten.",
+    sourceLabel: "TV clue",
+    choices: [
+      { label: "Dark" },
+      { label: "1899" },
+      { label: "Babylon Berlin" },
+      { label: "How to Sell Drugs Online" },
+    ],
+    answerIndex: 0,
+    explanation: "Dark is a German mystery-thriller featuring time travel across multiple generations.",
+  },
+];
+
+const MORE_MUSIC_ROUNDS: PlaygroundRound[] = [
+  {
+    id: "music-radiohead",
+    category: "music",
+    title: "Art rock kings",
+    prompt: "Which band released 'OK Computer' in 1997, widely considered one of the greatest albums ever?",
+    hint: "Thom Yorke, paranoid android, creep.",
+    sourceLabel: "Discoverography",
+    choices: [
+      { label: "Radiohead" },
+      { label: "Portishead" },
+      { label: "Massive Attack" },
+      { label: "The Verve" },
+    ],
+    answerIndex: 0,
+    explanation: "Radiohead's OK Computer is a landmark album that blended rock with electronic experimentation.",
+  },
+  {
+    id: "music-beethoven",
+    category: "music",
+    title: "Classical titan",
+    prompt: "Which composer wrote the famous 'Ode to Joy' in his Ninth Symphony, while profoundly deaf?",
+    hint: "Composed while unable to hear a single note.",
+    sourceLabel: "Classical lane",
+    choices: [
+      { label: "Ludwig van Beethoven" },
+      { label: "Wolfgang Amadeus Mozart" },
+      { label: "Johann Sebastian Bach" },
+      { label: "Franz Schubert" },
+    ],
+    answerIndex: 0,
+    explanation: "Beethoven composed the Ninth Symphony, including 'Ode to Joy', after losing his hearing completely.",
+  },
+];
+
+const MORE_ANIME_ROUNDS: PlaygroundRound[] = [
+  {
+    id: "anime-vinland",
+    category: "anime",
+    title: "Viking saga",
+    prompt: "Which anime follows Thorfinn seeking revenge and eventually redemption in medieval Europe?",
+    hint: "Norse warriors, Iceland, and the English coast.",
+    sourceLabel: "Historical lane",
+    choices: [
+      { label: "Vinland Saga" },
+      { label: "Berserk" },
+      { label: "Dororo" },
+      { label: "Golden Kamuy" },
+    ],
+    answerIndex: 0,
+    explanation: "Vinland Saga is a historical epic following Viking warrior Thorfinn through revenge and growth.",
+  },
+  {
+    id: "anime-cowboy-bebop",
+    category: "anime",
+    title: "Space jazz",
+    prompt: "Which anime follows bounty hunters aboard the Bebop spaceship through jazz-infused adventures?",
+    hint: "See you space cowboy.",
+    sourceLabel: "Classic lane",
+    choices: [
+      { label: "Cowboy Bebop" },
+      { label: "Outlaw Star" },
+      { label: "Trigun" },
+      { label: "Space Dandy" },
+    ],
+    answerIndex: 0,
+    explanation: "Cowboy Bebop is a genre-defining 1998 anime mixing jazz, noir, and sci-fi.",
+  },
 ];
 
 export const PLAYGROUND_ROUNDS: Record<PlaygroundCategoryId, PlaygroundRound[]> = {
-  geo: GEO_ROUNDS,
-  music: MUSIC_ROUNDS,
-  screen: SCREEN_ROUNDS,
-  anime: ANIME_ROUNDS,
+  geo: [...GEO_ROUNDS, ...MORE_GEO_ROUNDS],
+  music: [...MUSIC_ROUNDS, ...MORE_MUSIC_ROUNDS],
+  screen: [...SCREEN_ROUNDS, ...MORE_SCREEN_ROUNDS],
+  anime: [...ANIME_ROUNDS, ...MORE_ANIME_ROUNDS],
   books: BOOK_ROUNDS,
 };
 

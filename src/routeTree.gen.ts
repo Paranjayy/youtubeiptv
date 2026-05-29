@@ -9,7 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WordleRouteImport } from './routes/wordle'
+import { Route as VibesRouteImport } from './routes/vibes'
+import { Route as RoadmapRouteImport } from './routes/roadmap'
+import { Route as ReaderRouteImport } from './routes/reader'
 import { Route as PlaygroundRouteImport } from './routes/playground'
+import { Route as NewsRouteImport } from './routes/news'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,9 +24,34 @@ import { Route as ChannelsSlugRouteImport } from './routes/channels/$slug'
 import { Route as RadioCountryStationRouteImport } from './routes/radio/$country/$station'
 import { Route as IptvCountryStreamRouteImport } from './routes/iptv/$country/$stream'
 
+const WordleRoute = WordleRouteImport.update({
+  id: '/wordle',
+  path: '/wordle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VibesRoute = VibesRouteImport.update({
+  id: '/vibes',
+  path: '/vibes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoadmapRoute = RoadmapRouteImport.update({
+  id: '/roadmap',
+  path: '/roadmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReaderRoute = ReaderRouteImport.update({
+  id: '/reader',
+  path: '/reader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FocusRoute = FocusRouteImport.update({
@@ -69,7 +99,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
+  '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
+  '/reader': typeof ReaderRoute
+  '/roadmap': typeof RoadmapRoute
+  '/vibes': typeof VibesRoute
+  '/wordle': typeof WordleRoute
   '/channels/$slug': typeof ChannelsSlugRoute
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
@@ -80,7 +115,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
+  '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
+  '/reader': typeof ReaderRoute
+  '/roadmap': typeof RoadmapRoute
+  '/vibes': typeof VibesRoute
+  '/wordle': typeof WordleRoute
   '/channels/$slug': typeof ChannelsSlugRoute
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
@@ -92,7 +132,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
+  '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
+  '/reader': typeof ReaderRoute
+  '/roadmap': typeof RoadmapRoute
+  '/vibes': typeof VibesRoute
+  '/wordle': typeof WordleRoute
   '/channels/$slug': typeof ChannelsSlugRoute
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
@@ -105,7 +150,12 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/focus'
+    | '/news'
     | '/playground'
+    | '/reader'
+    | '/roadmap'
+    | '/vibes'
+    | '/wordle'
     | '/channels/$slug'
     | '/iptv/$country'
     | '/radio/$country'
@@ -116,7 +166,12 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/focus'
+    | '/news'
     | '/playground'
+    | '/reader'
+    | '/roadmap'
+    | '/vibes'
+    | '/wordle'
     | '/channels/$slug'
     | '/iptv/$country'
     | '/radio/$country'
@@ -127,7 +182,12 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/focus'
+    | '/news'
     | '/playground'
+    | '/reader'
+    | '/roadmap'
+    | '/vibes'
+    | '/wordle'
     | '/channels/$slug'
     | '/iptv/$country'
     | '/radio/$country'
@@ -139,7 +199,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscoverRoute: typeof DiscoverRoute
   FocusRoute: typeof FocusRoute
+  NewsRoute: typeof NewsRoute
   PlaygroundRoute: typeof PlaygroundRoute
+  ReaderRoute: typeof ReaderRoute
+  RoadmapRoute: typeof RoadmapRoute
+  VibesRoute: typeof VibesRoute
+  WordleRoute: typeof WordleRoute
   ChannelsSlugRoute: typeof ChannelsSlugRoute
   IptvCountryRoute: typeof IptvCountryRouteWithChildren
   RadioCountryRoute: typeof RadioCountryRouteWithChildren
@@ -147,11 +212,46 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wordle': {
+      id: '/wordle'
+      path: '/wordle'
+      fullPath: '/wordle'
+      preLoaderRoute: typeof WordleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vibes': {
+      id: '/vibes'
+      path: '/vibes'
+      fullPath: '/vibes'
+      preLoaderRoute: typeof VibesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roadmap': {
+      id: '/roadmap'
+      path: '/roadmap'
+      fullPath: '/roadmap'
+      preLoaderRoute: typeof RoadmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reader': {
+      id: '/reader'
+      path: '/reader'
+      fullPath: '/reader'
+      preLoaderRoute: typeof ReaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/playground': {
       id: '/playground'
       path: '/playground'
       fullPath: '/playground'
       preLoaderRoute: typeof PlaygroundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/focus': {
@@ -241,7 +341,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscoverRoute: DiscoverRoute,
   FocusRoute: FocusRoute,
+  NewsRoute: NewsRoute,
   PlaygroundRoute: PlaygroundRoute,
+  ReaderRoute: ReaderRoute,
+  RoadmapRoute: RoadmapRoute,
+  VibesRoute: VibesRoute,
+  WordleRoute: WordleRoute,
   ChannelsSlugRoute: ChannelsSlugRoute,
   IptvCountryRoute: IptvCountryRouteWithChildren,
   RadioCountryRoute: RadioCountryRouteWithChildren,

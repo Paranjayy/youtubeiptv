@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel } from "@/lib/channels";
+import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel, CATEGORIES } from "@/lib/channels";
 import {
   getIptvPath,
   getIptvItemPath,
@@ -30,6 +30,7 @@ import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/ipt
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { getRandomChannel } from "@/lib/channels";
 import { cn } from "@/lib/utils";
+import { getCategoryColor } from "@/lib/ui-kit";
 import { toast } from "sonner";
 import {
   ChevronUp,
@@ -47,6 +48,10 @@ import {
   Gamepad2,
   Timer,
   Search,
+  Newspaper,
+  Map,
+  BookOpen,
+  Music2,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -593,6 +598,26 @@ export function TubeTVPage({
           void navigate({ to: "/focus" });
         },
       },
+      {
+        id: "route-wordle",
+        title: "Wordle",
+        subtitle: "Daily 5-letter word guessing game",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/wordle" });
+        },
+      },
+      {
+        id: "route-vibes",
+        title: "Vibes",
+        subtitle: "Music mood explorer — lofi to synthwave",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/vibes" });
+        },
+      },
       ...history.slice(0, 6).map((entry) => ({
         id: `history-${entry.path}`,
         title: entry.title,
@@ -702,91 +727,123 @@ export function TubeTVPage({
       <Ticker />
 
       <section className="relative flex flex-1 flex-col lg:flex-row">
-        <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(9,12,15,0.96),rgba(6,8,10,0.98))] lg:block">
-          <div className="border-b border-border/60 px-4 py-3 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
-            Sources
+        <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.98),rgba(5,6,9,0.99))] lg:flex lg:flex-col">
+          {/* Header: Sources label */}
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
+            <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">Sources</span>
+            <span className="rounded bg-primary/15 px-1.5 py-0.5 font-mono-tv text-[9px] uppercase tracking-widest text-primary">{CHANNELS.length} ch</span>
           </div>
-          <div className="h-[calc(100vh-180px)] overflow-y-auto py-2">
+
+          {/* Mode switchers with per-mode neon accents */}
+          <div className="border-b border-border/60 py-1.5">
             <button
-              onClick={() => {
-                handleModeChange("iptv");
-                setGuideOpen(true);
-              }}
-              className={
-                "flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
-                (mode === "iptv"
-                  ? "border-primary bg-primary/10"
-                  : "border-transparent hover:bg-primary/8")
-              }
-            >
-              <Globe2 className="h-5 w-5 text-primary" />
-              <span className="flex-1">
-                <span className="block text-sm font-semibold tracking-tight">LIVE TV - WORLD</span>
-                <span className="block text-[11px] text-muted-foreground">
-                  {countryLabel?.flag} {countryLabel?.name}
-                </span>
-              </span>
-              {mode === "iptv" && (
-                <span className="h-2 w-2 animate-pulse-dot rounded-full bg-accent shadow-glow" />
+              onClick={() => { handleModeChange("iptv"); setGuideOpen(true); }}
+              style={mode === "iptv" ? { boxShadow: "inset 3px 0 0 oklch(0.84 0.14 205)" } : undefined}
+              className={cn(
+                "flex w-full items-center gap-3 px-4 py-2.5 text-left transition-all duration-200",
+                mode === "iptv"
+                  ? "bg-[oklch(0.84_0.14_205_/_0.1)] text-[oklch(0.84_0.14_205)]"
+                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
               )}
+            >
+              <Globe2 className="h-4 w-4 shrink-0" />
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider">Live TV</span>
+                <span className="block text-[10px] opacity-70">{countryLabel?.flag} {countryLabel?.name}</span>
+              </span>
+              {mode === "iptv" && <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-[oklch(0.84_0.14_205)]" />}
             </button>
             <button
-              onClick={() => {
-                handleModeChange("radio");
-                setGuideOpen(true);
-              }}
-              className={
-                "flex w-full items-center gap-3 border-l-2 px-4 py-3 text-left transition-colors " +
-                (mode === "radio"
-                  ? "border-accent bg-accent/10"
-                  : "border-transparent hover:bg-accent/8")
-              }
-            >
-              <RadioIcon className="h-5 w-5 text-accent" />
-              <span className="flex-1">
-                <span className="block text-sm font-semibold tracking-tight">RADIO - WORLD</span>
-                <span className="block text-[11px] text-muted-foreground">
-                  {radioCountryLabel?.flag} {radioCountryLabel?.name}
-                </span>
-              </span>
-              {mode === "radio" && (
-                <span className="h-2 w-2 animate-pulse-dot rounded-full bg-primary shadow-glow" />
+              onClick={() => { handleModeChange("radio"); setGuideOpen(true); }}
+              style={mode === "radio" ? { boxShadow: "inset 3px 0 0 oklch(0.86 0.16 72)" } : undefined}
+              className={cn(
+                "flex w-full items-center gap-3 px-4 py-2.5 text-left transition-all duration-200",
+                mode === "radio"
+                  ? "bg-[oklch(0.86_0.16_72_/_0.1)] text-[oklch(0.86_0.16_72)]"
+                  : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
               )}
+            >
+              <RadioIcon className="h-4 w-4 shrink-0" />
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider">Radio World</span>
+                <span className="block text-[10px] opacity-70">{radioCountryLabel?.flag} {radioCountryLabel?.name}</span>
+              </span>
+              {mode === "radio" && <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-[oklch(0.86_0.16_72)]" />}
             </button>
-            <div className="mt-3 border-t border-border/60 px-4 pt-3 pb-1 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
-              YouTube channels - {CHANNELS.length}
-            </div>
-            {CHANNELS.map((ch, i) => {
-              const active = mode === "yt" && i === channelIdx;
+          </div>
+
+          {/* YouTube channel list grouped by category */}
+          <div className="flex-1 overflow-y-auto">
+            {CATEGORIES.map((cat) => {
+              const catChannels = CHANNELS.filter((ch) => ch.category === cat);
+              const catColor = getCategoryColor(cat);
               return (
-                <button
-                  key={ch.id}
-                  onClick={() => openChannel(ch)}
-                  className={
-                    "flex w-full items-center gap-3 border-l-2 px-4 py-2.5 text-left transition-colors " +
-                    (active
-                      ? "border-primary bg-primary/10"
-                      : "border-transparent hover:bg-primary/8")
-                  }
-                >
-                  <span
-                    className={cn(
-                      "font-mono-tv text-lg font-bold tabular-nums",
-                      active ? "text-foreground" : "text-muted-foreground/80",
-                    )}
-                  >
-                    {ch.number}
-                  </span>
-                  <span className="flex-1">
-                    <span className="block text-sm font-semibold tracking-tight">{ch.name}</span>
-                    <span className="block text-[11px] text-muted-foreground">{ch.category}</span>
-                  </span>
-                  {active && (
-                    <span className="h-2 w-2 animate-pulse-dot rounded-full bg-primary shadow-glow" />
-                  )}
-                </button>
+                <div key={cat}>
+                  {/* Category header chip */}
+                  <div className={cn("flex items-center gap-1.5 border-b border-t border-border/40 px-3 py-1.5", catColor.bg)}>
+                    <span className={cn("font-mono-tv text-[9px] font-bold uppercase tracking-widest", catColor.text)}>
+                      {catColor.label}
+                    </span>
+                    <span className={cn("ml-auto font-mono-tv text-[9px] opacity-60", catColor.text)}>{catChannels.length}</span>
+                  </div>
+                  {catChannels.map((ch) => {
+                    const active = mode === "yt" && CHANNELS.indexOf(ch) === channelIdx;
+                    return (
+                      <button
+                        key={ch.id}
+                        onClick={() => openChannel(ch)}
+                        style={active ? { boxShadow: `inset 3px 0 0 ${ch.color}`, background: `${ch.color}18` } : undefined}
+                        className={cn(
+                          "flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150",
+                          active ? "text-foreground" : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground/90"
+                        )}
+                      >
+                        <span
+                          className="font-mono-tv text-base font-bold tabular-nums"
+                          style={active ? { color: ch.color, textShadow: `0 0 8px ${ch.color}` } : undefined}
+                        >
+                          {ch.number}
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block truncate text-[11px] font-semibold tracking-tight">{ch.name}</span>
+                          <span className="block truncate text-[10px] opacity-60">{ch.tagline}</span>
+                        </span>
+                        {active && (
+                          <span
+                            className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full"
+                            style={{ background: ch.color, boxShadow: `0 0 6px ${ch.color}` }}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               );
             })}
+          </div>
+
+          {/* Sidebar bottom: quick nav to extra routes */}
+          <div className="border-t border-border/60 p-2 grid grid-cols-4 gap-1">
+            {([
+              { to: "/discover", icon: Compass, label: "Disc", color: "oklch(0.84 0.14 205)" },
+              { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
+              { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
+              { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
+              { to: "/wordle", icon: BookOpen, label: "Word", color: "oklch(0.82 0.18 152)" },
+              { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
+              { to: "/roadmap", icon: Map, label: "Map", color: "oklch(0.72 0.16 305)" },
+              { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
+            ] as const).map(({ to, icon: Icon, label, color }) => (
+              <button
+                key={to}
+                onClick={() => navigate({ to })}
+                className="flex flex-col items-center gap-0.5 rounded p-1.5 transition-all duration-150 hover:bg-white/[0.06]"
+                title={label}
+              >
+                <Icon className="h-3.5 w-3.5" style={{ color }} />
+                <span className="font-mono-tv text-[8px] uppercase tracking-wider" style={{ color, opacity: 0.8 }}>{label}</span>
+              </button>
+            ))}
           </div>
         </aside>
 
@@ -941,95 +998,118 @@ export function TubeTVPage({
                 </div>
               </div>
 
-              <div className="-mx-3 flex items-center gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+              <div className="-mx-3 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
                 {mode === "yt" && (
                   <>
                     <button
                       onClick={() => changeChannel(-1)}
-                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-border/60 bg-background/45 px-2.5 py-1.5 text-xs font-medium hover:border-[oklch(0.82_0.18_152_/_0.5)] hover:bg-[oklch(0.82_0.18_152_/_0.08)] hover:text-[oklch(0.82_0.18_152)]"
                       aria-label="Previous channel"
                     >
-                      <ChevronDown className="h-4 w-4" /> CH-
+                      <ChevronDown className="h-3.5 w-3.5" /> CH−
                     </button>
                     <button
                       onClick={() => changeChannel(1)}
-                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-border/60 bg-background/45 px-2.5 py-1.5 text-xs font-medium hover:border-[oklch(0.82_0.18_152_/_0.5)] hover:bg-[oklch(0.82_0.18_152_/_0.08)] hover:text-[oklch(0.82_0.18_152)]"
                       aria-label="Next channel"
                     >
-                      <ChevronUp className="h-4 w-4" /> CH+
+                      <ChevronUp className="h-3.5 w-3.5" /> CH+
                     </button>
                     <button
                       onClick={advance}
-                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-border/60 bg-background/45 px-2.5 py-1.5 text-xs font-medium hover:border-[oklch(0.86_0.16_72_/_0.5)] hover:bg-[oklch(0.86_0.16_72_/_0.08)] hover:text-[oklch(0.86_0.16_72)]"
                       aria-label="Skip to next video"
                     >
-                      <SkipForward className="h-4 w-4" /> Skip
+                      <SkipForward className="h-3.5 w-3.5" /> Skip
                     </button>
                   </>
                 )}
                 <button
                   onClick={() => setMuted((m) => !m)}
-                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-1.5 hover:border-[oklch(0.82_0.18_152_/_0.5)] hover:bg-[oklch(0.82_0.18_152_/_0.08)] hover:text-[oklch(0.82_0.18_152)]"
                   aria-label={muted ? "Unmute" : "Mute"}
                 >
-                  {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
                 </button>
                 <button
                   onClick={() => setGuideOpen(true)}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md bg-[linear-gradient(135deg,rgba(79,174,123,0.95),rgba(58,143,104,0.95))] px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
+                  className="flex shrink-0 items-center gap-1 rounded-md bg-[oklch(0.82_0.18_152)] px-3 py-1.5 text-xs font-semibold text-black shadow-[0_0_10px_oklch(0.82_0.18_152_/_0.4)] hover:opacity-90"
                 >
-                  <Grid3x3 className="h-4 w-4" /> Guide
+                  <Grid3x3 className="h-3.5 w-3.5" /> Guide
                 </button>
                 {history[0] && (
                   <button
                     onClick={resumeLatest}
-                    className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                    className="flex shrink-0 items-center gap-1 rounded-md border border-border/60 bg-background/45 px-2.5 py-1.5 text-xs font-medium hover:border-[oklch(0.82_0.18_152_/_0.5)] hover:bg-[oklch(0.82_0.18_152_/_0.08)] hover:text-[oklch(0.82_0.18_152)]"
                     aria-label="Resume latest"
                   >
-                    <SkipForward className="h-4 w-4" /> Resume
+                    <SkipForward className="h-3.5 w-3.5" /> Resume
                   </button>
                 )}
                 <button
                   onClick={openRandomChannel}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-border/60 bg-background/45 px-2.5 py-1.5 text-xs font-medium hover:border-[oklch(0.86_0.16_72_/_0.5)] hover:bg-[oklch(0.86_0.16_72_/_0.08)] hover:text-[oklch(0.86_0.16_72)]"
                   aria-label="Surprise me"
                 >
-                  <Sparkles className="h-4 w-4" /> Surprise
+                  <Sparkles className="h-3.5 w-3.5" /> Surprise
                 </button>
-                <button
-                  onClick={copyShareLink}
-                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
-                  aria-label="Copy current link"
-                >
-                  <Link2 className="h-4 w-4" />
-                </button>
+
+                {/* Separator */}
+                <span className="mx-0.5 h-4 w-px shrink-0 bg-border/60" />
+
+                {/* Discovery/extras in neon colors */}
                 <button
                   onClick={openDiscoveryDesk}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-[oklch(0.84_0.14_205_/_0.25)] bg-[oklch(0.84_0.14_205_/_0.07)] px-2.5 py-1.5 text-xs font-medium text-[oklch(0.84_0.14_205)] hover:bg-[oklch(0.84_0.14_205_/_0.14)]"
                   aria-label="Open discovery desk"
                 >
-                  <Compass className="h-4 w-4" /> Discover
+                  <Compass className="h-3.5 w-3.5" /> Discover
+                </button>
+                <button
+                  onClick={() => navigate({ to: "/news" })}
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-[oklch(0.84_0.14_205_/_0.25)] bg-[oklch(0.84_0.14_205_/_0.07)] px-2.5 py-1.5 text-xs font-medium text-[oklch(0.84_0.14_205)] hover:bg-[oklch(0.84_0.14_205_/_0.14)]"
+                  aria-label="Open news"
+                >
+                  <Newspaper className="h-3.5 w-3.5" /> News
                 </button>
                 <button
                   onClick={openPlayground}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-[oklch(0.74_0.18_335_/_0.25)] bg-[oklch(0.74_0.18_335_/_0.07)] px-2.5 py-1.5 text-xs font-medium text-[oklch(0.74_0.18_335)] hover:bg-[oklch(0.74_0.18_335_/_0.14)]"
                   aria-label="Open playground"
                 >
-                  <Gamepad2 className="h-4 w-4" /> Play
+                  <Gamepad2 className="h-3.5 w-3.5" /> Play
                 </button>
                 <button
                   onClick={openFocusRoom}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-[oklch(0.86_0.16_72_/_0.25)] bg-[oklch(0.86_0.16_72_/_0.07)] px-2.5 py-1.5 text-xs font-medium text-[oklch(0.86_0.16_72)] hover:bg-[oklch(0.86_0.16_72_/_0.14)]"
                   aria-label="Open focus room"
                 >
-                  <Timer className="h-4 w-4" /> Focus
+                  <Timer className="h-3.5 w-3.5" /> Focus
+                </button>
+                <button
+                  onClick={() => navigate({ to: "/vibes" })}
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-[oklch(0.8_0.14_180_/_0.25)] bg-[oklch(0.8_0.14_180_/_0.07)] px-2.5 py-1.5 text-xs font-medium text-[oklch(0.8_0.14_180)] hover:bg-[oklch(0.8_0.14_180_/_0.14)]"
+                  aria-label="Open vibes"
+                >
+                  <Music2 className="h-3.5 w-3.5" /> Vibes
+                </button>
+
+                {/* Separator */}
+                <span className="mx-0.5 h-4 w-px shrink-0 bg-border/60" />
+
+                <button
+                  onClick={copyShareLink}
+                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-1.5 hover:border-[oklch(0.82_0.18_152_/_0.5)] hover:bg-[oklch(0.82_0.18_152_/_0.08)] hover:text-[oklch(0.82_0.18_152)]"
+                  aria-label="Copy current link"
+                >
+                  <Link2 className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={openJumpPalette}
-                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="flex shrink-0 items-center gap-1 rounded-md border border-border/60 bg-background/45 px-2.5 py-1.5 text-xs font-medium hover:border-[oklch(0.82_0.18_152_/_0.5)] hover:bg-[oklch(0.82_0.18_152_/_0.08)] hover:text-[oklch(0.82_0.18_152)]"
                   aria-label="Open jump palette"
                 >
-                  <Search className="h-4 w-4" /> Jump
+                  <Search className="h-3.5 w-3.5" /> Jump
                 </button>
               </div>
             </div>

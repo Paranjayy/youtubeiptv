@@ -1,66 +1,84 @@
 # Feature Roadmap
 
-## Current Saturation
+## Shipped / Live
 
 ```text
 Core TV / IPTV / Radio      ████████████████████ 95%
 Recent history / resume     ██████████████████░░ 80%
-Discovery / timepass        ███████░░░░░░░░░░░░░ 35%
-Playground / mini-games     ██████░░░░░░░░░░░░░░ 30%
-Mobile experience           ████████░░░░░░░░░░░░ 40%
-Mini-games / experiments    ███░░░░░░░░░░░░░░░░░ 15%
+Discovery / timepass        ████████████░░░░░░░░ 58%
+Playground daily deck       ████████████░░░░░░░░ 55%
+Focus Room (Pomodoro)       ████████████████████ 90%
+Wordle daily word game      ████████████████████ 100% ✓ NEW
+Vibes music mood explorer   ████████████████████ 100% ✓ NEW
 Sharing / SEO               ████████████████░░░░ 80%
 ```
 
 ## What We Should Build Next
 
 ### Discovery Desk
-- Wikipedia random article stream
-- "On this day" news-like feed
-- Artist trail / discoverography
-- Search for topics, people, and bands
-- One-click "surprise me" resurfacing
+- Wikipedia random article stream ✓ shipped
+- "On this day" news-like feed ✓ shipped
+- Artist trail / discoverography ✓ shipped
+- Search for topics, people, and bands ✓ shipped
+- Trending music / news from external feeds (RSS/HN/Reddit)
 
 ### Playground
-- Geo daily challenge
-- Music guesser
-- Movies / shows clue cards
-- Anime guesser
-- Books / literature rounds
-- Streaks, saved answers, and future daily mode expansion
+- Geo daily challenge ✓ shipped
+- Music guesser ✓ shipped (5 categories, 25+ rounds)
+- Movies / shows clue cards ✓ shipped
+- Anime guesser ✓ shipped
+- Books / literature rounds ✓ shipped
+- Wordle-style daily word game ✓ shipped
+- Streaks, saved answers, and daily mode expansion
+- Score leaderboard (local-first, no auth required)
+- More questions per category (bulk import from trivia APIs)
+
+### Vibes / Music
+- Mood-based music explorer ✓ shipped (/vibes)
+- Artist discoverography search ✓ shipped
+- Song discovery by mood/genre/era
+- MusicBrainz artist deep dives
 
 ### Focus Room
-- Pomodoro / study-with-me room with timer, sticky notes, and a sketch canvas
-- Local-first persistence for solo prep sessions
-- Future shared-room mode with invites, avatars, and co-study presence once auth/db exists
-
-### Timepass Games
-- GeoGuessr-style browser game
-- Wordle-style daily puzzle
-- Music Guesser
-- Quote / trivia / obscure fact rounds
-- Score streaks and daily resets
+- Pomodoro / study-with-me room ✓ shipped
+- Sticky notes with colors ✓ shipped
+- Sketch canvas ✓ shipped
+- Session statistics ✓ shipped
+- Future shared-room mode with invites and presence once auth/db exists
 
 ### Small but High Impact
-- Better mobile controls for the TV shell
-- Custom 404 page with a proper way back in
-- Sharper social/share previews
+- Better mobile controls for TV shell
+- Jump palette with Wordle + Vibes ✓ shipped
+- More vibrant color system + glassmorphism ✓ shipped
 - Search history and saved searches
-- Searchable jump palette for routes, channels, and recent items
 - Compact mobile guide and schedule rails
-- Branded recovery screens for stale links and bad slugs
+- Torrent/debrid player (Popcorn-style via Real-Debrid / free sources)
+
+## Ideas Parking Lot
+
+- **Free movie player**: Popcorn-style torrent/debrid (Real-Debrid or open public domain sources)
+- **Study-with-me co-presence**: Face bubbles, shared timers, invite links (needs auth)
+- **GeoGuessr-style**: Street panorama guessing, distance scoring
+- **News feed**: RSS aggregator for tech/culture/world news in a channel-surf UI
+- **Quote / trivia rounds**: Random philosophy, science, or pop culture quotes
+- **Daily crossword**: Mini 5×5 crossword generated from a word list
 
 ## Build Order
 
-1. Discovery Desk
-2. Playground daily deck
-3. Focus Room / study mode
-4. Wiki/artist search polish
-5. Mobile cleanup
-6. Sharing and metadata polish
+1. ~~Discovery Desk~~ ✓ Done
+2. ~~Playground daily deck~~ ✓ Done
+3. ~~Focus Room / study mode~~ ✓ Done
+4. ~~Wordle daily word game~~ ✓ Done
+5. ~~Vibes music mood explorer~~ ✓ Done
+6. Mobile cleanup
+7. Trending news / RSS feeds in Discover
+8. Score streaks and daily leaderboard
+9. Torrent/debrid player exploration
+10. Sharing and metadata polish
 
 ## Notes
 
 - Keep the TV shell and the discovery/games layer distinct so the main experience stays fast.
 - Prefer public, low-friction sources over anything that needs auth for the first version.
 - If a feature starts feeling heavy, split it into its own route instead of squeezing it into the TV page.
+- Color system now uses full oklch neon palette with glow utilities - apply liberally!
