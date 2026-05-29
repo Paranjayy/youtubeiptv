@@ -44,7 +44,8 @@ export function TvNotFound({ eyebrow = "Signal lost", title, detail, slug }: TvN
               Discover
             </Link>
             <Link
-              to="/radio/us"
+              to="/radio/$country"
+              params={{ country: "us" }}
               className="inline-flex items-center gap-2 rounded-md border border-border/70 bg-background/45 px-4 py-2 text-sm font-semibold text-foreground hover:border-accent/60 hover:bg-accent/10"
             >
               <Radio className="h-4 w-4" />
