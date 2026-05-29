@@ -705,7 +705,7 @@ export function TubeTVPage({
   const currentMeta = mode === "yt" ? channel : null;
 
   return (
-    <main className="relative flex min-h-screen flex-col overflow-hidden">
+    <main className="relative flex h-screen flex-col overflow-hidden bg-[#050608]">
       <header className="relative flex items-center justify-between gap-3 overflow-hidden border-b border-border/60 bg-[linear-gradient(90deg,rgba(8,12,16,0.98),rgba(10,16,15,0.94)_42%,rgba(18,13,8,0.95))] px-3 py-2.5 sm:px-6 sm:py-3">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(112,239,183,0.68),rgba(255,196,92,0.58),transparent)]" />
         <div className="flex items-center gap-3">
@@ -726,7 +726,7 @@ export function TubeTVPage({
 
       <Ticker />
 
-      <section className="relative flex flex-1 flex-col lg:flex-row">
+      <section className="relative flex flex-1 flex-col lg:flex-row min-h-0">
         <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.98),rgba(5,6,9,0.99))] lg:flex lg:flex-col">
           {/* Header: Sources label */}
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
@@ -847,7 +847,7 @@ export function TubeTVPage({
           </div>
         </aside>
 
-        <div className="relative flex flex-1 flex-col">
+        <div className="relative flex flex-1 flex-col min-h-0">
           <div
             className={
               "relative aspect-video w-full bg-[radial-gradient(circle_at_top_left,rgba(79,174,123,0.11),transparent_28%),radial-gradient(circle_at_top_right,rgba(104,145,255,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(226,174,74,0.1),transparent_22%),#050608] lg:aspect-auto lg:flex-1 " +

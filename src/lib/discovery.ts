@@ -113,7 +113,7 @@ export async function fetchWikiOnThisDay() {
     text: String(event.text || ""),
     pages: Array.isArray(event.pages)
       ? event.pages.slice(0, 2).map((page) => ({
-          title: String(page?.titles?.display || page?.titles?.canonical || page?.title || ""),
+          title: String(page?.titles?.display || page?.titles?.canonical || page?.title || "").replace(/<[^>]+>/g, ""),
           description: page?.description ? String(page.description) : undefined,
           extract: page?.extract ? String(page.extract) : undefined,
           url: String(
