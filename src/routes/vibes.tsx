@@ -410,6 +410,7 @@ function VibesPage() {
               {[
                 { to: '/', label: 'Home' },
                 { to: '/discover', label: 'Discover' },
+                { to: '/movies', label: 'Movies' },
                 { to: '/playground', label: 'Playground' },
                 { to: '/focus', label: 'Focus' },
                 { to: '/vibes', label: 'Vibes' },

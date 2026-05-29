@@ -15,6 +15,7 @@ import { Route as RoadmapRouteImport } from './routes/roadmap'
 import { Route as ReaderRouteImport } from './routes/reader'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as NewsRouteImport } from './routes/news'
+import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as FocusRouteImport } from './routes/focus'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
@@ -52,6 +53,11 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
 const NewsRoute = NewsRouteImport.update({
   id: '/news',
   path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FocusRoute = FocusRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
+  '/movies': typeof MoviesRoute
   '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
+  '/movies': typeof MoviesRoute
   '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
+  '/movies': typeof MoviesRoute
   '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/focus'
+    | '/movies'
     | '/news'
     | '/playground'
     | '/reader'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/focus'
+    | '/movies'
     | '/news'
     | '/playground'
     | '/reader'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/discover'
     | '/focus'
+    | '/movies'
     | '/news'
     | '/playground'
     | '/reader'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscoverRoute: typeof DiscoverRoute
   FocusRoute: typeof FocusRoute
+  MoviesRoute: typeof MoviesRoute
   NewsRoute: typeof NewsRoute
   PlaygroundRoute: typeof PlaygroundRoute
   ReaderRoute: typeof ReaderRoute
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       path: '/news'
       fullPath: '/news'
       preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/focus': {
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscoverRoute: DiscoverRoute,
   FocusRoute: FocusRoute,
+  MoviesRoute: MoviesRoute,
   NewsRoute: NewsRoute,
   PlaygroundRoute: PlaygroundRoute,
   ReaderRoute: ReaderRoute,
