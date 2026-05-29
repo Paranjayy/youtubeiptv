@@ -151,12 +151,12 @@ export function Guide({
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col bg-[linear-gradient(180deg,rgba(10,13,16,0.93),rgba(7,9,12,0.98))] backdrop-blur-md animate-flicker">
-      <div className="flex items-center justify-between border-b border-border/60 bg-[linear-gradient(90deg,rgba(79,174,123,0.05),rgba(226,174,74,0.04),transparent)] px-6 py-4">
+      <div className="flex flex-col gap-3 border-b border-border/60 bg-[linear-gradient(90deg,rgba(79,174,123,0.05),rgba(226,174,74,0.04),transparent)] px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
         <div>
           <div className="font-mono-tv text-xs uppercase tracking-[0.3em] text-primary text-glow">
             ▎ Channel Guide
           </div>
-          <div className="mt-1 text-2xl font-bold tracking-tight">
+          <div className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">
             {mode === "yt"
               ? "Pick a channel"
               : mode === "iptv"
@@ -165,11 +165,11 @@ export function Guide({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-md border border-border/60 bg-background/30 p-0.5">
+          <div className="flex flex-1 rounded-md border border-border/60 bg-background/30 p-0.5 sm:flex-none">
             <button
               onClick={() => onModeChange("yt")}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors sm:flex-none sm:px-3",
                 mode === "yt"
                   ? "bg-primary/15 text-primary"
                   : "text-muted-foreground hover:text-foreground",
@@ -180,7 +180,7 @@ export function Guide({
             <button
               onClick={() => onModeChange("iptv")}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors sm:flex-none sm:px-3",
                 mode === "iptv"
                   ? "bg-primary/15 text-primary"
                   : "text-muted-foreground hover:text-foreground",
@@ -191,7 +191,7 @@ export function Guide({
             <button
               onClick={() => onModeChange("radio")}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors sm:flex-none sm:px-3",
                 mode === "radio"
                   ? "bg-accent/15 text-accent"
                   : "text-muted-foreground hover:text-foreground",
@@ -202,7 +202,7 @@ export function Guide({
           </div>
           <button
             onClick={onClose}
-            className="font-mono-tv text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
+            className="hidden font-mono-tv text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground sm:block"
           >
             [ESC] close
           </button>
@@ -210,13 +210,13 @@ export function Guide({
       </div>
 
       {recentHistory.length > 0 && (
-        <div className="border-b border-border/60 px-6 py-3">
+        <div className="border-b border-border/60 px-3 py-3 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="font-mono-tv text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                 Recent
               </div>
-              <div className="mt-1 text-sm text-muted-foreground">
+              <div className="mt-1 hidden text-sm text-muted-foreground sm:block">
                 Jump back to the last places you were watching or listening.
               </div>
             </div>
@@ -233,7 +233,7 @@ export function Guide({
                   key={entry.path}
                   onClick={() => onPickHistory?.(entry)}
                   className={cn(
-                    "min-w-[220px] rounded-md border border-l-4 bg-background/25 p-3 text-left transition-colors hover:bg-background/40",
+                    "min-w-[190px] rounded-md border border-l-4 bg-background/25 p-3 text-left transition-colors hover:bg-background/40 sm:min-w-[220px]",
                     entry.mode === "yt"
                       ? "border-l-primary/40 hover:border-l-primary/70"
                       : entry.mode === "iptv"
@@ -261,13 +261,13 @@ export function Guide({
 
       {mode === "yt" && (
         <>
-          <div className="flex gap-2 overflow-x-auto border-b border-border/60 px-6 py-3">
+          <div className="flex gap-2 overflow-x-auto border-b border-border/60 px-3 py-2.5 sm:px-6 sm:py-3">
             {cats.map((c) => (
               <button
                 key={c}
                 onClick={() => setCat(c)}
                 className={cn(
-                  "rounded-md border px-4 py-1.5 font-mono-tv text-xs uppercase tracking-widest transition-colors",
+                  "shrink-0 rounded-md border px-3 py-1.5 font-mono-tv text-[10px] uppercase tracking-widest transition-colors sm:px-4 sm:text-xs",
                   cat === c
                     ? "border-primary bg-primary/12 text-primary"
                     : "border-border/60 text-muted-foreground hover:border-foreground/40 hover:text-foreground",
@@ -278,7 +278,7 @@ export function Guide({
             ))}
           </div>
 
-          <div className="grid flex-1 gap-3 overflow-y-auto p-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid flex-1 gap-2 overflow-y-auto p-3 sm:grid-cols-2 sm:gap-3 sm:p-6 lg:grid-cols-3 xl:grid-cols-4">
             {list.map((ch) => {
               const active = ch.id === currentId;
               const fav = favorites.includes(ch.id);
@@ -287,7 +287,7 @@ export function Guide({
                   key={ch.id}
                   onClick={() => onPick(ch)}
                   className={cn(
-                    "group relative overflow-hidden rounded-sm border border-border/60 bg-background/25 p-5 text-left transition-colors hover:bg-background/40",
+                    "group relative overflow-hidden rounded-sm border border-border/60 bg-background/25 p-4 text-left transition-colors hover:bg-background/40 sm:p-5",
                     active
                       ? "border-l-4 border-l-primary bg-primary/10"
                       : "hover:border-foreground/30",
@@ -318,7 +318,7 @@ export function Guide({
                     </span>
                   )}
                   <div className="flex items-start justify-between">
-                    <div className="font-mono-tv text-3xl font-bold leading-none text-foreground/85">
+                    <div className="font-mono-tv text-2xl font-bold leading-none text-foreground/85 sm:text-3xl">
                       {ch.number}
                     </div>
                     {active && (
@@ -342,11 +342,11 @@ export function Guide({
 
       {mode === "iptv" && (
         <>
-          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 px-6 py-3">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 px-3 py-2.5 sm:px-6 sm:py-3">
             <select
               value={iptvCountry}
               onChange={(e) => onCountryChange(e.target.value)}
-              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
+              className="min-w-0 flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60 sm:flex-none"
             >
               {IPTV_COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -357,7 +357,7 @@ export function Guide({
             <select
               value={group}
               onChange={(e) => setGroup(e.target.value)}
-              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
+              className="min-w-0 flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60 sm:flex-none"
             >
               {iptvGroups.map((g) => (
                 <option key={g} value={g}>
@@ -368,7 +368,7 @@ export function Guide({
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as "default" | "name")}
-              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60"
+              className="min-w-0 flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-accent/60 sm:flex-none"
             >
               <option value="default">Sort: default</option>
               <option value="name">Sort: A–Z</option>
@@ -377,13 +377,13 @@ export function Guide({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search channels…"
-              className="flex-1 min-w-[180px] rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-accent/60 focus:outline-none"
+              className="min-w-full flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-accent/60 focus:outline-none sm:min-w-[180px]"
             />
             <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
               {loading ? "loading…" : `${filteredIptv.length} streams`}
             </span>
           </div>
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6">
             {error && (
               <div className="rounded-md border border-destructive/60 bg-destructive/10 p-4 text-sm text-destructive">
                 {error}
@@ -445,11 +445,11 @@ export function Guide({
 
       {mode === "radio" && (
         <>
-          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 px-6 py-3">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 px-3 py-2.5 sm:px-6 sm:py-3">
             <select
               value={radioCountry}
               onChange={(e) => onRadioCountryChange(e.target.value)}
-              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60"
+              className="min-w-0 flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60 sm:flex-none"
             >
               {RADIO_COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -460,7 +460,7 @@ export function Guide({
             <select
               value={radioTag}
               onChange={(e) => setRadioTag(e.target.value)}
-              className="rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60"
+              className="min-w-0 flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 font-mono-tv text-xs uppercase tracking-widest text-foreground hover:border-foreground/60 sm:flex-none"
             >
               {radioTags.map((t) => (
                 <option key={t} value={t}>
@@ -472,13 +472,13 @@ export function Guide({
               value={radioSearch}
               onChange={(e) => setRadioSearch(e.target.value)}
               placeholder="Search stations…"
-              className="flex-1 min-w-[180px] rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-foreground/60 focus:outline-none"
+              className="min-w-full flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-foreground/60 focus:outline-none sm:min-w-[180px]"
             />
             <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
               {radioLoading ? "loading…" : `${filteredRadio.length} stations`}
             </span>
           </div>
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6">
             {radioError && (
               <div className="rounded-md border border-destructive/60 bg-destructive/10 p-4 text-sm text-destructive">
                 {radioError}

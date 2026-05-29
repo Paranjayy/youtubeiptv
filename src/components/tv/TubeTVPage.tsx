@@ -681,17 +681,17 @@ export function TubeTVPage({
 
   return (
     <main className="relative flex min-h-screen flex-col overflow-hidden">
-      <header className="relative flex items-center justify-between gap-4 overflow-hidden border-b border-border/60 bg-[linear-gradient(90deg,rgba(8,12,16,0.98),rgba(10,16,15,0.94)_42%,rgba(18,13,8,0.95))] px-6 py-3">
+      <header className="relative flex items-center justify-between gap-3 overflow-hidden border-b border-border/60 bg-[linear-gradient(90deg,rgba(8,12,16,0.98),rgba(10,16,15,0.94)_42%,rgba(18,13,8,0.95))] px-3 py-2.5 sm:px-6 sm:py-3">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(112,239,183,0.68),rgba(255,196,92,0.58),transparent)]" />
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-primary/30 bg-[linear-gradient(135deg,rgba(79,174,123,0.18),rgba(226,174,74,0.12))] text-primary shadow-glow">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-primary/30 bg-[linear-gradient(135deg,rgba(79,174,123,0.18),rgba(226,174,74,0.12))] text-primary shadow-glow sm:h-9 sm:w-9">
             <Tv className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h1 className="font-mono-tv text-lg font-semibold tracking-[0.12em] text-foreground">
+            <h1 className="font-mono-tv text-base font-semibold tracking-[0.12em] text-foreground sm:text-lg">
               Tube<span className="text-primary">TV</span>
             </h1>
-            <p className="font-mono-tv text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="hidden font-mono-tv text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:block">
               broadcast desk
             </p>
           </div>
@@ -862,35 +862,37 @@ export function TubeTVPage({
               />
             )}
 
-            <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-3 rounded-md border border-border/60 bg-background/75 px-3 py-2 backdrop-blur">
+            <div className="pointer-events-none absolute left-3 top-3 flex max-w-[calc(100%-1.5rem)] items-center gap-2 rounded-md border border-border/60 bg-background/75 px-2.5 py-1.5 backdrop-blur sm:left-4 sm:top-4 sm:gap-3 sm:px-3 sm:py-2">
               <span className="flex items-center gap-1.5 font-mono-tv text-[10px] uppercase tracking-widest text-primary">
                 <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-primary" />
                 Live
               </span>
               {mode === "yt" && currentMeta && (
                 <>
-                  <span className="font-mono-tv text-lg font-bold leading-none text-primary">
+                  <span className="font-mono-tv text-base font-bold leading-none text-primary sm:text-lg">
                     {currentMeta.number}
                   </span>
-                  <span className="text-sm font-semibold tracking-tight">{currentMeta.name}</span>
+                  <span className="truncate text-xs font-semibold tracking-tight sm:text-sm">
+                    {currentMeta.name}
+                  </span>
                 </>
               )}
               {mode === "iptv" && (
                 <>
-                  <span className="font-mono-tv text-lg leading-none text-primary">
+                  <span className="font-mono-tv text-base leading-none text-primary sm:text-lg">
                     {countryLabel?.flag}
                   </span>
-                  <span className="text-sm font-semibold tracking-tight">
+                  <span className="truncate text-xs font-semibold tracking-tight sm:text-sm">
                     {iptvChannel?.name ?? "Live TV"}
                   </span>
                 </>
               )}
               {mode === "radio" && (
                 <>
-                  <span className="font-mono-tv text-lg leading-none text-accent">
+                  <span className="font-mono-tv text-base leading-none text-accent sm:text-lg">
                     {radioCountryLabel?.flag}
                   </span>
-                  <span className="text-sm font-semibold tracking-tight">
+                  <span className="truncate text-xs font-semibold tracking-tight sm:text-sm">
                     {radioStation?.name ?? "Radio"}
                   </span>
                 </>
@@ -915,8 +917,8 @@ export function TubeTVPage({
             )}
           </div>
 
-          <div className="border-t border-border/60 bg-[linear-gradient(180deg,rgba(8,10,12,0.72),rgba(4,5,7,0.96))] px-6 py-4">
-            <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="border-t border-border/60 bg-[linear-gradient(180deg,rgba(8,10,12,0.72),rgba(4,5,7,0.96))] px-3 py-3 sm:px-6 sm:py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
               <div className="min-w-0 flex-1">
                 <div className="font-mono-tv text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
                   Now playing -{" "}
@@ -926,7 +928,7 @@ export function TubeTVPage({
                       ? `Live TV - ${countryLabel?.name}`
                       : `Radio - ${radioCountryLabel?.name}`}
                 </div>
-                <div className="mt-1 truncate text-lg font-semibold tracking-tight">
+                <div className="mt-1 truncate text-base font-semibold tracking-tight sm:text-lg">
                   {title || "Tuning in..."}
                 </div>
                 <div className="mt-0.5 truncate text-sm text-muted-foreground">
@@ -939,26 +941,26 @@ export function TubeTVPage({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="-mx-3 flex items-center gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
                 {mode === "yt" && (
                   <>
                     <button
                       onClick={() => changeChannel(-1)}
-                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                       aria-label="Previous channel"
                     >
                       <ChevronDown className="h-4 w-4" /> CH-
                     </button>
                     <button
                       onClick={() => changeChannel(1)}
-                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                       aria-label="Next channel"
                     >
                       <ChevronUp className="h-4 w-4" /> CH+
                     </button>
                     <button
                       onClick={advance}
-                      className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
+                      className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
                       aria-label="Skip to next video"
                     >
                       <SkipForward className="h-4 w-4" /> Skip
@@ -967,21 +969,21 @@ export function TubeTVPage({
                 )}
                 <button
                   onClick={() => setMuted((m) => !m)}
-                  className="rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label={muted ? "Unmute" : "Mute"}
                 >
                   {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </button>
                 <button
                   onClick={() => setGuideOpen(true)}
-                  className="flex items-center gap-1.5 rounded-md bg-[linear-gradient(135deg,rgba(79,174,123,0.95),rgba(58,143,104,0.95))] px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md bg-[linear-gradient(135deg,rgba(79,174,123,0.95),rgba(58,143,104,0.95))] px-4 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-95"
                 >
                   <Grid3x3 className="h-4 w-4" /> Guide
                 </button>
                 {history[0] && (
                   <button
                     onClick={resumeLatest}
-                    className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                    className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                     aria-label="Resume latest"
                   >
                     <SkipForward className="h-4 w-4" /> Resume
@@ -989,42 +991,42 @@ export function TubeTVPage({
                 )}
                 <button
                   onClick={openRandomChannel}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
                   aria-label="Surprise me"
                 >
                   <Sparkles className="h-4 w-4" /> Surprise
                 </button>
                 <button
                   onClick={copyShareLink}
-                  className="rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-2 hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Copy current link"
                 >
                   <Link2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={openDiscoveryDesk}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Open discovery desk"
                 >
                   <Compass className="h-4 w-4" /> Discover
                 </button>
                 <button
                   onClick={openPlayground}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-accent/60 hover:bg-accent/10 hover:text-accent"
                   aria-label="Open playground"
                 >
                   <Gamepad2 className="h-4 w-4" /> Play
                 </button>
                 <button
                   onClick={openFocusRoom}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Open focus room"
                 >
                   <Timer className="h-4 w-4" /> Focus
                 </button>
                 <button
                   onClick={openJumpPalette}
-                  className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border/60 bg-background/45 px-3 py-2 text-sm font-medium hover:border-primary/60 hover:bg-primary/10 hover:text-primary"
                   aria-label="Open jump palette"
                 >
                   <Search className="h-4 w-4" /> Jump
@@ -1032,7 +1034,7 @@ export function TubeTVPage({
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+            <div className="mt-2 hidden flex-wrap items-center gap-x-6 gap-y-1 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground sm:flex">
               {mode === "yt" && <span>↑/↓ change channel</span>}
               {mode === "yt" && <span>→ skip</span>}
               <span>G guide</span>
@@ -1091,7 +1093,7 @@ export function TubeTVPage({
       </section>
 
       {helpOpen && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-3 backdrop-blur-sm sm:px-4">
           <div className="w-full max-w-lg rounded-md border border-border/60 bg-[linear-gradient(180deg,rgba(12,15,18,0.96),rgba(7,9,12,0.98))] p-6 shadow-2xl">
             <div className="text-lg font-bold tracking-tight">Keyboard shortcuts</div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -1115,7 +1117,7 @@ export function TubeTVPage({
       )}
 
       {jumpOpen && (
-        <div className="absolute inset-0 z-40 flex items-start justify-center bg-black/65 px-4 pt-16 backdrop-blur-sm">
+        <div className="absolute inset-0 z-40 flex items-end justify-center bg-black/65 px-3 pb-3 backdrop-blur-sm sm:items-start sm:px-4 sm:pt-16 sm:pb-0">
           <div className="w-full max-w-2xl overflow-hidden rounded-md border border-border/60 bg-[linear-gradient(180deg,rgba(12,15,18,0.98),rgba(7,9,12,0.98))] shadow-2xl">
             <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3">
               <Search className="h-4 w-4 text-primary" />
@@ -1133,14 +1135,14 @@ export function TubeTVPage({
                 Esc
               </button>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[62vh] overflow-y-auto sm:max-h-[60vh]">
               {jumpTargets.map((item) => (
                 <button
                   key={item.id}
                   onClick={item.run}
-                  className="flex w-full items-center gap-3 border-b border-border/50 px-4 py-3 text-left transition-colors hover:bg-primary/8"
+                  className="flex w-full items-center gap-3 border-b border-border/50 px-3 py-3 text-left transition-colors hover:bg-primary/8 sm:px-4"
                 >
-                  <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <span className="hidden w-20 shrink-0 font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground sm:block">
                     {item.kind}
                   </span>
                   <span className="min-w-0 flex-1">

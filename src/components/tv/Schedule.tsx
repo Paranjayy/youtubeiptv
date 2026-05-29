@@ -36,24 +36,24 @@ export function Schedule({ channel, order, cursor, currentDuration, currentElaps
   }
 
   return (
-    <div className="border-t border-border/60 bg-black/40 px-6 py-3">
+    <div className="border-t border-border/60 bg-black/40 px-3 py-2.5 sm:px-6 sm:py-3">
       <div className="flex items-center justify-between">
         <div className="font-mono-tv text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
           ▎ Schedule · {channel.name}
         </div>
-        <div className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+        <div className="hidden font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground sm:block">
           {CHANNELS.length} channels on air
         </div>
       </div>
-      <ol className="mt-2 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-5">
+      <ol className="mt-2 flex gap-1.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-5">
         {items.map((it, i) => (
           <li
             key={`${it.id}-${i}`}
-            className="flex items-center gap-2 rounded-md border border-border/50 bg-card/40 px-2.5 py-1.5"
+            className="flex min-w-[150px] items-center gap-2 rounded-md border border-border/50 bg-background/35 px-2.5 py-1.5 sm:min-w-0"
           >
             <span
               className="font-mono-tv text-[11px] font-bold tabular-nums"
-              style={{ color: channel.color }}
+              style={{ color: "var(--color-primary)" }}
             >
               {fmtClock(it.start)}
             </span>

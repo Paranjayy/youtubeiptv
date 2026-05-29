@@ -47,6 +47,7 @@ Sharing / SEO               ████████████████░�
 - Sharper social/share previews
 - Search history and saved searches
 - Searchable jump palette for routes, channels, and recent items
+- Compact mobile guide and schedule rails
 
 ## Build Order
 

@@ -42,6 +42,7 @@
 - I softened the brand palette and removed per-channel index colors so the TV shell reads more like a professional product and less like a demo mashup.
 - I then pushed the shell further toward a broadcast-console look: a richer dark background, a tighter green/amber brand system, flatter list rows, and fewer card-like surfaces so the UI feels more like an instrument than a dashboard of panels.
 - I added a searchable jump palette (`J`) so channels, routes, and recent items can be reached from one overlay instead of piling more controls into the main toolbar.
+- I tightened the mobile shell by compacting the header, making the bottom controls horizontally scrollable on small screens, reducing guide padding, and turning the schedule into a swipeable rail before it becomes a desktop grid.
 - I could not complete a local Vite production build in this shell because the Rollup native binary in `node_modules` hit a macOS code-signing mismatch. TypeScript and ESLint still pass for the touched files, and Vercel remote builds should be able to validate the production bundle once the commit is pushed.
 
 ## Left For Later

@@ -17,7 +17,7 @@ export function Clock() {
   const date = now.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
   return (
     <div suppressHydrationWarning className="flex items-baseline gap-3 font-mono-tv">
-      <span className="text-sm uppercase text-muted-foreground">{date}</span>
+      <span className="hidden text-sm uppercase text-muted-foreground sm:inline">{date}</span>
       <span className="text-base font-medium text-primary">{time}</span>
     </div>
   );
