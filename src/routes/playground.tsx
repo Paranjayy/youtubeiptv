@@ -107,20 +107,20 @@ function PlaygroundPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4ede0] text-zinc-950">
-      <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(rgba(17,17,17,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(17,17,17,0.04)_1px,transparent_1px)] [background-size:36px_36px]" />
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-amber-100/60 to-transparent" />
+    <main className="relative min-h-screen overflow-hidden bg-[#050608] text-zinc-100">
+      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:36px_36px]" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-amber-500/5 to-transparent" />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-zinc-900/10 pb-4">
+        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-4">
           <div>
-            <div className="font-mono-tv text-[10px] uppercase tracking-[0.45em] text-zinc-600">
+            <div className="font-mono-tv text-[10px] uppercase tracking-[0.45em] text-amber-200/80">
               Playground
             </div>
-            <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">
+            <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-50 sm:text-5xl">
               Daily guessers, built like a game cabinet.
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-700 sm:text-base">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300 sm:text-base">
               Five quick rounds. One for geography, music, screen culture, anime, and books. We can
               keep adding more lanes without bloating the TV shell.
             </p>
@@ -129,25 +129,25 @@ function PlaygroundPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
             >
               <Tv className="h-4 w-4" /> TV
             </Link>
             <Link
               to="/discover"
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
             >
               <Sparkles className="h-4 w-4" /> Discover
             </Link>
             <Link
               to="/focus"
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-white/70 px-4 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
             >
               <Timer className="h-4 w-4" /> Focus
             </Link>
             <button
               onClick={() => setAnswers({})}
-              className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-4 py-2 text-sm font-semibold text-zinc-50 transition-colors hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-full bg-amber-200 px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-100"
             >
               <RotateCcw className="h-4 w-4" /> Reset
             </button>
@@ -155,17 +155,17 @@ function PlaygroundPage() {
         </header>
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.35fr_0.9fr]">
-          <article className="rounded-[2rem] border border-zinc-900/10 bg-white/75 p-5 shadow-[0_24px_60px_rgba(60,45,25,0.08)] backdrop-blur-sm">
+          <article className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/30 backdrop-blur-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2 font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+                <div className="flex items-center gap-2 font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                   <Dice5 className="h-3.5 w-3.5" /> Daily pack
                 </div>
-                <div className="mt-2 text-xl font-bold tracking-tight text-zinc-950">
+                <div className="mt-2 text-xl font-bold tracking-tight text-zinc-100">
                   {dayKey} · {completed} solved · {streakLabel}
                 </div>
               </div>
-              <div className="rounded-full border border-zinc-900/10 bg-zinc-950 px-3 py-1 font-mono-tv text-[10px] uppercase tracking-widest text-zinc-50">
+              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono-tv text-[10px] uppercase tracking-widest text-zinc-300">
                 {hydrated ? "synced" : "loading"}
               </div>
             </div>
@@ -180,45 +180,45 @@ function PlaygroundPage() {
                 return (
                   <section
                     key={round.id}
-                    className="overflow-hidden rounded-[1.5rem] border border-zinc-900/10 bg-[#fffaf2] shadow-sm"
+                    className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-black/20 shadow-sm"
                     style={{ ["--accent" as string]: category.accent }}
                   >
-                    <div className="flex items-start justify-between gap-3 border-b border-zinc-900/10 px-4 py-4">
+                    <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-4">
                       <div className="flex min-w-0 items-start gap-3">
                         <div
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-950 text-zinc-50"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-900 text-zinc-100"
                           style={{ backgroundColor: category.accent }}
                         >
                           <Icon className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="text-sm font-bold uppercase tracking-[0.25em] text-zinc-500">
+                            <div className="text-sm font-bold uppercase tracking-[0.25em] text-zinc-400">
                               {category.label}
                             </div>
-                            <div className="rounded-full border border-zinc-900/10 bg-white px-2 py-0.5 font-mono-tv text-[9px] uppercase tracking-widest text-zinc-500">
+                            <div className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono-tv text-[9px] uppercase tracking-widest text-zinc-400">
                               {round.sourceLabel}
                             </div>
                           </div>
-                          <div className="mt-1 text-lg font-semibold tracking-tight text-zinc-950">
+                          <div className="mt-1 text-lg font-semibold tracking-tight text-zinc-100">
                             {round.title}
                           </div>
                         </div>
                       </div>
-                      <div className="rounded-full border border-zinc-900/10 bg-white px-3 py-1 font-mono-tv text-[10px] uppercase tracking-widest text-zinc-500">
+                      <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono-tv text-[10px] uppercase tracking-widest text-zinc-400">
                         {solved ? (isCorrect ? "correct" : "missed") : "pending"}
                       </div>
                     </div>
 
                     <div className="space-y-4 px-4 py-4">
                       <div>
-                        <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+                        <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                           Clue
                         </div>
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-800">
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-200">
                           {round.prompt}
                         </p>
-                        <p className="mt-2 text-xs italic leading-5 text-zinc-500">{round.hint}</p>
+                        <p className="mt-2 text-xs italic leading-5 text-zinc-400">{round.hint}</p>
                       </div>
 
                       <div className="grid gap-2 sm:grid-cols-2">
@@ -233,9 +233,9 @@ function PlaygroundPage() {
                                 "group rounded-2xl border px-4 py-3 text-left transition-all hover:-translate-y-0.5",
                                 active
                                   ? correctChoice
-                                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-950"
-                                    : "border-rose-500/50 bg-rose-500/10 text-rose-950"
-                                  : "border-zinc-900/10 bg-white hover:border-zinc-900/20",
+                                    ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
+                                    : "border-rose-500/50 bg-rose-500/10 text-rose-300"
+                                  : "border-white/10 bg-white/5 hover:border-white/20 text-zinc-100",
                               )}
                             >
                               <div className="flex items-center justify-between gap-3">
@@ -248,7 +248,7 @@ function PlaygroundPage() {
                                 />
                               </div>
                               {choice.detail && (
-                                <div className="mt-1 text-xs text-zinc-500">{choice.detail}</div>
+                                <div className="mt-1 text-xs text-zinc-400">{choice.detail}</div>
                               )}
                             </button>
                           );
@@ -260,8 +260,8 @@ function PlaygroundPage() {
                           className={cn(
                             "rounded-2xl border p-4 text-sm leading-6",
                             isCorrect
-                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-950"
-                              : "border-rose-500/30 bg-rose-500/10 text-rose-950",
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                              : "border-rose-500/30 bg-rose-500/10 text-rose-300",
                           )}
                         >
                           <div className="font-semibold tracking-tight">
@@ -269,7 +269,7 @@ function PlaygroundPage() {
                           </div>
                           <button
                             onClick={() => resetRound(round)}
-                            className="mt-3 inline-flex items-center gap-2 rounded-full border border-current/20 bg-white/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] hover:bg-white"
+                            className="mt-3 inline-flex items-center gap-2 rounded-full border border-current/20 bg-white/10 hover:bg-white/20 text-zinc-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.25em]"
                           >
                             Try again
                           </button>
@@ -283,7 +283,7 @@ function PlaygroundPage() {
           </article>
 
           <aside className="space-y-4">
-            <article className="rounded-[2rem] border border-zinc-900/10 bg-zinc-950 p-5 text-zinc-50 shadow-[0_24px_60px_rgba(17,17,17,0.18)]">
+            <article className="rounded-[2rem] border border-white/10 bg-zinc-950 p-5 text-zinc-50 shadow-[0_24px_60px_rgba(17,17,17,0.18)]">
               <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                 Score
               </div>
@@ -309,17 +309,17 @@ function PlaygroundPage() {
               </div>
             </article>
 
-            <article className="rounded-[2rem] border border-zinc-900/10 bg-white/75 p-5 shadow-[0_24px_60px_rgba(60,45,25,0.08)] backdrop-blur-sm">
+            <article className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl backdrop-blur-sm">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+                  <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                     Next lanes
                   </div>
-                  <div className="mt-2 text-xl font-bold tracking-tight text-zinc-950">
+                  <div className="mt-2 text-xl font-bold tracking-tight text-zinc-100">
                     More game modes we can ship
                   </div>
                 </div>
-                <Gamepad2 className="h-5 w-5 text-zinc-500" />
+                <Gamepad2 className="h-5 w-5 text-zinc-400" />
               </div>
 
               <div className="mt-4 space-y-3">
@@ -343,17 +343,17 @@ function PlaygroundPage() {
                 ].map((item) => (
                   <div
                     key={item.title}
-                    className="rounded-2xl border border-zinc-900/10 bg-white p-4"
+                    className="rounded-2xl border border-white/10 bg-black/20 p-4"
                   >
-                    <div className="font-semibold tracking-tight text-zinc-950">{item.title}</div>
-                    <p className="mt-1 text-sm leading-6 text-zinc-600">{item.body}</p>
+                    <div className="font-semibold tracking-tight text-zinc-100">{item.title}</div>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">{item.body}</p>
                   </div>
                 ))}
               </div>
             </article>
 
-            <article className="rounded-[2rem] border border-zinc-900/10 bg-gradient-to-br from-amber-100 via-white to-cyan-100 p-5 shadow-[0_24px_60px_rgba(60,45,25,0.08)]">
-              <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+            <article className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-amber-500/10 via-transparent to-cyan-500/10 p-5 shadow-2xl">
+              <div className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                 Category deck
               </div>
               <div className="mt-3 space-y-2">
@@ -362,25 +362,25 @@ function PlaygroundPage() {
                   return (
                     <div
                       key={category.id}
-                      className="flex items-center gap-3 rounded-2xl border border-zinc-900/10 bg-white/70 px-3 py-3"
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-3 py-3"
                     >
                       <div
-                        className="flex h-10 w-10 items-center justify-center rounded-2xl text-zinc-950"
+                        className="flex h-10 w-10 items-center justify-center rounded-2xl text-zinc-100"
                         style={{ backgroundColor: category.accent }}
                       >
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="font-semibold tracking-tight text-zinc-950">
+                        <div className="font-semibold tracking-tight text-zinc-100">
                           {category.label}
                         </div>
-                        <div className="truncate text-xs text-zinc-600">{category.blurb}</div>
+                        <div className="truncate text-xs text-zinc-400">{category.blurb}</div>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <div className="mt-4 flex items-center gap-2 text-sm text-zinc-600">
+              <div className="mt-4 flex items-center gap-2 text-sm text-zinc-400">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Roadmap lives in [feature-roadmap.md]
               </div>

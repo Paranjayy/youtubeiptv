@@ -180,8 +180,8 @@ function DiscoveryPage() {
   );
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,180,120,0.16),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(80,120,255,0.12),_transparent_24%),linear-gradient(180deg,_#171310_0%,_#0f1114_55%,_#0a0b0d_100%)] text-zinc-100">
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] [background-size:42px_42px]" />
+    <main className="relative min-h-screen overflow-hidden bg-[#050608] text-zinc-100">
+      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] [background-size:42px_42px]" />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
         <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-4">
@@ -287,10 +287,10 @@ function DiscoveryPage() {
             </div>
           </article>
 
-          <article className="rounded-[2rem] border border-white/10 bg-[#fbf2e6] p-5 text-zinc-950 shadow-2xl shadow-black/20">
+          <article className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 text-zinc-100 shadow-2xl shadow-black/30 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2 font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+                <div className="flex items-center gap-2 font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                   <BookOpenText className="h-3.5 w-3.5" /> Wiki drift
                 </div>
                 <div className="mt-2 text-xl font-bold tracking-tight">One good rabbit hole</div>
@@ -299,40 +299,40 @@ function DiscoveryPage() {
                 onClick={() => {
                   void loadRandom();
                 }}
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-900/10 bg-zinc-950 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-50 transition-colors hover:bg-zinc-800"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-200 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-950 transition-colors hover:bg-amber-100"
               >
                 <RefreshCcw className="h-3.5 w-3.5" /> New
               </button>
             </div>
 
-            <div className="mt-4 rounded-[1.5rem] bg-white/60 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
+            <div className="mt-4 rounded-[1.5rem] bg-black/20 border border-white/5 p-4 shadow-[0_18px_40px_rgba(0,0,0,0.3)]">
               {randomLoading && (
-                <div className="flex items-center gap-2 text-sm text-zinc-600">
+                <div className="flex items-center gap-2 text-sm text-zinc-400 animate-pulse">
                   <Loader2 className="h-4 w-4 animate-spin" /> Loading random article...
                 </div>
               )}
               {randomError && (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-700">
+                <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
                   {randomError}
                 </div>
               )}
               {randomArticle && (
                 <>
-                  <div className="text-xs font-mono-tv uppercase tracking-[0.35em] text-zinc-500">
+                  <div className="text-xs font-mono-tv uppercase tracking-[0.35em] text-amber-200/60">
                     Random article
                   </div>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight">{randomArticle.title}</h2>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight text-zinc-100">{randomArticle.title}</h2>
                   {randomArticle.description && (
-                    <p className="mt-2 text-sm font-medium text-zinc-700">
+                    <p className="mt-2 text-sm font-medium text-zinc-400">
                       {randomArticle.description}
                     </p>
                   )}
-                  <p className="mt-4 text-sm leading-6 text-zinc-700">{randomArticle.extract}</p>
+                  <p className="mt-4 text-sm leading-6 text-zinc-300">{randomArticle.extract}</p>
                   <a
                     href={randomArticle.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-zinc-950 px-4 py-2 text-sm font-semibold text-zinc-50 transition-colors hover:bg-zinc-800"
+                    className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-200 px-4 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-amber-100"
                   >
                     Open article <ArrowUpRight className="h-4 w-4" />
                   </a>
@@ -348,8 +348,8 @@ function DiscoveryPage() {
                   className={cn(
                     "rounded-full border px-3 py-2 text-left text-sm transition-colors",
                     wikiQuery === topic
-                      ? "border-zinc-950 bg-zinc-950 text-zinc-50"
-                      : "border-zinc-900/10 bg-white/70 text-zinc-700 hover:bg-white",
+                      ? "border-amber-200/50 bg-amber-200/10 text-amber-200"
+                      : "border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10",
                   )}
                 >
                   {topic}
@@ -364,22 +364,22 @@ function DiscoveryPage() {
                 setWikiQuery(wikiQuery.trim());
               }}
             >
-              <label className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-500">
+              <label className="font-mono-tv text-[10px] uppercase tracking-[0.35em] text-zinc-400">
                 Search Wikipedia
               </label>
               <div className="mt-2 flex gap-2">
                 <div className="relative flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                   <input
                     value={wikiQuery}
                     onChange={(e) => setWikiQuery(e.target.value)}
                     placeholder="Try art, AI, cricket, cities..."
-                    className="w-full rounded-full border border-zinc-900/10 bg-white px-10 py-3 text-sm text-zinc-950 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+                    className="w-full rounded-full border border-white/10 bg-black/20 px-10 py-3 text-sm text-zinc-50 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-200/20"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="rounded-full bg-amber-300 px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-200"
+                  className="rounded-full bg-amber-200 px-4 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-100"
                 >
                   Go
                 </button>
@@ -388,12 +388,12 @@ function DiscoveryPage() {
 
             <div className="mt-4 space-y-2">
               {wikiLoading && (
-                <div className="flex items-center gap-2 text-sm text-zinc-600">
+                <div className="flex items-center gap-2 text-sm text-zinc-400">
                   <Loader2 className="h-4 w-4 animate-spin" /> Searching the archive...
                 </div>
               )}
               {wikiError && (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-700">
+                <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
                   {wikiError}
                 </div>
               )}
@@ -405,13 +405,13 @@ function DiscoveryPage() {
                     href={result.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="group block rounded-2xl border border-zinc-900/10 bg-white/80 p-4 transition-colors hover:border-zinc-900/20 hover:bg-white"
+                    className="group block rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors hover:border-amber-200/40 hover:bg-black/30"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="font-semibold tracking-tight">{result.title}</div>
+                      <div className="font-semibold tracking-tight text-zinc-100">{result.title}</div>
                       <ArrowUpRight className="h-4 w-4 text-zinc-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-zinc-700">{result.snippet}</p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-300">{result.snippet}</p>
                   </a>
                 ))}
             </div>
