@@ -86,7 +86,11 @@ const IN_PROGRESS: FeatureCard[] = [
 ];
 
 const PARKING_LOT: FeatureCard[] = [
-  { name: 'Real-Debrid / Torrent Player', detail: 'Debrid-powered stream links in TV shell', category: 'tv', emoji: '⚡' },
+  { name: 'Real-Debrid Torrent Player', detail: 'Stream cached torrents instantly by converting magnet links to HTTPS streams using Real-Debrid API (Highly feasible; uses HTML5 / Hls.js player).', category: 'tv', emoji: '⚡' },
+  { name: 'Polymarket & Kalshi Tickers', detail: 'Real-time prediction market probability tracking for sports, tech, elections, and macro news using public REST APIs.', category: 'discovery', emoji: '📈' },
+  { name: 'Mock AI Stock Simulator', detail: 'A trading playground allowing user-configured AI agents to paper-trade live stock tickers without real money.', category: 'games', emoji: '📊' },
+  { name: 'Google News RSS Panel', detail: 'Feed topics from Google News RSS categories styled in a sleek console grid layout.', category: 'discovery', emoji: '📰' },
+  { name: '123movies-style Catalog', detail: 'Movie catalog indexing TMDb metadata with integrated direct source player streams (e.g. vidsrc.to, superembed) in custom player shell.', category: 'tv', emoji: '🎬' },
   { name: 'Study-with-me Co-presence', detail: 'Real-time shared focus sessions', category: 'focus', emoji: '👥' },
   { name: 'GeoGuessr-style Game', detail: 'Guess location from street-view screenshots', category: 'games', emoji: '🌍' },
   { name: 'Daily Crossword', detail: 'NYT-style crossword with auto-check', category: 'games', emoji: '✏️' },
