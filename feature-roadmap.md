@@ -48,6 +48,7 @@ Sharing / SEO               ████████████████░�
 - Search history and saved searches
 - Searchable jump palette for routes, channels, and recent items
 - Compact mobile guide and schedule rails
+- Branded recovery screens for stale links and bad slugs
 
 ## Build Order
 

@@ -1,6 +1,7 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { TubeTVPage } from "@/components/tv/TubeTVPage";
 import { getChannelBySlug } from "@/lib/channels";
+import { TvNotFound } from "@/components/tv/TvNotFound";
 
 export const Route = createFileRoute("/channels/$slug")({
   head: ({ params }) => {
@@ -30,21 +31,12 @@ function ChannelRoute() {
 
   if (!channel) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4 text-center">
-        <div className="max-w-md">
-          <h1 className="text-3xl font-bold tracking-tight">Channel not found</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            We could not resolve the slug{" "}
-            <span className="font-mono-tv text-foreground">{slug}</span>.
-          </p>
-          <Link
-            to="/"
-            className="mt-6 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-          >
-            Back to home
-          </Link>
-        </div>
-      </div>
+      <TvNotFound
+        eyebrow="Channel missing"
+        title="That channel slug went off air."
+        detail="The requested YouTube channel is not in the current lineup. Jump back to the TV desk or try discovery."
+        slug={slug}
+      />
     );
   }
 
