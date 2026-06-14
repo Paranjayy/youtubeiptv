@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import {
   Search,
@@ -11,6 +11,15 @@ import {
   Layers,
   AlertTriangle,
   Loader2,
+  Globe2,
+  Radio as RadioIcon,
+  Github,
+  Compass,
+  Gamepad2,
+  Newspaper,
+  BookOpen,
+  Map,
+  Music2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -217,11 +226,30 @@ export const Route = createFileRoute("/movies")({
 });
 
 function MoviesPage() {
+  const navigate = useNavigate();
   const [selectedMedia, setSelectedMedia] = useState<MediaItem>(TRENDING_MEDIA[0]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<MediaItem[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeSourceIndex, setActiveSourceIndex] = useState(0);
+
+  const [activeViewers, setActiveViewers] = useState(48);
+  const [totalViewers, setTotalViewers] = useState(14832);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTotal = localStorage.getItem("tubetv:total-viewers");
+      let base = savedTotal ? parseInt(savedTotal, 10) : 14832;
+      setTotalViewers(base);
+    }
+    const interval = setInterval(() => {
+      setActiveViewers((prev) => {
+        const diff = Math.floor(Math.random() * 5) - 2;
+        return Math.max(38, Math.min(68, prev + diff));
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Manual ID query overrides
   const [customIdInput, setCustomIdInput] = useState("");
@@ -326,51 +354,150 @@ function MoviesPage() {
   }, [selectedMedia, activeSourceIndex, season, episode]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050608] text-zinc-100 font-sans">
-      <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:40px_40px]" />
-      <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none" />
-
-      <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-4">
+    <div className="flex min-h-screen flex-col bg-[#050608] text-foreground font-sans selection:bg-primary/20">
+      {/* Top Header */}
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 bg-[#080a0e]/95 px-4 backdrop-blur-md z-10">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[linear-gradient(135deg,rgba(79,174,123,0.2),rgba(226,174,74,0.15))] border border-primary/20">
+            <Film className="h-4 w-4 text-[oklch(0.74_0.18_335)] animate-pulse" />
+          </div>
           <div>
-            <div className="font-mono-tv text-[10px] uppercase tracking-[0.45em] text-red-400">
-              Cinema Room
-            </div>
-            <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-50 sm:text-5xl">
-              123Movies Cabinet
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-300">
-              On-demand, non-torrent CDN streaming. Search for absolutely any movie or series and select a mirror server below to play.
+            <span className="font-mono-tv text-sm font-bold uppercase tracking-widest text-white">TubeTV</span>
+            <p className="hidden font-mono-tv text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:block">
+              cinema cabinet
             </p>
           </div>
+        </div>
+        
+        <div className="font-mono-tv text-xs text-muted-foreground uppercase tracking-widest">
+          CINEMA ROOM
+        </div>
+      </header>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
-            >
-              <Tv className="h-4 w-4" /> TV
-            </Link>
-            <Link
-              to="/discover"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
-            >
-              <Sparkles className="h-4 w-4" /> Discover
-            </Link>
-            <Link
-              to="/playground"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
-            >
-              <Layers className="h-4 w-4" /> Arcade
-            </Link>
-            <Link
-              to="/focus"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
-            >
-              <Timer className="h-4 w-4" /> Focus
-            </Link>
+      {/* Main layout container */}
+      <section className="relative flex flex-1 flex-col lg:flex-row min-h-0">
+        {/* Left Sidebar */}
+        <aside className="hidden w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.98),rgba(5,6,9,0.99))] lg:flex lg:flex-col">
+          {/* Header: Sources label */}
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
+            <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">Sources</span>
           </div>
-        </header>
+
+          {/* Mode switchers with per-mode neon accents */}
+          <div className="border-b border-border/60 py-1.5">
+            <button
+              onClick={() => navigate({ to: "/" })}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-all duration-200 text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
+            >
+              <Tv className="h-4 w-4 shrink-0" />
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider">Live TV</span>
+                <span className="block text-[10px] opacity-70">YouTube & IPTV</span>
+              </span>
+            </button>
+            <button
+              onClick={() => navigate({ to: "/", search: { mode: "radio" } } as any)}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-all duration-200 text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
+            >
+              <RadioIcon className="h-4 w-4 shrink-0" />
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider">Radio World</span>
+                <span className="block text-[10px] opacity-70">Worldwide stations</span>
+              </span>
+            </button>
+            <button
+              style={{ boxShadow: "inset 3px 0 0 oklch(0.74 0.18 335)" }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-all duration-200 bg-[oklch(0.74_0.18_335_/_0.1)] text-[oklch(0.74_0.18_335)]"
+            >
+              <Film className="h-4 w-4 shrink-0 text-[oklch(0.74_0.18_335)] animate-pulse" />
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-[oklch(0.74_0.18_335)]" style={{ textShadow: "0 0 6px oklch(0.74 0.18 335 / 0.4)" }}>Movies & Series</span>
+                <span className="block text-[10px] opacity-70">On-Demand Stream</span>
+              </span>
+              <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-[oklch(0.74_0.18_335)]" />
+            </button>
+          </div>
+
+          {/* Sidebar bottom: quick nav & stats (inside scroll area) */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-2 grid grid-cols-4 gap-1 mt-4 bg-black/10 border-t border-border/40">
+              {([
+                { to: "/discover", icon: Compass, label: "Disc", color: "oklch(0.84 0.14 205)" },
+                { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
+                { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
+                { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
+                { to: "/wordle", icon: BookOpen, label: "Word", color: "oklch(0.82 0.18 152)" },
+                { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
+                { to: "/roadmap", icon: Map, label: "Map", color: "oklch(0.72 0.16 305)" },
+                { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
+              ] as const).map(({ to, icon: Icon, label, color }) => (
+                <button
+                  key={to}
+                  onClick={() => navigate({ to })}
+                  className="flex flex-col items-center gap-0.5 rounded p-1.5 transition-all duration-150 hover:bg-white/[0.06]"
+                  title={label}
+                >
+                  <Icon className="h-3.5 w-3.5" style={{ color }} />
+                  <span className="font-mono-tv text-[8px] uppercase tracking-wider" style={{ color, opacity: 0.8 }}>{label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="border-t border-border/60 bg-black/40 p-2.5 flex flex-col gap-2">
+              <div className="flex flex-col gap-1 rounded bg-black/30 p-2 font-mono-tv text-[9px] text-muted-foreground border border-border/20">
+                <div className="flex justify-between items-center">
+                  <span>VERSION</span>
+                  <span className="text-primary font-bold">v2.4.2</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>UPDATED</span>
+                  <span className="text-foreground">Jun 14, 2026</span>
+                </div>
+                <div className="h-[1px] bg-border/40 my-1" />
+                <div className="flex justify-between items-center">
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    ACTIVE
+                  </span>
+                  <span className="text-emerald-400 font-bold">{activeViewers}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>TOTAL VIEWS</span>
+                  <span className="text-sky-400 font-bold">{totalViewers.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <a
+                href="https://github.com/Paranjayy/youtubeiptv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-200 hover:bg-white/[0.04] hover:text-foreground w-full border border-dashed border-border/40 hover:border-border/80"
+              >
+                <Github className="h-3.5 w-3.5 text-primary" />
+                <span className="font-mono-tv text-[9px] uppercase tracking-[0.15em]">GitHub Source</span>
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto min-h-0 bg-[#050608] text-zinc-100 relative">
+          <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
+          
+          <div className="relative w-full px-4 py-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col min-h-full">
+            <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-4">
+              <div>
+                <div className="font-mono-tv text-[10px] uppercase tracking-[0.45em] text-red-400">
+                  Cinema Room
+                </div>
+                <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-50 sm:text-5xl">
+                  123Movies Cabinet
+                </h1>
+                <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-300">
+                  On-demand, non-torrent CDN streaming. Search for absolutely any movie or series and select a mirror server below to play.
+                </p>
+              </div>
+            </header>
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_0.9fr]">
           {/* LEFT: Video player & details */}
@@ -616,8 +743,10 @@ function MoviesPage() {
               Disclaimer: This app indexes third party streaming APIs for educational research. No files are stored locally.
             </div>
           </aside>
-        </section>
-      </div>
-    </main>
+            </section>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
