@@ -508,7 +508,6 @@ function MoviesPage() {
                 title="TubeTV Cinema Player"
                 className="h-full w-full"
                 allowFullScreen
-                sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
               />
             </div>
 
