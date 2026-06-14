@@ -506,6 +506,7 @@ export function TubeTVPage({
         })
         .catch((err) => {
           console.error("TMDb search failed: ", err);
+          toast.error("TMDb Search failed. Check your API key or network/ad-blocker connection.");
         })
         .finally(() => {
           setMovieSearchLoading(false);
@@ -1509,12 +1510,7 @@ export function TubeTVPage({
                               setMovieSeason(1);
                               setMovieEpisode(1);
                               setMovieSearchQuery("");
-                              const playerEl = document.getElementById("theater-arena");
-                              if (playerEl) {
-                                playerEl.scrollIntoView({ behavior: "smooth" });
-                              } else {
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }
+                              window.scrollTo({ top: 0, behavior: "smooth" });
                             }}
                             className="group flex flex-col rounded-2xl overflow-hidden border border-white/5 bg-zinc-950/40 text-left transition-all duration-300 hover:scale-105 hover:border-red-500/40 hover:bg-zinc-900/40 cursor-pointer shadow-lg"
                           >
@@ -1558,101 +1554,185 @@ export function TubeTVPage({
                 ) : (
                   /* HOME GRID BROWSE VIEW */
                   <>
-                    {/* Giant Hero Spotlight Banner */}
-                    <header className="relative h-[40vh] sm:h-[55vh] w-full overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl shadow-black/90 group text-left">
-                      <div className="absolute inset-0 z-0">
-                        <img
-                          src={selectedMedia.backdropUrl}
-                          alt=""
-                          className="h-full w-full object-cover opacity-30 group-hover:scale-102 transition-transform duration-1000"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/40 to-transparent" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#050608] via-transparent to-transparent hidden lg:block" />
-                      </div>
-
-                      <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 sm:p-10 max-w-3xl">
-                        <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-red-500 font-bold mb-2">
-                          SPOTLIGHT SELECTION
+                    {/* Giant Hero Theater Spotlight Arena */}
+                    <div className="grid gap-6 lg:grid-cols-[1.6fr_0.8fr] text-left">
+                      {/* LEFT: Video Player and Mirror Selector */}
+                      <div className="space-y-4">
+                        <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/60 shadow-2xl shadow-black/85 group">
+                          {/* Ambient Glow behind player */}
+                          <div 
+                            className="absolute inset-0 z-0 bg-cover bg-center opacity-10 filter blur-3xl scale-110 pointer-events-none"
+                            style={{ backgroundImage: `url(${selectedMedia.backdropUrl})` }}
+                          />
+                          <iframe
+                            src={VIDEO_SOURCES[movieActiveSourceIndex].getUrl(selectedMedia.id, movieImdbId, selectedMedia.type, movieSeason, movieEpisode)}
+                            title="Cinema HD Stream Player"
+                            className="relative z-10 h-full w-full border-none"
+                            allowFullScreen
+                          />
                         </div>
-                        <h1 className="text-2xl sm:text-5xl font-black italic tracking-tighter text-white drop-shadow-lg uppercase transform -skew-x-3">
-                          {selectedMedia.title}
-                        </h1>
-                        
-                        <div className="mt-3.5 flex flex-wrap items-center gap-3 text-xs font-semibold text-zinc-300">
-                          <span className="rounded bg-white/10 px-2 py-0.5 text-white">
-                            {selectedMedia.year}
-                          </span>
-                          <span className="rounded bg-red-500/20 px-2 py-0.5 text-red-400 uppercase">
-                            {selectedMedia.type}
-                          </span>
-                          <span className="rounded border border-white/10 px-2 py-0.5 text-zinc-400">
-                            {movieExtraDetails.runtime !== "N/A" ? movieExtraDetails.runtime : selectedMedia.duration}
-                          </span>
-                          <span className="rounded border border-white/10 px-2 py-0.5">
-                            {selectedMedia.ageRating}
-                          </span>
-                          <div className="flex items-center gap-1 text-yellow-400">
-                            <Star className="h-3.5 w-3.5 fill-current" />
-                            <span>{selectedMedia.rating}</span>
+
+                        {/* Mirror Selector & Panel */}
+                        <div className="rounded-[2rem] border border-white/10 bg-zinc-950/40 p-5 backdrop-blur-md">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold flex items-center gap-2">
+                              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
+                              Select Video Mirror
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-zinc-500">
+                              <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" /> Buffering? Try a different server.
+                            </div>
                           </div>
-                        </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {VIDEO_SOURCES.map((src, idx) => (
+                              <button
+                                key={src.name}
+                                onClick={() => setMovieActiveSourceIndex(idx)}
+                                className={cn(
+                                  "rounded-full border px-4 py-2 font-mono text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer",
+                                  movieActiveSourceIndex === idx
+                                    ? "border-red-500 bg-red-600/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                                    : "border-white/5 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                                )}
+                              >
+                                {src.name}
+                              </button>
+                            ))}
+                          </div>
 
-                        <p className="mt-4 text-xs sm:text-sm text-zinc-300 leading-relaxed line-clamp-3 drop-shadow-md max-w-xl">
-                          {selectedMedia.synopsis}
-                        </p>
-
-                        <div className="mt-6 flex flex-wrap items-center gap-3">
-                          <a
-                            href="#theater-arena"
-                            className="relative rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold tracking-wide bg-red-600 hover:bg-red-500 hover:scale-105 shadow-xl shadow-red-600/15 h-[42px] px-6 text-xs uppercase text-white"
-                          >
-                            <Play className="w-3.5 h-3.5 mr-2 fill-current" /> Stream Live
-                          </a>
-
-                          {selectedMedia.trailers && selectedMedia.trailers.length > 0 && (
-                            <button
-                              onClick={() => setMovieActiveTrailerKey(selectedMedia.trailers?.[0].key ?? null)}
-                              className="relative rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold tracking-wide bg-white/5 border border-white/10 hover:border-white/20 hover:scale-105 shadow-lg h-[42px] px-5 text-xs uppercase text-zinc-100"
-                            >
-                              Watch Trailer
-                            </button>
+                          {/* Visual Season & Episode Grid Selector */}
+                          {selectedMedia.type === "tv" && (
+                            <div className="mt-5 border-t border-white/5 pt-4">
+                              <div className="flex justify-between items-center mb-3">
+                                <span className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold">
+                                  Episodes picker
+                                </span>
+                                <div className="flex items-center gap-1 bg-black/45 border border-white/5 rounded-full p-0.5">
+                                  {/* Seasons Toggles */}
+                                  {Array.from({ length: 3 }).map((_, idx) => {
+                                    const s = idx + 1;
+                                    return (
+                                      <button
+                                        key={"season-tab-" + s}
+                                        onClick={() => setMovieSeason(s)}
+                                        className={cn(
+                                          "px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase transition-all cursor-pointer",
+                                          movieSeason === s ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                                        )}
+                                      >
+                                        S{s}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                                {Array.from({ length: 24 }).map((_, idx) => {
+                                  const ep = idx + 1;
+                                  return (
+                                    <button
+                                      key={"episode-grid-" + ep}
+                                      onClick={() => setMovieEpisode(ep)}
+                                      className={cn(
+                                        "py-2 rounded-xl border font-mono text-[10px] font-bold text-center transition-all cursor-pointer",
+                                        movieEpisode === ep
+                                          ? "border-red-500/50 bg-red-600/10 text-red-500"
+                                          : "border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                                      )}
+                                    >
+                                      EP {ep}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           )}
-
-                          <button
-                            onClick={() => setMovieShowDownloadPanel((prev) => !prev)}
-                            className="relative rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold tracking-wide bg-white/5 border border-white/10 hover:border-white/20 hover:scale-105 shadow-lg h-[42px] w-[42px] p-0 shrink-0 text-white"
-                            title="Download stream offline"
-                          >
-                            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                              <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
-                            </svg>
-                          </button>
                         </div>
                       </div>
 
-                      {/* Info Stat panel (Desktop) */}
-                      <div className="hidden lg:block absolute right-10 bottom-10 w-[240px] z-10 text-left">
-                        <div className="rounded-2xl bg-black/40 border border-white/[0.06] overflow-hidden backdrop-blur-md">
-                          <div className="divide-y divide-white/[0.05] font-mono text-[9px]">
-                            <div className="flex items-center justify-between px-4 py-2">
-                              <span className="text-zinc-500">DIRECTOR</span>
-                              <span className="text-zinc-200 font-bold truncate max-w-[120px]">{movieExtraDetails.director}</span>
+                      {/* RIGHT: Spotlight Selection Metadata Info details */}
+                      <div className="flex flex-col gap-6">
+                        <div className="rounded-[2.5rem] border border-white/10 bg-zinc-950/40 p-6 sm:p-8 backdrop-blur-md flex flex-col justify-between h-full relative overflow-hidden group">
+                          {/* Background Glow */}
+                          <div 
+                            className="absolute inset-0 z-0 bg-cover bg-center opacity-[0.03] scale-110 pointer-events-none"
+                            style={{ backgroundImage: `url(${selectedMedia.backdropUrl})` }}
+                          />
+                          
+                          <div className="relative z-10 flex flex-col h-full justify-between gap-5">
+                            <div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-red-500 font-bold mb-2">
+                                SPOTLIGHT SELECTION
+                              </div>
+                              <h1 className="text-xl sm:text-3xl font-black italic tracking-tighter text-white uppercase transform -skew-x-3 line-clamp-2">
+                                {selectedMedia.title}
+                              </h1>
+                              
+                              <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold text-zinc-300">
+                                <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">
+                                  {selectedMedia.year}
+                                </span>
+                                <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-red-400 uppercase">
+                                  {selectedMedia.type}
+                                </span>
+                                <span className="rounded border border-white/10 px-1.5 py-0.5 text-zinc-400">
+                                  {movieExtraDetails.runtime !== "N/A" ? movieExtraDetails.runtime : selectedMedia.duration}
+                                </span>
+                                <span className="rounded border border-white/10 px-1.5 py-0.5">
+                                  {selectedMedia.ageRating}
+                                </span>
+                                <div className="flex items-center gap-1 text-yellow-400 font-bold">
+                                  ★ {selectedMedia.rating}
+                                </div>
+                              </div>
+
+                              <p className="mt-4 text-xs text-zinc-400 leading-relaxed line-clamp-5">
+                                {selectedMedia.synopsis}
+                              </p>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-2">
-                              <span className="text-zinc-500">LANGUAGE</span>
-                              <span className="text-zinc-200 font-bold uppercase">{movieExtraDetails.language}</span>
-                            </div>
-                            <div className="flex items-center justify-between px-4 py-2">
-                              <span className="text-zinc-500">RELEASED</span>
-                              <span className="text-zinc-200 font-bold">{movieExtraDetails.releaseDate !== "N/A" ? movieExtraDetails.releaseDate : selectedMedia.year}</span>
+
+                            <div className="space-y-4">
+                              {/* Extra Info List */}
+                              <div className="rounded-2xl bg-black/45 border border-white/[0.05] divide-y divide-white/[0.05] font-mono text-[9px] w-full">
+                                <div className="flex items-center justify-between px-3.5 py-2">
+                                  <span className="text-zinc-500">DIRECTOR</span>
+                                  <span className="text-zinc-200 font-bold truncate max-w-[150px]">{movieExtraDetails.director}</span>
+                                </div>
+                                <div className="flex items-center justify-between px-3.5 py-2">
+                                  <span className="text-zinc-500">LANGUAGE</span>
+                                  <span className="text-zinc-200 font-bold uppercase">{movieExtraDetails.language}</span>
+                                </div>
+                                <div className="flex items-center justify-between px-3.5 py-2">
+                                  <span className="text-zinc-500">RELEASED</span>
+                                  <span className="text-zinc-200 font-bold">{movieExtraDetails.releaseDate !== "N/A" ? movieExtraDetails.releaseDate : selectedMedia.year}</span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex gap-2">
+                                {selectedMedia.trailers && selectedMedia.trailers.length > 0 && (
+                                  <button
+                                    onClick={() => setMovieActiveTrailerKey(selectedMedia.trailers?.[0].key ?? null)}
+                                    className="flex-1 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold bg-white/5 border border-white/10 hover:border-white/20 hover:scale-102 h-[38px] text-[10px] uppercase text-zinc-100 cursor-pointer"
+                                  >
+                                    Watch Trailer
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => setMovieShowDownloadPanel((prev) => !prev)}
+                                  className="rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold bg-white/5 border border-white/10 hover:border-white/20 hover:scale-102 h-[38px] w-[38px] p-0 shrink-0 text-white cursor-pointer"
+                                  title="Download stream offline"
+                                >
+                                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                    <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </header>
+                    </div>
 
                     {/* HORIZONTAL CATEGORY SHELVES */}
                     <div className="flex flex-col gap-6">
@@ -1815,213 +1895,116 @@ export function TubeTVPage({
                   </>
                 )}
 
-                {/* THEATER ARENA: Video Player & Stream Options */}
-                <main id="theater-arena" className="grid gap-6 lg:grid-cols-[1.6fr_0.8fr] scroll-mt-6">
-                  {/* LEFT: Video Player and Mirror Selector */}
-                  <article className="space-y-4">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950/60 shadow-2xl shadow-black/85 group">
-                      {/* Ambient Glow behind player */}
-                      <div 
-                        className="absolute inset-0 z-0 bg-cover bg-center opacity-10 filter blur-3xl scale-110 pointer-events-none"
-                        style={{ backgroundImage: `url(${selectedMedia.backdropUrl})` }}
-                      />
-                      <iframe
-                        src={VIDEO_SOURCES[movieActiveSourceIndex].getUrl(selectedMedia.id, movieImdbId, selectedMedia.type, movieSeason, movieEpisode)}
-                        title="Cinema HD Stream Player"
-                        className="relative z-10 h-full w-full"
-                        allowFullScreen
-                      />
-                    </div>
-
-                    {/* Mirror Selector & Panel */}
-                    <div className="rounded-[2rem] border border-white/10 bg-zinc-950/40 p-5 backdrop-blur-md text-left">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
-                          Select Video Mirror
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-zinc-500">
-                          <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" /> Buffering? Try a different server.
-                        </div>
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {VIDEO_SOURCES.map((src, idx) => (
-                          <button
-                            key={src.name}
-                            onClick={() => setMovieActiveSourceIndex(idx)}
-                            className={cn(
-                              "rounded-full border px-4 py-2 font-mono text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer",
-                              movieActiveSourceIndex === idx
-                                ? "border-red-500 bg-red-600/10 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
-                                : "border-white/5 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
-                            )}
-                          >
-                            {src.name}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Visual Season & Episode Grid Selector */}
-                      {selectedMedia.type === "tv" && (
-                        <div className="mt-5 border-t border-white/5 pt-4">
-                          <div className="flex justify-between items-center mb-3">
-                            <span className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold">
-                              Episodes picker
-                            </span>
-                            <div className="flex items-center gap-1 bg-black/45 border border-white/5 rounded-full p-0.5">
-                              {/* Seasons Toggles */}
-                              {Array.from({ length: 3 }).map((_, idx) => {
-                                const s = idx + 1;
-                                return (
-                                  <button
-                                    key={"season-tab-" + s}
-                                    onClick={() => setMovieSeason(s)}
-                                    className={cn(
-                                      "px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase transition-all cursor-pointer",
-                                      movieSeason === s ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
-                                    )}
-                                  >
-                                    S{s}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
-                            {Array.from({ length: 24 }).map((_, idx) => {
-                              const ep = idx + 1;
-                              return (
-                                <button
-                                  key={"episode-grid-" + ep}
-                                  onClick={() => setMovieEpisode(ep)}
-                                  className={cn(
-                                    "py-2 rounded-xl border font-mono text-[10px] font-bold text-center transition-all cursor-pointer",
-                                    movieEpisode === ep
-                                      ? "border-red-500/50 bg-red-600/10 text-red-500"
-                                      : "border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
-                                  )}
-                                >
-                                  EP {ep}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
+                {/* TMDb API Settings & Custom Loader Utility Panel */}
+                <section className="grid gap-6 md:grid-cols-2 text-left mt-2">
+                  {/* Settings Panel */}
+                  <article className="rounded-[2rem] border border-white/10 bg-zinc-950/40 p-5 backdrop-blur-md">
+                    <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-zinc-300 font-bold">
+                      <span>🔑 TMDb API Configuration</span>
+                      {tmdbKey.trim() ? (
+                        <span className="text-emerald-400 font-bold text-[9px] border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 rounded-full">Connected</span>
+                      ) : (
+                        <span className="text-yellow-500 font-bold text-[9px] border border-yellow-500/20 bg-yellow-500/5 px-2 py-0.5 rounded-full">Offline Mode</span>
                       )}
+                    </div>
+                    <div className="mt-3.5 space-y-3">
+                      <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
+                        Paste your personal TMDb v3 API Key to resolve online details, search, cast & trailers. Saved strictly to localStorage.
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        <input
+                          type="password"
+                          value={tmdbKey}
+                          onChange={(e) => {
+                            setTmdbKey(e.target.value);
+                            localStorage.setItem("tubetv:tmdb-key", e.target.value);
+                          }}
+                          placeholder="Paste TMDb API Key..."
+                          className="w-full rounded-full border border-white/10 bg-zinc-950 px-4 py-2.5 text-xs font-mono text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-red-500/40"
+                        />
+                        {tmdbKey.trim() && (
+                          <button
+                            onClick={() => {
+                              setTmdbKey("");
+                              localStorage.removeItem("tubetv:tmdb-key");
+                              toast.success("TMDb API Key cleared");
+                            }}
+                            className="w-full text-center text-[10px] font-mono font-bold uppercase tracking-wider text-red-400/80 hover:text-red-400 mt-1 cursor-pointer"
+                          >
+                            Clear Key
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </article>
 
-                  {/* RIGHT: TMDb API Settings & Custom Loader */}
-                  <aside className="space-y-6">
-                    {/* Settings Panel */}
-                    <article className="rounded-[2rem] border border-white/10 bg-zinc-950/40 p-5 backdrop-blur-md text-left">
-                      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-zinc-300 font-bold">
-                        <span>🔑 TMDb API Configuration</span>
-                        {tmdbKey.trim() ? (
-                          <span className="text-emerald-400 font-bold text-[9px] border border-emerald-500/20 bg-emerald-500/5 px-2 py-0.5 rounded-full">Connected</span>
-                        ) : (
-                          <span className="text-yellow-500 font-bold text-[9px] border border-yellow-500/20 bg-yellow-500/5 px-2 py-0.5 rounded-full">Offline Mode</span>
-                        )}
-                      </div>
-                      <div className="mt-3.5 space-y-3">
-                        <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
-                          Paste your personal TMDb v3 API Key to resolve online details, search, cast & trailers. Saved strictly to localStorage.
-                        </p>
-                        <div className="flex flex-col gap-2">
-                          <input
-                            type="password"
-                            value={tmdbKey}
-                            onChange={(e) => {
-                              setTmdbKey(e.target.value);
-                              localStorage.setItem("tubetv:tmdb-key", e.target.value);
-                            }}
-                            placeholder="Paste TMDb API Key..."
-                            className="w-full rounded-full border border-white/10 bg-zinc-950 px-4 py-2.5 text-xs font-mono text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-red-500/40"
-                          />
-                          {tmdbKey.trim() && (
-                            <button
-                              onClick={() => {
-                                setTmdbKey("");
-                                localStorage.removeItem("tubetv:tmdb-key");
-                                toast.success("TMDb API Key cleared");
-                              }}
-                              className="w-full text-center text-[10px] font-mono font-bold uppercase tracking-wider text-red-400/80 hover:text-red-400 mt-1 cursor-pointer"
-                            >
-                              Clear Key
-                            </button>
+                  {/* Direct ID Loader */}
+                  <article className="rounded-[2rem] border border-white/10 bg-zinc-950/40 p-5 backdrop-blur-md">
+                    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-300 font-bold">
+                      <span>Direct Loader</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 leading-relaxed font-mono mt-2">
+                      Know the TMDb ID? Load the stream instantly by typing it below.
+                    </p>
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!movieCustomIdInput.trim()) return;
+                      setSelectedMedia({
+                        id: movieCustomIdInput.trim(),
+                        title: `Custom ${movieCustomType === "movie" ? "Movie" : "TV"} #${movieCustomIdInput}`,
+                        year: "2026",
+                        type: movieCustomType,
+                        rating: "N/A",
+                        votes: "0",
+                        genres: ["Override"],
+                        duration: "Unknown",
+                        ageRating: "NR",
+                        synopsis: "Manual override stream loaded via direct TMDB ID override.",
+                        backdropUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+                        posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+                      });
+                      setMovieSeason(1);
+                      setMovieEpisode(1);
+                    }} className="mt-3.5 space-y-2.5">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setMovieCustomType("movie")}
+                          className={cn(
+                            "flex-1 rounded-full py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer",
+                            movieCustomType === "movie" ? "bg-red-600 text-white" : "bg-white/5 text-zinc-400"
                           )}
-                        </div>
+                        >
+                          Movie
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMovieCustomType("tv")}
+                          className={cn(
+                            "flex-1 rounded-full py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer",
+                            movieCustomType === "tv" ? "bg-red-600 text-white" : "bg-white/5 text-zinc-400"
+                          )}
+                        >
+                          TV
+                        </button>
                       </div>
-                    </article>
-
-                    {/* Direct ID Loader */}
-                    <article className="rounded-[2rem] border border-white/10 bg-zinc-950/40 p-5 backdrop-blur-md text-left">
-                      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-zinc-300 font-bold">
-                        <span>Direct Loader</span>
+                      <div className="flex gap-2">
+                        <input
+                          value={movieCustomIdInput}
+                          onChange={(e) => setMovieCustomIdInput(e.target.value)}
+                          placeholder="e.g. 27205"
+                          className="flex-1 rounded-full border border-white/10 bg-zinc-950 px-4 py-2 text-xs font-mono text-white focus:outline-none"
+                        />
+                        <button
+                          type="submit"
+                          className="rounded-full bg-red-600 hover:bg-red-500 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                        >
+                          Load
+                        </button>
                       </div>
-                      <p className="text-[10px] text-zinc-400 leading-relaxed font-mono mt-2">
-                        Know the TMDb ID? Load the stream instantly by typing it below.
-                      </p>
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!movieCustomIdInput.trim()) return;
-                        setSelectedMedia({
-                          id: movieCustomIdInput.trim(),
-                          title: `Custom ${movieCustomType === "movie" ? "Movie" : "TV"} #${movieCustomIdInput}`,
-                          year: "2026",
-                          type: movieCustomType,
-                          rating: "N/A",
-                          votes: "0",
-                          genres: ["Override"],
-                          duration: "Unknown",
-                          ageRating: "NR",
-                          synopsis: "Manual override stream loaded via direct TMDB ID override.",
-                          backdropUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
-                          posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
-                        });
-                        setMovieSeason(1);
-                        setMovieEpisode(1);
-                      }} className="mt-3.5 space-y-2.5">
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setMovieCustomType("movie")}
-                            className={cn(
-                              "flex-1 rounded-full py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer",
-                              movieCustomType === "movie" ? "bg-red-600 text-white" : "bg-white/5 text-zinc-400"
-                            )}
-                          >
-                            Movie
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setMovieCustomType("tv")}
-                            className={cn(
-                              "flex-1 rounded-full py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer",
-                              movieCustomType === "tv" ? "bg-red-600 text-white" : "bg-white/5 text-zinc-400"
-                            )}
-                          >
-                            TV
-                          </button>
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            value={movieCustomIdInput}
-                            onChange={(e) => setMovieCustomIdInput(e.target.value)}
-                            placeholder="e.g. 27205"
-                            className="flex-1 rounded-full border border-white/10 bg-zinc-950 px-4 py-2 text-xs font-mono text-white focus:outline-none"
-                          />
-                          <button
-                            type="submit"
-                            className="rounded-full bg-red-600 hover:bg-red-500 text-white px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                          >
-                            Load
-                          </button>
-                        </div>
-                      </form>
-                    </article>
-                  </aside>
-                </main>
+                    </form>
+                  </article>
+                </section>
 
                 {/* Circular Cast Grid */}
                 {movieCast.length > 0 && (
