@@ -162,6 +162,13 @@ interface VideoSource {
 
 const VIDEO_SOURCES: VideoSource[] = [
   {
+    name: "LordFlix (Premium)",
+    getUrl: (id, imdbId, type) =>
+      type === "movie"
+        ? `https://lordflix.org/watch/movie/${id}`
+        : `https://lordflix.org/watch/tv/${id}`,
+  },
+  {
     name: "StreamIMDb (123Movies 1)",
     getUrl: (id, imdbId, type, season = 1, episode = 1) => {
       const targetId = imdbId || "tt37287335";
