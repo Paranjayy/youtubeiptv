@@ -90,7 +90,11 @@ export function loadCountryChannels(code: string): Promise<IptvChannel[]> {
       if (!r.ok) throw new Error(`Failed to load ${code} (${r.status})`);
       return r.text();
     })
-    .then((t) => parseM3U(t).map(c => ({ ...c, countryCode: key })));
+    .then((t) => parseM3U(t).map(c => ({ ...c, countryCode: key })))
+    .catch((err) => {
+      cache.delete(key);
+      throw err;
+    });
   cache.set(key, p);
   return p;
 }
@@ -104,7 +108,11 @@ export function loadCategoryChannels(category: string): Promise<IptvChannel[]> {
       if (!r.ok) throw new Error(`Failed to load category ${category} (${r.status})`);
       return r.text();
     })
-    .then((t) => parseM3U(t));
+    .then((t) => parseM3U(t))
+    .catch((err) => {
+      categoryCache.delete(key);
+      throw err;
+    });
   categoryCache.set(key, p);
   return p;
 }

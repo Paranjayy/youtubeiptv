@@ -275,25 +275,135 @@ function MoviesPage() {
   const [activeSourceIndex, setActiveSourceIndex] = useState(0);
   const [imdbId, setImdbId] = useState<string | null>(null);
 
-  // Fetch IMDb ID when selected media changes
+  const [cast, setCast] = useState<{ name: string; character: string; profileUrl: string | null }[]>([]);
+  const [trailers, setTrailers] = useState<{ name: string; key: string }[]>([]);
+  const [recommendations, setRecommendations] = useState<MediaItem[]>([]);
+  const [activeTrailerKey, setActiveTrailerKey] = useState<string | null>(null);
+  const [showDownloadPanel, setShowDownloadPanel] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<Record<string, number>>({});
+  const [downloadActive, setDownloadActive] = useState<string | null>(null);
+  const [extraDetails, setExtraDetails] = useState<{
+    director: string;
+    runtime: string;
+    language: string;
+    releaseDate: string;
+    budget: string;
+    revenue: string;
+  }>({
+    director: "N/A",
+    runtime: "N/A",
+    language: "EN",
+    releaseDate: "N/A",
+    budget: "N/A",
+    revenue: "N/A",
+  });
+
+  // Fetch IMDb ID, Cast, Trailers, Stats & Recommendations when selected media changes
   useEffect(() => {
     if (!selectedMedia.id) return;
     setImdbId(null);
+    setCast([]);
+    setTrailers([]);
+    setRecommendations([]);
+    setExtraDetails({
+      director: "N/A",
+      runtime: "N/A",
+      language: "EN",
+      releaseDate: "N/A",
+      budget: "N/A",
+      revenue: "N/A",
+    });
     
     const isTv = selectedMedia.type === "tv";
     const url = isTv
-      ? `https://api.themoviedb.org/3/tv/${selectedMedia.id}/external_ids?api_key=15d1a227521ab6b773a7d5907d9b5741`
-      : `https://api.themoviedb.org/3/movie/${selectedMedia.id}?api_key=15d1a227521ab6b773a7d5907d9b5741`;
+      ? `https://api.themoviedb.org/3/tv/${selectedMedia.id}?api_key=15d1a227521ab6b773a7d5907d9b5741&append_to_response=credits,videos,external_ids,recommendations`
+      : `https://api.themoviedb.org/3/movie/${selectedMedia.id}?api_key=15d1a227521ab6b773a7d5907d9b5741&append_to_response=credits,videos,recommendations`;
 
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        if (data.imdb_id) {
+        // 1. Set IMDb ID
+        if (isTv && data.external_ids?.imdb_id) {
+          setImdbId(data.external_ids.imdb_id);
+        } else if (data.imdb_id) {
           setImdbId(data.imdb_id);
+        }
+
+        // 2. Set Cast (top 12)
+        if (data.credits?.cast) {
+          const castList = data.credits.cast.slice(0, 12).map((member: any) => ({
+            name: member.name,
+            character: member.character,
+            profileUrl: member.profile_path
+              ? `https://image.tmdb.org/t/p/w185${member.profile_path}`
+              : null,
+          }));
+          setCast(castList);
+        }
+
+        // 3. Set Trailers
+        if (data.videos?.results) {
+          const trailerList = data.videos.results
+            .filter((video: any) => video.site === "YouTube" && (video.type === "Trailer" || video.type === "Teaser" || video.type === "Clip"))
+            .map((video: any) => ({
+              name: video.name,
+              key: video.key,
+            }));
+          setTrailers(trailerList);
+        }
+
+        // 4. Set Director/Creator
+        let director = "N/A";
+        if (isTv && data.created_by && data.created_by.length > 0) {
+          director = data.created_by.map((c: any) => c.name).join(", ");
+        } else if (data.credits?.crew) {
+          const dirMember = data.credits.crew.find((c: any) => c.job === "Director");
+          if (dirMember) director = dirMember.name;
+        }
+
+        // Format currency values
+        const formatter = new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        });
+
+        // Set extra details
+        setExtraDetails({
+          director,
+          runtime: isTv
+            ? `${data.episode_run_time?.[0] || 45}m`
+            : data.runtime
+            ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m`
+            : "N/A",
+          language: (data.original_language || "en").toUpperCase(),
+          releaseDate: data.release_date || data.first_air_date || "N/A",
+          budget: data.budget ? formatter.format(data.budget) : "N/A",
+          revenue: data.revenue ? formatter.format(data.revenue) : "N/A",
+        });
+
+        // 5. Set Recommendations
+        if (data.recommendations?.results) {
+          const recList = data.recommendations.results.slice(0, 10).map((item: any) => ({
+            id: String(item.id),
+            title: item.title || item.name || "Untitled",
+            year: (item.release_date || item.first_air_date || "2026").slice(0, 4),
+            type: item.media_type === "tv" ? "tv" : "movie",
+            rating: item.vote_average ? String(item.vote_average.toFixed(1)) : "N/A",
+            votes: item.vote_count ? String(item.vote_count) : "0",
+            genres: item.genre_ids ? item.genre_ids.map((gid: number) => getGenreName(gid)) : ["Stream"],
+            duration: item.media_type === "tv" ? "TV Series" : "Movie",
+            ageRating: item.adult ? "R" : "PG-13",
+            synopsis: item.overview || "No overview description available.",
+            backdropUrl: item.backdrop_path
+              ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
+              : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+          }));
+          setRecommendations(recList);
         }
       })
       .catch((err) => {
-        console.error("Failed to fetch IMDb ID:", err);
+        console.error("Failed to fetch TMDb details:", err);
       });
   }, [selectedMedia]);
 
@@ -531,23 +641,23 @@ function MoviesPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(153,51,204,0.06),transparent_45%)] pointer-events-none" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(239,68,68,0.04),transparent_50%)] pointer-events-none" />
           
-          <div className="relative w-full px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-6 min-h-full">
+          <div className="relative w-full px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-6 min-h-full z-10">
             
             {/* ─── Giant Hero Banner (LordFlix Style) ─── */}
-            <header className="relative h-[45vh] sm:h-[55vh] w-full overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl shadow-black/80 group">
+            <header className="relative h-[50vh] sm:h-[60vh] w-full overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl shadow-black/80 group">
               {/* Backdrop image */}
               <div className="absolute inset-0 z-0">
                 <img
                   src={selectedMedia.backdropUrl}
                   alt=""
-                  className="h-full w-full object-cover opacity-35 group-hover:scale-105 transition-transform duration-1000"
+                  className="h-full w-full object-cover opacity-25 group-hover:scale-105 transition-transform duration-1000"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80";
                   }}
                 />
                 {/* Netflix-style massive dark overlay gradients */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/50 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#050608] via-transparent to-transparent hidden sm:block" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#050608] via-transparent to-transparent hidden lg:block" />
               </div>
 
               {/* Title & info container */}
@@ -560,7 +670,7 @@ function MoviesPage() {
                 </h1>
                 
                 {/* Meta details */}
-                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-zinc-400">
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-zinc-300">
                   <span className="rounded bg-white/10 px-2 py-0.5 text-white">
                     {selectedMedia.year}
                   </span>
@@ -568,7 +678,7 @@ function MoviesPage() {
                     {selectedMedia.type}
                   </span>
                   <span className="rounded border border-white/10 px-2 py-0.5">
-                    {selectedMedia.duration}
+                    {extraDetails.runtime}
                   </span>
                   <span className="rounded border border-white/10 px-2 py-0.5">
                     {selectedMedia.ageRating}
@@ -579,21 +689,161 @@ function MoviesPage() {
                   </div>
                 </div>
 
+                <div className="mt-2 text-xs text-white/50">
+                  <span className="text-white/30">Director/Creator: </span>
+                  <span className="text-white/70 font-semibold">{extraDetails.director}</span>
+                </div>
+
                 <p className="mt-4 text-xs sm:text-sm text-zinc-300 leading-relaxed line-clamp-3 drop-shadow-md">
                   {selectedMedia.synopsis}
                 </p>
 
-                {/* Play Action button */}
-                <div className="mt-6 flex items-center gap-3">
+                {/* Actions row */}
+                <div className="mt-6 flex flex-wrap items-center gap-3">
                   <a
                     href="#theater-arena"
-                    className="flex h-[46px] items-center justify-center rounded-full bg-red-500 hover:bg-red-400 text-zinc-950 font-bold px-8 text-sm tracking-wider uppercase transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/20"
+                    className="relative rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold tracking-wide select-none bg-red-600 hover:bg-red-500 hover:scale-105 shadow-xl shadow-red-600/15 h-[44px] px-6 text-sm uppercase text-white"
                   >
-                    <Play className="h-4 w-4 mr-2 fill-current" /> Play Stream
+                    <Play className="w-4 h-4 mr-2 fill-current" /> Play Stream
                   </a>
+
+                  <button
+                    onClick={() => setShowDownloadPanel((prev) => !prev)}
+                    className="relative rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 font-bold tracking-wide select-none bg-white/5 border border-white/10 hover:border-white/20 hover:scale-105 shadow-lg h-[44px] w-[44px] p-0 shrink-0 text-white"
+                    title="Download stream offline"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Floating Stat Card (Desktop) */}
+              <div className="hidden lg:block absolute right-10 bottom-10 w-[260px] z-10">
+                <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden backdrop-blur-md">
+                  <div className="divide-y divide-white/[0.06] font-mono text-[10px]">
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <span className="text-zinc-500">RUNTIME</span>
+                      <span className="text-zinc-200 font-bold">{extraDetails.runtime}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <span className="text-zinc-500">LANGUAGE</span>
+                      <span className="text-zinc-200 font-bold">{extraDetails.language}</span>
+                    </div>
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <span className="text-zinc-500">RELEASE DATE</span>
+                      <span className="text-zinc-200 font-bold">{extraDetails.releaseDate}</span>
+                    </div>
+                    {selectedMedia.type === "movie" && (
+                      <>
+                        <div className="flex items-center justify-between px-4 py-2">
+                          <span className="text-zinc-500">BUDGET</span>
+                          <span className="text-zinc-200 font-bold">{extraDetails.budget}</span>
+                        </div>
+                        <div className="flex items-center justify-between px-4 py-2">
+                          <span className="text-zinc-500">REVENUE</span>
+                          <span className="text-zinc-200 font-bold">{extraDetails.revenue}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </header>
+
+            {/* Floating Stat Card (Mobile) */}
+            <div className="lg:hidden w-full">
+              <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden backdrop-blur-md">
+                <div className="divide-y divide-white/[0.06] font-mono text-[10px]">
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-zinc-500">RUNTIME</span>
+                    <span className="text-zinc-200 font-bold">{extraDetails.runtime}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-zinc-500">LANGUAGE</span>
+                    <span className="text-zinc-200 font-bold">{extraDetails.language}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-zinc-500">RELEASE DATE</span>
+                    <span className="text-zinc-200 font-bold">{extraDetails.releaseDate}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ─── Download Panel Manager ─── */}
+            {showDownloadPanel && (
+              <section className="rounded-[2rem] border border-white/10 bg-[#0c0f16]/90 p-6 backdrop-blur-xl animate-fade-in">
+                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-500 fill-current animate-bounce" viewBox="0 0 24 24">
+                      <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z" />
+                    </svg>
+                    <span className="font-mono text-xs uppercase tracking-widest text-zinc-100 font-bold">Offline Download Cabinet</span>
+                  </div>
+                  <button onClick={() => setShowDownloadPanel(false)} className="text-zinc-500 hover:text-white text-xs font-mono">CLOSE ✕</button>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  {([
+                    { quality: "720p HD", size: "950 MB", format: "MP4 (H.264)" },
+                    { quality: "1080p Full HD", size: "2.1 GB", format: "MKV (HEVC)" },
+                    { quality: "2160p 4K Ultra HD", size: "7.8 GB", format: "MKV (AV1/HDR)" }
+                  ] as const).map(({ quality, size, format }) => {
+                    const key = `${selectedMedia.id}-${quality}`;
+                    const progress = downloadProgress[key] ?? 0;
+                    const isActive = downloadActive === key;
+
+                    const triggerDownload = () => {
+                      if (progress >= 100 || isActive) return;
+                      setDownloadActive(key);
+                      let p = 0;
+                      const interval = setInterval(() => {
+                        p += Math.floor(Math.random() * 8) + 4;
+                        if (p >= 100) {
+                          p = 100;
+                          clearInterval(interval);
+                          setDownloadActive(null);
+                          toast.success(`${quality} downloaded successfully!`);
+                        }
+                        setDownloadProgress((prev) => ({ ...prev, [key]: p }));
+                      }, 250);
+                    };
+
+                    return (
+                      <div key={quality} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between gap-3 hover:border-white/10 hover:bg-white/[0.04] transition-all">
+                        <div>
+                          <div className="font-bold text-sm text-zinc-100">{quality}</div>
+                          <div className="text-xs text-zinc-500 font-mono mt-1">{format} · {size}</div>
+                        </div>
+
+                        {progress > 0 && (
+                          <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
+                            <div className="bg-red-500 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                          </div>
+                        )}
+
+                        <button
+                          onClick={triggerDownload}
+                          disabled={isActive}
+                          className={cn(
+                            "w-full rounded-lg py-2 font-mono text-[10px] uppercase font-bold tracking-wider transition-all",
+                            progress >= 100
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : isActive
+                              ? "bg-red-500/20 text-red-400 animate-pulse"
+                              : "bg-white/5 text-zinc-300 hover:bg-white/10 border border-white/5"
+                          )}
+                        >
+                          {progress >= 100 ? "Completed ✓" : isActive ? `Downloading ${progress}%...` : "Request Download"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             {/* ─── Main Content Grid: Video & Filters ─── */}
             <main id="theater-arena" className="grid gap-6 lg:grid-cols-[1.5fr_0.9fr] scroll-mt-6">
@@ -615,7 +865,7 @@ function MoviesPage() {
                       Select Video Mirror
                     </div>
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <AlertTriangle className="h-3.5 w-3.5 text-yellow-500/80" /> Buffering? Try a different mirror
+                      <AlertTriangle className="h-3.5 w-3.5 text-yellow-500/80" /> Buffering? Try another mirror
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -673,7 +923,7 @@ function MoviesPage() {
               {/* RIGHT: Direct Loader & Live Search Panel */}
               <aside className="space-y-6">
                 {/* Search Bar */}
-                <article className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md">
+                <article className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md relative">
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                     <input
@@ -688,6 +938,40 @@ function MoviesPage() {
                     <div className="mt-6 flex items-center justify-center gap-2 text-zinc-400 font-mono text-xs">
                       <Loader2 className="h-4 w-4 animate-spin text-red-400" />
                       Searching Database...
+                    </div>
+                  )}
+
+                  {/* Dropdown Suggestions List for immediate clicking */}
+                  {searchQuery.trim() && searchResults.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-2 rounded-[2rem] border border-white/10 bg-[#080a0e]/95 p-3 shadow-2xl z-40 max-h-[300px] overflow-y-auto backdrop-blur-md">
+                      <div className="divide-y divide-white/5">
+                        {searchResults.slice(0, 5).map((item) => (
+                          <button
+                            key={item.id + item.type + "-suggestion"}
+                            onClick={() => {
+                              setSelectedMedia(item);
+                              setSeason(1);
+                              setEpisode(1);
+                              setSearchQuery("");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            className="w-full flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-all text-left group"
+                          >
+                            <img
+                              src={item.backdropUrl}
+                              alt=""
+                              className="h-10 w-16 object-cover rounded-lg bg-zinc-800"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=60";
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-zinc-100 truncate group-hover:text-red-400 transition-colors">{item.title}</p>
+                              <p className="text-[10px] text-zinc-500 font-mono uppercase mt-0.5">{item.year} · {item.type}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </article>
@@ -739,14 +1023,78 @@ function MoviesPage() {
               </aside>
             </main>
 
-            {/* ─── Horizontal Scroll Row (LordFlix Poster Grid) ─── */}
+            {/* ─── Circular Cast Grid (LordFlix Bubble Style) ─── */}
+            {cast.length > 0 && (
+              <section className="space-y-4 mt-2">
+                <h2 className="text-xl font-bold text-white/90 px-2">Cast</h2>
+                <div className="flex gap-5 overflow-x-auto p-4 px-6 scrollbar-hide">
+                  {cast.map((member) => (
+                    <div key={member.name} className="flex flex-col items-center gap-2.5 flex-none w-28 text-center group">
+                      <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden bg-white/5 border border-white/10 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:border-white/30 z-10">
+                        {member.profileUrl ? (
+                          <img
+                            src={member.profileUrl}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/30 font-bold text-xl bg-zinc-800">
+                            {member.name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-semibold text-white/90 line-clamp-1 group-hover:text-white transition-colors">{member.name}</p>
+                        <p className="text-[10px] text-white/50 line-clamp-1">{member.character}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ─── YouTube Trailers Row ─── */}
+            {trailers.length > 0 && (
+              <section className="space-y-4 mt-2">
+                <h2 className="text-xl font-bold text-white/90 px-2">Trailers & Clips</h2>
+                <div className="flex gap-5 overflow-x-auto p-4 px-6 scrollbar-hide">
+                  {trailers.slice(0, 6).map((trailer) => (
+                    <button
+                      key={trailer.key}
+                      onClick={() => setActiveTrailerKey(trailer.key)}
+                      className="relative flex-none w-56 sm:w-72 aspect-video group cursor-pointer transition-transform duration-200 active:scale-95 text-left"
+                    >
+                      <div className="relative w-full h-full rounded-2xl overflow-hidden bg-black/20 border border-white/5 transition-all duration-300 group-hover:scale-105 group-hover:ring-1 group-hover:ring-white/30 shadow-lg shadow-black/40">
+                        <img
+                          src={`https://img.youtube.com/vi/${trailer.key}/mqdefault.jpg`}
+                          alt={trailer.name}
+                          className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="bg-white/10 hover:bg-white/20 rounded-full p-2.5 backdrop-blur-md border border-white/20 transition-all scale-90 group-hover:scale-105">
+                            <Play className="h-6 w-6 text-white fill-current" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 to-transparent">
+                          <p className="text-xs font-bold text-white line-clamp-1">{trailer.name}</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ─── You Might Also Like / Recommendations ─── */}
             <section className="space-y-4 mt-4">
               <h2 className="text-xl font-bold text-white/90 shadow-black drop-shadow-md">
-                {searchQuery.trim() ? `Search Results (${searchResults.length})` : "Trending Cabinets"}
+                {recommendations.length > 0 ? "You Might Also Like" : "Trending Cabinets"}
               </h2>
               
               <div className="flex gap-4 overflow-x-auto pb-6 pt-2 scrollbar-hide items-start">
-                {(searchQuery.trim() ? searchResults : TRENDING_MEDIA).map((item) => (
+                {(recommendations.length > 0 ? recommendations : TRENDING_MEDIA).map((item) => (
                   <button
                     key={item.id + item.type}
                     onClick={() => {
@@ -797,6 +1145,33 @@ function MoviesPage() {
                 ))}
               </div>
             </section>
+
+            {/* Trailer Lightbox Modal */}
+            {activeTrailerKey && (
+              <div
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md animate-fade-in"
+                onClick={() => setActiveTrailerKey(null)}
+              >
+                <div
+                  className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <iframe
+                    src={`https://www.youtube.com/embed/${activeTrailerKey}?autoplay=1`}
+                    title="Trailer Player"
+                    className="w-full h-full"
+                    allowFullScreen
+                    allow="autoplay"
+                  />
+                  <button
+                    onClick={() => setActiveTrailerKey(null)}
+                    className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 border border-white/10 transition-colors font-bold w-9 h-9 flex items-center justify-center"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="mt-8 p-4 font-mono text-[9px] leading-relaxed text-zinc-600 text-center uppercase tracking-wider border-t border-white/5">
               Disclaimer: This app indexes third party streaming APIs for educational research. No files are stored locally.

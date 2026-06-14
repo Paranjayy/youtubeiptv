@@ -45,22 +45,45 @@ export function getRadioItemPath(country: string, station: RadioStation) {
 
 export function findIptvChannelBySlug(list: IptvChannel[], slug: string) {
   const normalized = normalizeChannelSlug(slug);
-  return (
+  
+  // 1. Exact match
+  const exact =
     list.find((channel) => getIptvItemSlug(channel) === normalized) ??
     list.find((channel) => normalizeChannelSlug(channel.id) === normalized) ??
-    list.find((channel) => normalizeChannelSlug(channel.name) === normalized) ??
-    null
-  );
+    list.find((channel) => normalizeChannelSlug(channel.name) === normalized);
+  if (exact) return exact;
+
+  // 2. Fuzzy name prefix / substring match
+  const fuzzyName = list.find((channel) => {
+    const chName = normalizeChannelSlug(channel.name);
+    return chName.length > 3 && (normalized.startsWith(chName) || chName.startsWith(normalized));
+  });
+  if (fuzzyName) return fuzzyName;
+
+  // 3. Fuzzy ID substring match
+  const fuzzyId = list.find((channel) => {
+    const chId = normalizeChannelSlug(channel.id);
+    return chId.length > 3 && (normalized.includes(chId) || chId.includes(normalized));
+  });
+  return fuzzyId ?? null;
 }
 
 export function findRadioStationBySlug(list: RadioStation[], slug: string) {
   const normalized = normalizeChannelSlug(slug);
-  return (
+  
+  // 1. Exact match
+  const exact =
     list.find((station) => getRadioItemSlug(station) === normalized) ??
     list.find((station) => normalizeChannelSlug(station.stationuuid) === normalized) ??
-    list.find((station) => normalizeChannelSlug(station.name) === normalized) ??
-    null
-  );
+    list.find((station) => normalizeChannelSlug(station.name) === normalized);
+  if (exact) return exact;
+
+  // 2. Fuzzy name prefix match
+  const fuzzyName = list.find((station) => {
+    const stName = normalizeChannelSlug(station.name);
+    return stName.length > 3 && (normalized.startsWith(stName) || stName.startsWith(normalized));
+  });
+  return fuzzyName ?? null;
 }
 
 export function getTvPath(

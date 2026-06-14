@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel, CATEGORIES } from "@/lib/channels";
+import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel, CATEGORIES, normalizeChannelSlug } from "@/lib/channels";
 import {
   getIptvPath,
   getIptvItemPath,
@@ -272,89 +272,97 @@ export function TubeTVPage({
   useEffect(() => {
     let cancelled = false;
 
-    if (initialIptvItemSlugRef.current && mode === "iptv" && !iptvChannel) {
-      loadCountryChannels(iptvCountry)
-        .then((list) => {
-          if (cancelled) return;
-          const found = findIptvChannelBySlug(list, initialIptvItemSlugRef.current!);
-          if (found) {
-            initialIptvItemSlugRef.current = null;
-            setIptvChannel(found);
-            setTitle(found.name);
-            setIptvError(null);
-            pushHistory(makeIptvHistoryEntry(iptvCountry, found));
-            void navigate({
-              to: getIptvItemPath(iptvCountry, found),
-              replace: true,
-            });
-          } else {
-            // Fallback global search across other supported countries
-            const fallbackCountries = ["us", "uk", "ca", "in", "fr", "de", "es", "au", "jp", "kr"];
-            const targetSlug = initialIptvItemSlugRef.current!;
-            Promise.all(
-              fallbackCountries
-                .filter((c) => c !== iptvCountry)
-                .map((code) =>
-                  loadCountryChannels(code)
-                    .then((subList) => {
-                      const match = findIptvChannelBySlug(subList, targetSlug);
-                      return match ? { match, code } : null;
-                    })
-                    .catch(() => null)
-                )
-            ).then((results) => {
-              if (cancelled) return;
-              initialIptvItemSlugRef.current = null;
-              const match = results.find((r) => r !== null);
-              if (match) {
-                setIptvCountry(match.code);
-                setIptvChannel(match.match);
-                setTitle(match.match.name);
-                setIptvError(null);
-                pushHistory(makeIptvHistoryEntry(match.code, match.match));
-                void navigate({
-                  to: getIptvItemPath(match.code, match.match),
-                  replace: true,
-                });
-              } else {
-                void navigate({ to: getIptvPath(iptvCountry), replace: true });
-              }
-            });
-          }
-        })
-        .catch(() => {
-          if (!cancelled) initialIptvItemSlugRef.current = null;
-        });
+    if (initialIptvItemSlug && mode === "iptv") {
+      const currentSlug = iptvChannel ? getIptvItemSlug(iptvChannel) : null;
+      if (normalizeChannelSlug(initialIptvItemSlug) !== currentSlug) {
+        loadCountryChannels(iptvCountry)
+          .then((list) => {
+            if (cancelled) return;
+            const found = findIptvChannelBySlug(list, initialIptvItemSlug);
+            if (found) {
+              setIptvChannel(found);
+              setTitle(found.name);
+              setIptvError(null);
+              pushHistory(makeIptvHistoryEntry(iptvCountry, found));
+              void navigate({
+                to: getIptvItemPath(iptvCountry, found),
+                replace: true,
+              });
+            } else {
+              // Fallback global search across other supported countries
+              const fallbackCountries = ["us", "uk", "ca", "in", "fr", "de", "es", "au", "jp", "kr"];
+              Promise.all(
+                fallbackCountries
+                  .filter((c) => c !== iptvCountry)
+                  .map((code) =>
+                    loadCountryChannels(code)
+                      .then((subList) => {
+                        const match = findIptvChannelBySlug(subList, initialIptvItemSlug);
+                        return match ? { match, code } : null;
+                      })
+                      .catch(() => null)
+                  )
+              ).then((results) => {
+                if (cancelled) return;
+                const match = results.find((r) => r !== null);
+                if (match) {
+                  setIptvCountry(match.code);
+                  setIptvChannel(match.match);
+                  setTitle(match.match.name);
+                  setIptvError(null);
+                  pushHistory(makeIptvHistoryEntry(match.code, match.match));
+                  void navigate({
+                    to: getIptvItemPath(match.code, match.match),
+                    replace: true,
+                  });
+                } else {
+                  void navigate({ to: getIptvPath(iptvCountry), replace: true });
+                }
+              });
+            }
+          })
+          .catch(() => {});
+      }
     }
 
-    if (initialRadioItemSlugRef.current && mode === "radio" && !radioStation) {
-      loadCountryRadio(radioCountry)
-        .then((list) => {
-          if (cancelled) return;
-          const found = findRadioStationBySlug(list, initialRadioItemSlugRef.current!);
-          initialRadioItemSlugRef.current = null;
-          if (found) {
-            setRadioStation(found);
-            setTitle(found.name);
-            setRadioError(null);
-            pushHistory(makeRadioHistoryEntry(radioCountry, found));
-            void navigate({
-              to: getRadioItemPath(radioCountry, found),
-              replace: true,
-            });
-          } else {
-            void navigate({ to: getRadioPath(radioCountry), replace: true });
-          }
-        })
-        .catch(() => {
-          if (!cancelled) initialRadioItemSlugRef.current = null;
-        });
+    if (initialRadioItemSlug && mode === "radio") {
+      const currentSlug = radioStation ? getRadioItemSlug(radioStation) : null;
+      if (normalizeChannelSlug(initialRadioItemSlug) !== currentSlug) {
+        loadCountryRadio(radioCountry)
+          .then((list) => {
+            if (cancelled) return;
+            const found = findRadioStationBySlug(list, initialRadioItemSlug);
+            if (found) {
+              setRadioStation(found);
+              setTitle(found.name);
+              setRadioError(null);
+              pushHistory(makeRadioHistoryEntry(radioCountry, found));
+              void navigate({
+                to: getRadioItemPath(radioCountry, found),
+                replace: true,
+              });
+            } else {
+              void navigate({ to: getRadioPath(radioCountry), replace: true });
+            }
+          })
+          .catch(() => {});
+      }
     }
 
     return () => {
       cancelled = true;
     };
-  }, [iptvChannel, iptvCountry, mode, navigate, pushHistory, radioCountry, radioStation]);
+  }, [
+    initialIptvItemSlug,
+    initialRadioItemSlug,
+    mode,
+    iptvCountry,
+    radioCountry,
+    iptvChannel,
+    radioStation,
+    navigate,
+    pushHistory,
+  ]);
 
   const toggleFavorite = useCallback((id: string) => {
     setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
