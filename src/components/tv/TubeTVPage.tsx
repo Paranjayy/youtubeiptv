@@ -54,6 +54,8 @@ import {
   Music2,
   Film,
   Github,
+  Minimize,
+  Maximize,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -108,6 +110,7 @@ export function TubeTVPage({
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
   const [crt, setCrt] = useState(false);
+  const [fullWindow, setFullWindow] = useState(false);
   const [staticBurst, setStaticBurst] = useState(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [jumpOpen, setJumpOpen] = useState(false);
@@ -681,6 +684,46 @@ export function TubeTVPage({
           void navigate({ to: "/vibes" });
         },
       },
+      {
+        id: "route-movies",
+        title: "Movies & Series Cabinet",
+        subtitle: "On-demand CDN streaming search engine",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/movies" });
+        },
+      },
+      {
+        id: "route-news",
+        title: "News Aggregator",
+        subtitle: "Aggregated live tech, world, anime feeds",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/news" });
+        },
+      },
+      {
+        id: "route-reader",
+        title: "Interactive Reader",
+        subtitle: "Interactive annotations and Wikipedia search",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/reader" });
+        },
+      },
+      {
+        id: "route-roadmap",
+        title: "Feature Roadmap",
+        subtitle: "Progress, shipped logs, and saturation index",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/roadmap" });
+        },
+      },
       ...history.slice(0, 6).map((entry) => ({
         id: `history-${entry.path}`,
         title: entry.title,
@@ -722,7 +765,15 @@ export function TubeTVPage({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Command+K / Ctrl+K Command Palette toggle
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setJumpOpen((o) => !o);
+        return;
+      }
+
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+
       if (mode === "yt" && e.key === "ArrowUp") {
         e.preventDefault();
         changeChannel(1);
@@ -738,6 +789,7 @@ export function TubeTVPage({
         setGuideOpen(false);
         setHelpOpen(false);
         setJumpOpen(false);
+        setFullWindow(false);
       } else if (e.key.toLowerCase() === "m") {
         setMuted((m) => !m);
       } else if (e.key.toLowerCase() === "c") {
@@ -748,7 +800,11 @@ export function TubeTVPage({
       } else if (e.key.toLowerCase() === "j") {
         e.preventDefault();
         setJumpOpen((o) => !o);
-      } else if (e.key.toLowerCase() === "f" && mode === "yt") {
+      } else if (e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setFullWindow((fw) => !fw);
+      } else if ((e.altKey || e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f" && mode === "yt") {
+        e.preventDefault();
         toggleFavorite(CHANNELS[channelIdx].id);
       }
     };
@@ -961,11 +1017,20 @@ export function TubeTVPage({
 
         <div className="relative flex flex-1 flex-col min-h-0">
           <div
-            className={
-              "relative aspect-video w-full bg-[radial-gradient(circle_at_top_left,rgba(79,174,123,0.11),transparent_28%),radial-gradient(circle_at_top_right,rgba(104,145,255,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(226,174,74,0.1),transparent_22%),#050608] lg:aspect-auto lg:flex-1 " +
-              (crt ? "crt-screen" : "")
-            }
+            className={cn(
+              "relative aspect-video w-full bg-[radial-gradient(circle_at_top_left,rgba(79,174,123,0.11),transparent_28%),radial-gradient(circle_at_top_right,rgba(104,145,255,0.08),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(226,174,74,0.1),transparent_22%),#050608] lg:aspect-auto lg:flex-1",
+              crt && "crt-screen",
+              fullWindow && "fixed inset-0 z-50 w-screen h-screen"
+            )}
           >
+            {fullWindow && (
+              <button
+                onClick={() => setFullWindow(false)}
+                className="absolute right-4 top-4 z-50 flex items-center gap-1.5 rounded-md border border-white/20 bg-black/75 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-widest text-white shadow-lg backdrop-blur-sm transition-all hover:bg-black/90 hover:border-white/40"
+              >
+                <Minimize className="h-3.5 w-3.5 text-glow" /> Exit Screen
+              </button>
+            )}
             {mode === "yt" ? (
               <YouTubePlayer
                 videoId={currentVideo}
@@ -1144,6 +1209,14 @@ export function TubeTVPage({
                   {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
                 </button>
                 <button
+                  onClick={() => setFullWindow((fw) => !fw)}
+                  className="shrink-0 rounded-md border border-border/60 bg-background/45 p-1.5 hover:border-[oklch(0.86_0.16_72_/_0.5)] hover:bg-[oklch(0.86_0.16_72_/_0.08)] hover:text-[oklch(0.86_0.16_72)]"
+                  aria-label={fullWindow ? "Exit Full Window" : "Full Window"}
+                  title="Full Window (F)"
+                >
+                  {fullWindow ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+                </button>
+                <button
                   onClick={() => setGuideOpen(true)}
                   className="flex shrink-0 items-center gap-1 rounded-md bg-[oklch(0.82_0.18_152)] px-3 py-1.5 text-xs font-semibold text-black shadow-[0_0_10px_oklch(0.82_0.18_152_/_0.4)] hover:opacity-90"
                 >
@@ -1288,15 +1361,17 @@ export function TubeTVPage({
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/70 px-3 backdrop-blur-sm sm:px-4">
           <div className="w-full max-w-lg rounded-md border border-border/60 bg-[linear-gradient(180deg,rgba(12,15,18,0.96),rgba(7,9,12,0.98))] p-6 shadow-2xl">
             <div className="text-lg font-bold tracking-tight">Keyboard shortcuts</div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div>G open guide</div>
-              <div>M mute</div>
-              <div>C toggle CRT</div>
-              <div>? open help</div>
-              <div>Esc close overlays</div>
-              <div>F favorite current channel</div>
-              <div>Up / Down change channel</div>
-              <div>Right skip video</div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm font-mono-tv">
+              <div>Cmd+K / Ctrl+K : Search Palette</div>
+              <div>F : Full Window / Theater</div>
+              <div>Alt+F : Favorite current</div>
+              <div>G : Open channel guide</div>
+              <div>M : Mute toggle</div>
+              <div>C : Toggle CRT filter</div>
+              <div>? : Open help panel</div>
+              <div>Esc : Exit Full / Close modals</div>
+              <div>Up / Down : Change channel</div>
+              <div>Right : Skip video</div>
             </div>
             <button
               onClick={() => setHelpOpen(false)}

@@ -406,7 +406,9 @@ export function normalizeChannelSlug(slug: string) {
   return slug
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-");
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export function getChannelBySlug(slug: string) {
