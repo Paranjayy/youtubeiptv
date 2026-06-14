@@ -526,211 +526,226 @@ function MoviesPage() {
         </aside>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto min-h-0 bg-[#050608] text-zinc-100 relative">
-          <div className="absolute inset-0 opacity-10 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:40px_40px] pointer-events-none" />
+        <div className="flex-1 overflow-y-auto min-h-0 bg-[#050608] text-zinc-100 relative scroll-smooth">
+          {/* Ambient Liquid/Neon Background Bleed */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(153,51,204,0.06),transparent_45%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(239,68,68,0.04),transparent_50%)] pointer-events-none" />
           
-          <div className="relative w-full px-4 py-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col min-h-full">
-            <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-4">
-              <div>
-                <div className="font-mono-tv text-[10px] uppercase tracking-[0.45em] text-red-400">
-                  Cinema Room
+          <div className="relative w-full px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col gap-6 min-h-full">
+            
+            {/* ─── Giant Hero Banner (LordFlix Style) ─── */}
+            <header className="relative h-[45vh] sm:h-[55vh] w-full overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl shadow-black/80 group">
+              {/* Backdrop image */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src={selectedMedia.backdropUrl}
+                  alt=""
+                  className="h-full w-full object-cover opacity-35 group-hover:scale-105 transition-transform duration-1000"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80";
+                  }}
+                />
+                {/* Netflix-style massive dark overlay gradients */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#050608] via-transparent to-transparent hidden sm:block" />
+              </div>
+
+              {/* Title & info container */}
+              <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 sm:p-10 max-w-3xl text-left">
+                <div className="font-mono text-[9px] uppercase tracking-[0.45em] text-red-500 font-bold mb-2">
+                  Cabinet Selection
                 </div>
-                <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-50 sm:text-5xl">
-                  123Movies Cabinet
+                <h1 className="text-3xl sm:text-5xl font-black italic tracking-tighter text-white drop-shadow-lg uppercase transform -skew-x-3">
+                  {selectedMedia.title}
                 </h1>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-300">
-                  On-demand, non-torrent CDN streaming. Search for absolutely any movie or series and select a mirror server below to play.
+                
+                {/* Meta details */}
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-zinc-400">
+                  <span className="rounded bg-white/10 px-2 py-0.5 text-white">
+                    {selectedMedia.year}
+                  </span>
+                  <span className="rounded bg-red-500/20 px-2 py-0.5 text-red-400 uppercase">
+                    {selectedMedia.type}
+                  </span>
+                  <span className="rounded border border-white/10 px-2 py-0.5">
+                    {selectedMedia.duration}
+                  </span>
+                  <span className="rounded border border-white/10 px-2 py-0.5">
+                    {selectedMedia.ageRating}
+                  </span>
+                  <div className="flex items-center gap-1 text-yellow-400">
+                    <Star className="h-3.5 w-3.5 fill-current" />
+                    <span>{selectedMedia.rating}</span>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs sm:text-sm text-zinc-300 leading-relaxed line-clamp-3 drop-shadow-md">
+                  {selectedMedia.synopsis}
                 </p>
+
+                {/* Play Action button */}
+                <div className="mt-6 flex items-center gap-3">
+                  <a
+                    href="#theater-arena"
+                    className="flex h-[46px] items-center justify-center rounded-full bg-red-500 hover:bg-red-400 text-zinc-950 font-bold px-8 text-sm tracking-wider uppercase transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/20"
+                  >
+                    <Play className="h-4 w-4 mr-2 fill-current" /> Play Stream
+                  </a>
+                </div>
               </div>
             </header>
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_0.9fr]">
-          {/* LEFT: Video player & details */}
-          <article className="space-y-4">
-            <div className="relative aspect-video w-full overflow-hidden rounded-[2rem] border border-white/10 bg-black/60 shadow-2xl shadow-black/80">
-              <iframe
-                src={playerUrl}
-                title="TubeTV Cinema Player"
-                className="h-full w-full"
-                allowFullScreen
-              />
-            </div>
-
-            <div className="rounded-[2rem] border border-white/10 bg-[#0a0c10]/80 p-5 backdrop-blur-md">
-              <div className="flex items-center justify-between">
-                <div className="font-mono text-xs uppercase tracking-widest text-zinc-400">
-                  Select Video Source
-                </div>
-                <div className="flex items-center gap-2 text-xs text-zinc-500">
-                  <AlertTriangle className="h-3.5 w-3.5 text-yellow-500/80" /> Report error if buffering
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {VIDEO_SOURCES.map((src, idx) => (
-                  <button
-                    key={src.name}
-                    onClick={() => setActiveSourceIndex(idx)}
-                    className={cn(
-                      "rounded-xl border px-4 py-2 font-mono text-xs font-semibold tracking-wider transition-all",
-                      activeSourceIndex === idx
-                        ? "border-red-500/50 bg-red-500/15 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
-                        : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
-                    )}
-                  >
-                    {src.name}
-                  </button>
-                ))}
-              </div>
-
-              {selectedMedia.type === "tv" && (
-                <div className="mt-5 border-t border-white/5 pt-4">
-                  <div className="font-mono text-xs uppercase tracking-widest text-zinc-400 mb-2">
-                    Episode Panel
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-zinc-400">Season:</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="30"
-                        value={season}
-                        onChange={(e) => setSeason(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-16 rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-center font-mono text-xs text-white"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-zinc-400">Episode:</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="100"
-                        value={episode}
-                        onChange={(e) => setEpisode(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-16 rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-center font-mono text-xs text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-md">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-3xl font-black tracking-tight text-white">
-                    {selectedMedia.title}
-                  </h2>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-400">
-                    <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">
-                      {selectedMedia.year}
-                    </span>
-                    <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-red-400 uppercase">
-                      {selectedMedia.type}
-                    </span>
-                    <span className="rounded border border-white/10 px-1.5 py-0.5">
-                      {selectedMedia.duration}
-                    </span>
-                    <span className="rounded border border-white/10 px-1.5 py-0.5">
-                      {selectedMedia.ageRating}
-                    </span>
-                    <div className="flex items-center gap-1 text-yellow-400 ml-2">
-                      <Star className="h-3.5 w-3.5 fill-current" />
-                      <span>{selectedMedia.rating}</span>
-                      <span className="text-zinc-500">({selectedMedia.votes})</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {selectedMedia.genres.map((g) => (
-                  <span
-                    key={g}
-                    className="rounded-full border border-white/5 bg-white/5 px-3 py-1 text-xs text-zinc-300"
-                  >
-                    {g}
-                  </span>
-                ))}
-              </div>
-
-              <p className="mt-4 text-sm leading-relaxed text-zinc-300">
-                {selectedMedia.synopsis}
-              </p>
-            </div>
-          </article>
-
-          {/* RIGHT: Search input & movie list */}
-          <aside className="space-y-4">
-            <article className="rounded-[2rem] border border-red-500/20 bg-red-950/10 p-5">
-              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-red-400">
-                <Layers className="h-3.5 w-3.5" /> Direct ID Override
-              </div>
-              <form onSubmit={handleLoadCustom} className="mt-3 space-y-2">
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCustomType("movie")}
-                    className={cn(
-                      "flex-1 rounded-lg py-1.5 text-xs font-semibold uppercase tracking-wider transition-all",
-                      customType === "movie" ? "bg-red-500 text-zinc-950" : "bg-white/5 text-zinc-400"
-                    )}
-                  >
-                    Movie
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCustomType("tv")}
-                    className={cn(
-                      "flex-1 rounded-lg py-1.5 text-xs font-semibold uppercase tracking-wider transition-all",
-                      customType === "tv" ? "bg-red-500 text-zinc-950" : "bg-white/5 text-zinc-400"
-                    )}
-                  >
-                    TV
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    value={customIdInput}
-                    onChange={(e) => setCustomIdInput(e.target.value)}
-                    placeholder="Enter TMDb ID (e.g. 27205)"
-                    className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-red-500/50"
+            {/* ─── Main Content Grid: Video & Filters ─── */}
+            <main id="theater-arena" className="grid gap-6 lg:grid-cols-[1.5fr_0.9fr] scroll-mt-6">
+              {/* LEFT: Video Player and Mirror Selector */}
+              <article className="space-y-4">
+                <div className="relative aspect-video w-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/60 shadow-2xl shadow-black/80">
+                  <iframe
+                    src={playerUrl}
+                    title="TubeTV Cinema Player"
+                    className="h-full w-full"
+                    allowFullScreen
                   />
-                  <button
-                    type="submit"
-                    className="rounded-xl bg-red-500 hover:bg-red-400 text-zinc-950 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
-                  >
-                    Load
-                  </button>
-                </div>
-              </form>
-            </article>
-
-            <article className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 1,000,000+ titles..."
-                  className="w-full rounded-full border border-white/10 bg-black/20 px-10 py-2.5 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-                />
-              </div>
-
-              {/* Show list loader */}
-              {searchLoading && (
-                <div className="mt-6 flex items-center justify-center gap-2 text-zinc-400 font-mono text-xs">
-                  <Loader2 className="h-4 w-4 animate-spin text-red-400" />
-                  Searching TMDb Database...
-                </div>
-              )}
-
-              <div className="mt-4 space-y-2.5">
-                <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
-                  {searchQuery.trim() ? `Search Results (${searchResults.length})` : "Trending Movies & TV"}
                 </div>
 
-                {/* Grid list mapping */}
+                {/* Mirror Panel */}
+                <div className="rounded-[2.5rem] border border-white/10 bg-[#080a0e]/60 p-6 backdrop-blur-md">
+                  <div className="flex items-center justify-between">
+                    <div className="font-mono text-xs uppercase tracking-widest text-zinc-400">
+                      Select Video Mirror
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                      <AlertTriangle className="h-3.5 w-3.5 text-yellow-500/80" /> Buffering? Try a different mirror
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {VIDEO_SOURCES.map((src, idx) => (
+                      <button
+                        key={src.name}
+                        onClick={() => setActiveSourceIndex(idx)}
+                        className={cn(
+                          "rounded-full border px-4 py-2 font-mono text-xs font-semibold tracking-wider transition-all",
+                          activeSourceIndex === idx
+                            ? "border-red-500/50 bg-red-500/15 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                            : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+                        )}
+                      >
+                        {src.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Season/Episode Controls */}
+                  {selectedMedia.type === "tv" && (
+                    <div className="mt-5 border-t border-white/5 pt-4">
+                      <div className="font-mono text-xs uppercase tracking-widest text-zinc-400 mb-2">
+                        Episode Panel
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-zinc-400">Season:</span>
+                          <input
+                            type="number"
+                            min="1"
+                            max="30"
+                            value={season}
+                            onChange={(e) => setSeason(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-16 rounded-full border border-white/10 bg-black/40 px-3 py-1 text-center font-mono text-xs text-white"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-zinc-400">Episode:</span>
+                          <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={episode}
+                            onChange={(e) => setEpisode(Math.max(1, parseInt(e.target.value) || 1))}
+                            className="w-16 rounded-full border border-white/10 bg-black/40 px-3 py-1 text-center font-mono text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </article>
+
+              {/* RIGHT: Direct Loader & Live Search Panel */}
+              <aside className="space-y-6">
+                {/* Search Bar */}
+                <article className="rounded-[2.5rem] border border-white/10 bg-white/[0.04] p-5 backdrop-blur-md">
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search 1,000,000+ movies..."
+                      className="w-full rounded-full border border-white/10 bg-black/40 px-10 py-3 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                    />
+                  </div>
+
+                  {searchLoading && (
+                    <div className="mt-6 flex items-center justify-center gap-2 text-zinc-400 font-mono text-xs">
+                      <Loader2 className="h-4 w-4 animate-spin text-red-400" />
+                      Searching Database...
+                    </div>
+                  )}
+                </article>
+
+                {/* Direct ID Override */}
+                <article className="rounded-[2.5rem] border border-red-500/10 bg-red-950/5 p-5 backdrop-blur-md">
+                  <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-red-400">
+                    <Layers className="h-3.5 w-3.5" /> Direct ID Override
+                  </div>
+                  <form onSubmit={handleLoadCustom} className="mt-3 space-y-2">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCustomType("movie")}
+                        className={cn(
+                          "flex-1 rounded-full py-1.5 text-xs font-semibold uppercase tracking-wider transition-all",
+                          customType === "movie" ? "bg-red-500 text-zinc-950" : "bg-white/5 text-zinc-400"
+                        )}
+                      >
+                        Movie
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCustomType("tv")}
+                        className={cn(
+                          "flex-1 rounded-full py-1.5 text-xs font-semibold uppercase tracking-wider transition-all",
+                          customType === "tv" ? "bg-red-500 text-zinc-950" : "bg-white/5 text-zinc-400"
+                        )}
+                      >
+                        TV
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        value={customIdInput}
+                        onChange={(e) => setCustomIdInput(e.target.value)}
+                        placeholder="Enter TMDb ID (e.g. 27205)"
+                        className="flex-1 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-xs font-mono text-white focus:outline-none"
+                      />
+                      <button
+                        type="submit"
+                        className="rounded-full bg-red-500 hover:bg-red-400 text-zinc-950 px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+                      >
+                        Load
+                      </button>
+                    </div>
+                  </form>
+                </article>
+              </aside>
+            </main>
+
+            {/* ─── Horizontal Scroll Row (LordFlix Poster Grid) ─── */}
+            <section className="space-y-4 mt-4">
+              <h2 className="text-xl font-bold text-white/90 shadow-black drop-shadow-md">
+                {searchQuery.trim() ? `Search Results (${searchResults.length})` : "Trending Cabinets"}
+              </h2>
+              
+              <div className="flex gap-4 overflow-x-auto pb-6 pt-2 scrollbar-hide items-start">
                 {(searchQuery.trim() ? searchResults : TRENDING_MEDIA).map((item) => (
                   <button
                     key={item.id + item.type}
@@ -738,56 +753,55 @@ function MoviesPage() {
                       setSelectedMedia(item);
                       setSeason(1);
                       setEpisode(1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all hover:bg-white/5",
+                      "flex-none w-[160px] sm:w-[220px] rounded-[2rem] overflow-hidden bg-white/5 border border-white/5 text-left transition-all hover:scale-105 active:scale-95 group/card cursor-pointer shadow-lg",
                       selectedMedia.id === item.id && selectedMedia.type === item.type
-                        ? "border-red-500/40 bg-red-500/5"
-                        : "border-white/5 bg-black/10"
+                        ? "border-red-500/50 bg-red-500/5 shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                        : "hover:bg-white/10"
                     )}
                   >
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-zinc-900">
+                    {/* Poster section */}
+                    <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
                       <img
                         src={item.backdropUrl}
                         alt=""
-                        className="h-full w-full object-cover opacity-80"
+                        className="h-full w-full object-cover"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=60";
                         }}
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/35">
-                        <Play className="h-4 w-4 text-white" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                        <div className="flex items-center gap-1.5 text-xs text-yellow-400 font-semibold mb-1">
+                          ★ {item.rating}
+                        </div>
+                        <span className="text-[10px] text-zinc-400 font-mono uppercase">
+                          {item.duration}
+                        </span>
                       </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <div className="truncate text-sm font-bold text-zinc-100">
-                          {item.title}
-                        </div>
-                        <span className="shrink-0 rounded bg-white/10 px-1 py-0.5 text-[8px] font-bold text-zinc-400 uppercase">
-                          {item.type}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center gap-2 font-mono text-[9px] text-zinc-400">
+
+                    {/* Metadata text */}
+                    <div className="p-3">
+                      <h3 className="text-sm font-bold text-zinc-100 truncate group-hover/card:text-red-400 transition-colors">
+                        {item.title}
+                      </h3>
+                      <div className="mt-1.5 flex items-center gap-2 font-mono text-[9px] text-zinc-500">
                         <span>{item.year}</span>
                         <span>·</span>
-                        <span>{item.duration}</span>
-                        <span>·</span>
-                        <span className="flex items-center gap-0.5 text-yellow-500/80">
-                          ★ {item.rating}
-                        </span>
+                        <span className="uppercase text-red-500/80 font-bold">{item.type}</span>
                       </div>
                     </div>
                   </button>
                 ))}
               </div>
-            </article>
+            </section>
 
-            <div className="p-2 font-mono text-[8px] leading-relaxed text-zinc-600 text-center uppercase tracking-wider">
+            <div className="mt-8 p-4 font-mono text-[9px] leading-relaxed text-zinc-600 text-center uppercase tracking-wider border-t border-white/5">
               Disclaimer: This app indexes third party streaming APIs for educational research. No files are stored locally.
             </div>
-          </aside>
-            </section>
+
           </div>
         </div>
       </section>
