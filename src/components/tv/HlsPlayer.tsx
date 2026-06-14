@@ -60,7 +60,7 @@ export function HlsPlayer({ src, muted, onError, onReady }: Props) {
       className="absolute inset-0 h-full w-full bg-black"
       autoPlay
       playsInline
-      controls={false}
+      controls={true}
       muted={muted}
     />
   );

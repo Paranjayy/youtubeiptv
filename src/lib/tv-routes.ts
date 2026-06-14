@@ -93,6 +93,8 @@ export function getTvPath(
   radioCountry: string,
   iptvItemSlug?: string | null,
   radioItemSlug?: string | null,
+  movieId?: string | null,
+  movieType?: string | null
 ) {
   if (mode === "iptv")
     return iptvItemSlug ? `${getIptvPath(iptvCountry)}/${iptvItemSlug}` : getIptvPath(iptvCountry);
@@ -101,7 +103,7 @@ export function getTvPath(
       ? `${getRadioPath(radioCountry)}/${radioItemSlug}`
       : getRadioPath(radioCountry);
   if (mode === "movies")
-    return "/movies";
+    return movieId && movieType ? `/movies?id=${movieId}&type=${movieType}` : "/movies";
   return getChannelPath(channel);
 }
 

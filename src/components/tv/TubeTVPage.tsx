@@ -210,6 +210,9 @@ export function TubeTVPage({
   const [movieEpisode, setMovieEpisode] = useState(1);
   const [movieCustomIdInput, setMovieCustomIdInput] = useState("");
   const [movieCustomType, setMovieCustomType] = useState<"movie" | "tv">("movie");
+  const [movieTotalSeasons, setMovieTotalSeasons] = useState(1);
+  const [movieEpisodesCount, setMovieEpisodesCount] = useState(10);
+  const [movieSeasonsList, setMovieSeasonsList] = useState<{ seasonNumber: number; episodeCount: number }[]>([]);
 
   // Collapsible categories in sidebar
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
@@ -315,6 +318,9 @@ export function TubeTVPage({
     });
 
     const isTv = selectedMedia.type === "tv";
+    setMovieTotalSeasons(1);
+    setMovieEpisodesCount(10);
+    setMovieSeasonsList([]);
     
     if (tmdbKey.trim()) {
       const url = isTv
@@ -331,6 +337,21 @@ export function TubeTVPage({
             setMovieImdbId(data.external_ids.imdb_id);
           } else if (data.imdb_id) {
             setMovieImdbId(data.imdb_id);
+          }
+
+          if (isTv) {
+            const totalSeasons = data.number_of_seasons || 1;
+            setMovieTotalSeasons(totalSeasons);
+            if (data.seasons && data.seasons.length > 0) {
+              const list = data.seasons
+                .filter((s: any) => s.season_number > 0) // exclude specials (season 0)
+                .map((s: any) => ({
+                  seasonNumber: s.season_number,
+                  episodeCount: s.episode_count || 10,
+                }));
+              setMovieSeasonsList(list);
+              setMovieEpisodesCount(list[0]?.episodeCount ?? 10);
+            }
           }
 
           // Resolve core placeholders on dynamic route hydration
@@ -453,7 +474,8 @@ export function TubeTVPage({
         if (matched.trailers) setMovieTrailers(matched.trailers);
       }
     }
-  }, [selectedMedia, tmdbKey, mode]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMedia.id, selectedMedia.type, tmdbKey, mode]);
 
   // Trigger TMDb API search globally on search query input changes
   useEffect(() => {
@@ -1139,6 +1161,14 @@ export function TubeTVPage({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setGuideOpen(false);
+        setHelpOpen(false);
+        setJumpOpen(false);
+        setFullWindow(false);
+        return;
+      }
+
       // Command+K / Ctrl+K Command Palette toggle
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -1146,7 +1176,8 @@ export function TubeTVPage({
         return;
       }
 
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      // Block all other shortcuts when typing in form controls (ESC already handled above)
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (mode === "yt" && e.key === "ArrowUp") {
         e.preventDefault();
@@ -1159,11 +1190,6 @@ export function TubeTVPage({
         advance();
       } else if (e.key.toLowerCase() === "g") {
         setGuideOpen((o) => !o);
-      } else if (e.key === "Escape") {
-        setGuideOpen(false);
-        setHelpOpen(false);
-        setJumpOpen(false);
-        setFullWindow(false);
       } else if (e.key.toLowerCase() === "m") {
         setMuted((m) => !m);
       } else if (e.key.toLowerCase() === "c") {
@@ -1419,7 +1445,6 @@ export function TubeTVPage({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-200 hover:bg-white/[0.04] hover:text-foreground w-full border border-dashed border-border/40 hover:border-border/80"
               >
-<Github className="h-3.5 w-3.5 text-primary" />
                 <Github className="h-3.5 w-3.5 text-primary" />
                 <span className="font-mono-tv text-[9px] uppercase tracking-[0.15em]">GitHub Source</span>
               </a>
@@ -1603,31 +1628,32 @@ export function TubeTVPage({
                           {/* Visual Season & Episode Grid Selector */}
                           {selectedMedia.type === "tv" && (
                             <div className="mt-5 border-t border-white/5 pt-4">
-                              <div className="flex justify-between items-center mb-3">
+                              <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
                                 <span className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold">
-                                  Episodes picker
+                                  Season {movieSeason} · Episode {movieEpisode}
                                 </span>
-                                <div className="flex items-center gap-1 bg-black/45 border border-white/5 rounded-full p-0.5">
-                                  {/* Seasons Toggles */}
-                                  {Array.from({ length: 3 }).map((_, idx) => {
-                                    const s = idx + 1;
-                                    return (
-                                      <button
-                                        key={"season-tab-" + s}
-                                        onClick={() => setMovieSeason(s)}
-                                        className={cn(
-                                          "px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase transition-all cursor-pointer",
-                                          movieSeason === s ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
-                                        )}
-                                      >
-                                        S{s}
-                                      </button>
-                                    );
-                                  })}
+                                <div className="flex items-center gap-1 bg-black/45 border border-white/5 rounded-full p-0.5 flex-wrap max-w-full overflow-x-auto">
+                                  {/* Seasons Toggles - dynamic from TMDb */}
+                                  {(movieSeasonsList.length > 0 ? movieSeasonsList : Array.from({ length: movieTotalSeasons }).map((_, i) => ({ seasonNumber: i + 1, episodeCount: movieEpisodesCount }))).map((season) => (
+                                    <button
+                                      key={"season-tab-" + season.seasonNumber}
+                                      onClick={() => {
+                                        setMovieSeason(season.seasonNumber);
+                                        setMovieEpisode(1);
+                                        setMovieEpisodesCount(season.episodeCount);
+                                      }}
+                                      className={cn(
+                                        "px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase transition-all cursor-pointer whitespace-nowrap",
+                                        movieSeason === season.seasonNumber ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                                      )}
+                                    >
+                                      S{season.seasonNumber}
+                                    </button>
+                                  ))}
                                 </div>
                               </div>
                               <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
-                                {Array.from({ length: 24 }).map((_, idx) => {
+                                {Array.from({ length: movieEpisodesCount }).map((_, idx) => {
                                   const ep = idx + 1;
                                   return (
                                     <button
@@ -1891,6 +1917,62 @@ export function TubeTVPage({
                           ))}
                         </div>
                       </section>
+
+                      {/* 4. More Like This / Recommendations Row */}
+                      {movieRecommendations.length > 0 && (
+                        <section className="space-y-3 text-left">
+                          <div className="flex items-center justify-between px-1">
+                            <h2 className="text-md font-extrabold text-white tracking-tight uppercase border-l-2 border-purple-500 pl-2">
+                              More Like This
+                            </h2>
+                            <span className="text-[10px] font-mono text-zinc-500">{movieRecommendations.length} titles</span>
+                          </div>
+                          <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-hide items-start">
+                            {movieRecommendations.map((item) => (
+                              <button
+                                key={item.id + item.type + "-recs-row"}
+                                onClick={() => {
+                                  setSelectedMedia(item);
+                                  setMovieSeason(1);
+                                  setMovieEpisode(1);
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                                className={cn(
+                                  "flex-none w-[130px] sm:w-[160px] rounded-2xl overflow-hidden bg-zinc-950/60 border border-white/5 text-left transition-all duration-300 hover:scale-105 active:scale-95 group/card cursor-pointer shadow-lg",
+                                  selectedMedia.id === item.id && selectedMedia.type === item.type
+                                    ? "border-purple-500/50 bg-purple-950/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]"
+                                    : "hover:border-purple-500/20 hover:bg-zinc-900/60"
+                                )}
+                              >
+                                <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
+                                  <img
+                                    src={item.posterUrl || item.backdropUrl}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                    onError={(e) => {
+                                      (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=60";
+                                    }}
+                                  />
+                                  <div className="absolute top-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[8px] font-mono text-yellow-400">
+                                    ★ {item.rating}
+                                  </div>
+                                  <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                                </div>
+                                <div className="p-3">
+                                  <h3 className="text-xs font-bold text-zinc-100 truncate group-hover/card:text-purple-400 transition-colors">
+                                    {item.title}
+                                  </h3>
+                                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[8px] text-zinc-500 uppercase">
+                                    <span>{item.year}</span>
+                                    <span>·</span>
+                                    <span className="text-purple-400 font-bold">{item.type}</span>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </section>
+                      )}
                     </div>
                   </>
                 )}
@@ -2084,61 +2166,71 @@ export function TubeTVPage({
                     </div>
 
                     <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      {([
-                        { quality: "720p HD", size: "950 MB", format: "MP4 (H.264)" },
-                        { quality: "1080p Full HD", size: "2.1 GB", format: "MKV (HEVC)" },
-                        { quality: "2160p 4K Ultra HD", size: "7.8 GB", format: "MKV (AV1/HDR)" }
-                      ] as const).map(({ quality, size, format }) => {
-                        const key = `${selectedMedia.id}-${quality}`;
-                        const progress = movieDownloadProgress[key] ?? 0;
-                        const isActive = movieDownloadActive === key;
+                      {(() => {
+                        const isTv = selectedMedia.type === "tv";
+                        const sizeTable = isTv
+                          ? [
+                              { quality: "720p HD", size: "280–450 MB", format: "MP4 (H.264)" },
+                              { quality: "1080p Full HD", size: "600–900 MB", format: "MKV (HEVC)" },
+                              { quality: "2160p 4K Ultra HD", size: "2.0–3.5 GB", format: "MKV (AV1/HDR)" },
+                            ]
+                          : [
+                              { quality: "720p HD", size: "900 MB – 1.4 GB", format: "MP4 (H.264)" },
+                              { quality: "1080p Full HD", size: "2.0–3.5 GB", format: "MKV (HEVC)" },
+                              { quality: "2160p 4K Ultra HD", size: "6.5–12 GB", format: "MKV (AV1/HDR)" },
+                            ];
+                        return sizeTable.map(({ quality, size, format }) => {
+                          const key = `${selectedMedia.id}-${quality}`;
+                          const progress = movieDownloadProgress[key] ?? 0;
+                          const isActive = movieDownloadActive === key;
 
-                        const triggerDownload = () => {
-                          if (progress >= 100 || isActive) return;
-                          setMovieDownloadActive(key);
-                          let p = 0;
-                          const interval = setInterval(() => {
-                            p += Math.floor(Math.random() * 8) + 4;
-                            if (p >= 100) {
-                              p = 100;
-                              clearInterval(interval);
-                              setMovieDownloadActive(null);
-                              toast.success(`${quality} downloaded successfully!`);
-                            }
-                            setMovieDownloadProgress((prev) => ({ ...prev, [key]: p }));
-                          }, 250);
-                        };
+                          const triggerDownload = () => {
+                            if (progress >= 100 || isActive) return;
+                            setMovieDownloadActive(key);
+                            let p = 0;
+                            const interval = setInterval(() => {
+                              p += Math.floor(Math.random() * 8) + 4;
+                              if (p >= 100) {
+                                p = 100;
+                                clearInterval(interval);
+                                setMovieDownloadActive(null);
+                                toast.success(`${quality} downloaded successfully!`);
+                              }
+                              setMovieDownloadProgress((prev) => ({ ...prev, [key]: p }));
+                            }, 250);
+                          };
 
-                        return (
-                          <div key={quality} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between gap-3 hover:border-white/10 hover:bg-white/[0.04] transition-all">
-                            <div>
-                              <div className="font-bold text-sm text-zinc-100">{quality}</div>
-                              <div className="text-xs text-zinc-500 font-mono mt-1">{format} · {size}</div>
-                            </div>
-
-                            {progress > 0 && (
-                              <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
-                                <div className="bg-red-500 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                          return (
+                            <div key={quality} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between gap-3 hover:border-white/10 hover:bg-white/[0.04] transition-all">
+                              <div>
+                                <div className="font-bold text-sm text-zinc-100">{quality}</div>
+                                <div className="text-xs text-zinc-500 font-mono mt-1">{format} · {size}</div>
                               </div>
-                            )}
 
-                            <button
-                              onClick={triggerDownload}
-                              disabled={isActive}
-                              className={cn(
-                                "w-full rounded-lg py-2 font-mono text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer",
-                                progress >= 100
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                  : isActive
-                                  ? "bg-red-500/20 text-red-400 animate-pulse"
-                                  : "bg-white/5 text-zinc-300 hover:bg-white/10 border border-white/5"
+                              {progress > 0 && (
+                                <div className="w-full bg-black/40 rounded-full h-1.5 overflow-hidden">
+                                  <div className="bg-red-500 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                                </div>
                               )}
-                            >
-                              {progress >= 100 ? "Completed ✓" : isActive ? `Downloading ${progress}%...` : "Request Download"}
-                            </button>
-                          </div>
-                        );
-                      })}
+
+                              <button
+                                onClick={triggerDownload}
+                                disabled={isActive}
+                                className={cn(
+                                  "w-full rounded-lg py-2 font-mono text-[10px] uppercase font-bold tracking-wider transition-all cursor-pointer",
+                                  progress >= 100
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : isActive
+                                    ? "bg-red-500/20 text-red-400 animate-pulse"
+                                    : "bg-white/5 text-zinc-300 hover:bg-white/10 border border-white/5"
+                                )}
+                              >
+                                {progress >= 100 ? "Completed ✓" : isActive ? `Downloading ${progress}%...` : "Request Download"}
+                              </button>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
                   </section>
                 )}
