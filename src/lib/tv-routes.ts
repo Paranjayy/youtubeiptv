@@ -2,7 +2,7 @@ import { getChannelPath, normalizeChannelSlug, type Channel } from "@/lib/channe
 import { type IptvChannel } from "@/lib/iptv";
 import { type RadioStation } from "@/lib/radio";
 
-export type TvMode = "yt" | "iptv" | "radio";
+export type TvMode = "yt" | "iptv" | "radio" | "movies";
 
 export type TvHistoryEntry = {
   mode: TvMode;
@@ -100,6 +100,8 @@ export function getTvPath(
     return radioItemSlug
       ? `${getRadioPath(radioCountry)}/${radioItemSlug}`
       : getRadioPath(radioCountry);
+  if (mode === "movies")
+    return "/movies";
   return getChannelPath(channel);
 }
 
