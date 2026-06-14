@@ -157,58 +157,92 @@ const TRENDING_MEDIA: MediaItem[] = [
 // Video Sources list
 interface VideoSource {
   name: string;
-  getUrl: (id: string, type: "movie" | "tv", season?: number, episode?: number) => string;
+  getUrl: (id: string, imdbId: string | null, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
 const VIDEO_SOURCES: VideoSource[] = [
   {
+    name: "StreamIMDb (123Movies 1)",
+    getUrl: (id, imdbId, type, season = 1, episode = 1) => {
+      const targetId = imdbId || "tt37287335";
+      return type === "movie"
+        ? `https://streamimdb.me/embed/movie/${targetId}`
+        : `https://streamimdb.me/embed/tv/${targetId}/${season}/${episode}`;
+    }
+  },
+  {
+    name: "XPass (123Movies 2)",
+    getUrl: (id, imdbId, type, season = 1, episode = 1) => {
+      const targetId = imdbId || "tt37287335";
+      return type === "movie"
+        ? `https://play.xpass.top/e/movie/${targetId}`
+        : `https://play.xpass.top/e/tv/${targetId}/${season}/${episode}`;
+    }
+  },
+  {
+    name: "NxSha (123Movies 3)",
+    getUrl: (id, imdbId, type, season = 1, episode = 1) => {
+      const targetId = imdbId || "tt37287335";
+      return type === "movie"
+        ? `https://web.nxsha.app/embed/movie/${targetId}`
+        : `https://web.nxsha.app/embed/tv/${targetId}/${season}/${episode}`;
+    }
+  },
+  {
+    name: "VidApi (123Movies 4)",
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
+      type === "movie"
+        ? `https://vidapi.xyz/embed/movie/${id}`
+        : `https://vidapi.xyz/embed/tv/${id}/${season}/${episode}`,
+  },
+  {
     name: "Orion",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://vidsrc.to/embed/movie/${id}`
-        : `https://vidsrc.to/embed/tv/${id}/1/1`,
+        : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`,
   },
   {
     name: "Elysium",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://vidsrc.me/embed/movie?tmdb=${id}`
-        : `https://vidsrc.me/embed/tv?tmdb=${id}&season=1&episode=1`,
+        : `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`,
   },
   {
     name: "Vega",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://embed.su/embed/movie/${id}`
-        : `https://embed.su/embed/tv/${id}/1/1`,
+        : `https://embed.su/embed/tv/${id}/${season}/${episode}`,
   },
   {
     name: "Sirius",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://multiembed.to/emulator.php?video_id=${id}&tmdb=1`
-        : `https://multiembed.to/emulator.php?video_id=${id}&tmdb=1&s=1&e=1`,
+        : `https://multiembed.to/emulator.php?video_id=${id}&tmdb=1&s=${season}&e=${episode}`,
   },
   {
     name: "Capella",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://play2.vidapi.pro/movie/${id}`
-        : `https://play2.vidapi.pro/tv/${id}/1/1`,
+        : `https://play2.vidapi.pro/tv/${id}/${season}/${episode}`,
   },
   {
     name: "Nova",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://2embed.cc/embed/${id}`
-        : `https://2embed.cc/embedtv/${id}&s=1&e=1`,
+        : `https://2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
   },
   {
     name: "Lyra",
-    getUrl: (id, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://vidsrc.cc/v2/embed/movie/${id}`
-        : `https://vidsrc.cc/v2/embed/tv/${id}/1/1`,
+        : `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`,
   },
 ];
 
@@ -232,6 +266,29 @@ function MoviesPage() {
   const [searchResults, setSearchResults] = useState<MediaItem[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeSourceIndex, setActiveSourceIndex] = useState(0);
+  const [imdbId, setImdbId] = useState<string | null>(null);
+
+  // Fetch IMDb ID when selected media changes
+  useEffect(() => {
+    if (!selectedMedia.id) return;
+    setImdbId(null);
+    
+    const isTv = selectedMedia.type === "tv";
+    const url = isTv
+      ? `https://api.themoviedb.org/3/tv/${selectedMedia.id}/external_ids?api_key=15d1a227521ab6b773a7d5907d9b5741`
+      : `https://api.themoviedb.org/3/movie/${selectedMedia.id}?api_key=15d1a227521ab6b773a7d5907d9b5741`;
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.imdb_id) {
+          setImdbId(data.imdb_id);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch IMDb ID:", err);
+      });
+  }, [selectedMedia]);
 
   const [activeViewers, setActiveViewers] = useState(48);
   const [totalViewers, setTotalViewers] = useState(14832);
@@ -331,27 +388,8 @@ function MoviesPage() {
   // Compute player Url
   const playerUrl = useMemo(() => {
     const src = VIDEO_SOURCES[activeSourceIndex];
-    if (selectedMedia.type === "movie") {
-      return src.getUrl(selectedMedia.id, "movie");
-    } else {
-      const base = src.getUrl(selectedMedia.id, "tv");
-      if (base.includes("vidsrc.to")) {
-        return `https://vidsrc.to/embed/tv/${selectedMedia.id}/${season}/${episode}`;
-      } else if (base.includes("vidsrc.me")) {
-        return `https://vidsrc.me/embed/tv?tmdb=${selectedMedia.id}&season=${season}&episode=${episode}`;
-      } else if (base.includes("embed.su")) {
-        return `https://embed.su/embed/tv/${selectedMedia.id}/${season}/${episode}`;
-      } else if (base.includes("multiembed.to")) {
-        return `https://multiembed.to/emulator.php?video_id=${selectedMedia.id}&tmdb=1&s=${season}&e=${episode}`;
-      } else if (base.includes("2embed.cc")) {
-        return `https://2embed.cc/embedtv/${selectedMedia.id}&s=${season}&e=${episode}`;
-      } else if (base.includes("vidsrc.cc")) {
-        return `https://vidsrc.cc/v2/embed/tv/${selectedMedia.id}/${season}/${episode}`;
-      } else {
-        return `https://play2.vidapi.pro/tv/${selectedMedia.id}/${season}/${episode}`;
-      }
-    }
-  }, [selectedMedia, activeSourceIndex, season, episode]);
+    return src.getUrl(selectedMedia.id, imdbId, selectedMedia.type, season, episode);
+  }, [selectedMedia, activeSourceIndex, season, episode, imdbId]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#050608] text-foreground font-sans selection:bg-primary/20">
