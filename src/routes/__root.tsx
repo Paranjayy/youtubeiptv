@@ -11,6 +11,27 @@ import { TvNotFound } from "@/components/tv/TvNotFound";
 
 import appCss from "../styles.css?url";
 
+if (typeof window !== "undefined") {
+  if (!window.requestIdleCallback) {
+    window.requestIdleCallback = function (cb: any) {
+      const start = Date.now();
+      return setTimeout(function () {
+        cb({
+          didTimeout: false,
+          timeRemaining: function () {
+            return Math.max(0, 50 - (Date.now() - start));
+          },
+        });
+      }, 1) as any;
+    };
+  }
+  if (!window.cancelIdleCallback) {
+    window.cancelIdleCallback = function (id: any) {
+      clearTimeout(id);
+    };
+  }
+}
+
 function NotFoundComponent() {
   return (
     <TvNotFound
@@ -99,6 +120,30 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (!window.requestIdleCallback) {
+                window.requestIdleCallback = function (cb) {
+                  var start = Date.now();
+                  return setTimeout(function () {
+                    cb({
+                      didTimeout: false,
+                      timeRemaining: function () {
+                        return Math.max(0, 50 - (Date.now() - start));
+                      }
+                    });
+                  }, 1);
+                };
+              }
+              if (!window.cancelIdleCallback) {
+                window.cancelIdleCallback = function (id) {
+                  clearTimeout(id);
+                };
+              }
+            `,
+          }}
+        />
       </head>
       <body>
         {children}

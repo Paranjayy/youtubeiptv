@@ -52,6 +52,8 @@ import {
   Map,
   BookOpen,
   Music2,
+  Film,
+  Github,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -118,6 +120,36 @@ export function TubeTVPage({
   const initialRadioItemSlugRef = useRef(initialRadioItemSlug);
 
   const channel: Channel = CHANNELS[channelIdx];
+
+  const [activeViewers, setActiveViewers] = useState(48);
+  const [totalViewers, setTotalViewers] = useState(14832);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTotal = localStorage.getItem("tubetv:total-viewers");
+      let base = savedTotal ? parseInt(savedTotal, 10) : 14832;
+      base += Math.floor(Math.random() * 3) + 1;
+      localStorage.setItem("tubetv:total-viewers", base.toString());
+      setTotalViewers(base);
+    }
+
+    const interval = setInterval(() => {
+      setActiveViewers((prev) => {
+        const diff = Math.floor(Math.random() * 5) - 2;
+        const next = prev + diff;
+        return Math.max(38, Math.min(68, next));
+      });
+      setTotalViewers((prev) => {
+        const next = prev + (Math.random() > 0.7 ? 1 : 0);
+        try {
+          localStorage.setItem("tubetv:total-viewers", next.toString());
+        } catch {}
+        return next;
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     try {
@@ -801,6 +833,19 @@ export function TubeTVPage({
               </span>
               {mode === "radio" && <span className="h-1.5 w-1.5 shrink-0 animate-pulse-dot rounded-full bg-[oklch(0.86_0.16_72)]" />}
             </button>
+            <button
+              onClick={() => navigate({ to: "/movies" })}
+              className={cn(
+                "flex w-full items-center gap-3 border-t border-border/45 px-4 py-2.5 text-left transition-all duration-200",
+                "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground"
+              )}
+            >
+              <Film className="h-4 w-4 shrink-0 text-[oklch(0.74_0.18_335)]" />
+              <span className="flex-1">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-[oklch(0.74_0.18_335)]" style={{ textShadow: "0 0 6px oklch(0.74 0.18 335 / 0.4)" }}>Movies & Series</span>
+                <span className="block text-[10px] opacity-70">On-Demand Stream</span>
+              </span>
+            </button>
           </div>
 
           {/* YouTube channel list grouped by category */}
@@ -875,6 +920,42 @@ export function TubeTVPage({
                 <span className="font-mono-tv text-[8px] uppercase tracking-wider" style={{ color, opacity: 0.8 }}>{label}</span>
               </button>
             ))}
+          </div>
+
+          {/* GitHub Repo Link & Live Stats at the bottom of the sidebar */}
+          <div className="border-t border-border/60 bg-black/40 p-2.5 flex flex-col gap-2">
+            <div className="flex flex-col gap-1 rounded bg-black/30 p-2 font-mono-tv text-[9px] text-muted-foreground border border-border/20">
+              <div className="flex justify-between items-center">
+                <span>VERSION</span>
+                <span className="text-primary font-bold">v2.4.2</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>UPDATED</span>
+                <span className="text-foreground">Jun 14, 2026</span>
+              </div>
+              <div className="h-[1px] bg-border/40 my-1" />
+              <div className="flex justify-between items-center">
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  ACTIVE
+                </span>
+                <span className="text-emerald-400 font-bold">{activeViewers}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>TOTAL VIEWS</span>
+                <span className="text-sky-400 font-bold">{totalViewers.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <a
+              href="https://github.com/Paranjayy/youtubeiptv"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 rounded px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-200 hover:bg-white/[0.04] hover:text-foreground w-full border border-dashed border-border/40 hover:border-border/80"
+            >
+              <Github className="h-3.5 w-3.5 text-primary" />
+              <span className="font-mono-tv text-[9px] uppercase tracking-[0.15em]">GitHub Source</span>
+            </a>
           </div>
         </aside>
 

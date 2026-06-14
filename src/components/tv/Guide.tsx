@@ -164,7 +164,6 @@ export function Guide({
     return ["All", ...top];
   }, [radioList]);
 
-  if (!open) return null;
   const hasFavs = favorites.length > 0;
   const cats = ["All", ...(hasFavs ? ["★ Favs"] : []), ...CATEGORIES];
   const list =
@@ -198,6 +197,8 @@ export function Guide({
       s.name.toLowerCase().includes(radioSearch.toLowerCase()),
     );
   const recentHistory = history.slice(0, 8);
+
+  if (!open) return null;
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col bg-[linear-gradient(180deg,rgba(10,13,16,0.93),rgba(7,9,12,0.98))] backdrop-blur-md animate-flicker">
