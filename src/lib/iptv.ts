@@ -8,6 +8,7 @@ export type IptvChannel = {
   logo?: string;
   group?: string;
   url: string;
+  countryCode?: string;
 };
 
 export const IPTV_COUNTRIES: { code: string; name: string; flag: string }[] = [
@@ -78,6 +79,7 @@ export function parseM3U(text: string): IptvChannel[] {
 }
 
 const cache = new Map<string, Promise<IptvChannel[]>>();
+const categoryCache = new Map<string, Promise<IptvChannel[]>>();
 
 export function loadCountryChannels(code: string): Promise<IptvChannel[]> {
   const key = code.toLowerCase();
@@ -88,7 +90,46 @@ export function loadCountryChannels(code: string): Promise<IptvChannel[]> {
       if (!r.ok) throw new Error(`Failed to load ${code} (${r.status})`);
       return r.text();
     })
-    .then((t) => parseM3U(t));
+    .then((t) => parseM3U(t).map(c => ({ ...c, countryCode: key })));
   cache.set(key, p);
   return p;
 }
+
+export function loadCategoryChannels(category: string): Promise<IptvChannel[]> {
+  const key = category.toLowerCase();
+  if (categoryCache.has(key)) return categoryCache.get(key)!;
+  const url = `https://iptv-org.github.io/iptv/categories/${key}.m3u`;
+  const p = fetch(url)
+    .then((r) => {
+      if (!r.ok) throw new Error(`Failed to load category ${category} (${r.status})`);
+      return r.text();
+    })
+    .then((t) => parseM3U(t));
+  categoryCache.set(key, p);
+  return p;
+}
+
+export const GLOBAL_SEARCH_COUNTRIES = ["us", "uk", "ca", "in", "fr", "de", "es", "au", "jp", "kr"];
+
+export async function searchGlobally(query: string): Promise<IptvChannel[]> {
+  const lists = await Promise.all(
+    GLOBAL_SEARCH_COUNTRIES.map(code =>
+      loadCountryChannels(code)
+        .catch(() => [] as IptvChannel[])
+    )
+  );
+  const allChannels = lists.flat();
+  const lower = query.toLowerCase();
+  // Filter and deduplicate by URL
+  const seenUrls = new Set<string>();
+  return allChannels.filter(c => {
+    if (seenUrls.has(c.url)) return false;
+    const matches = c.name.toLowerCase().includes(lower) || (c.group && c.group.toLowerCase().includes(lower));
+    if (matches) {
+      seenUrls.add(c.url);
+      return true;
+    }
+    return false;
+  });
+}
+
