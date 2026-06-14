@@ -896,66 +896,66 @@ export function TubeTVPage({
                 </div>
               );
             })}
-          </div>
 
-          {/* Sidebar bottom: quick nav to extra routes */}
-          <div className="border-t border-border/60 p-2 grid grid-cols-4 gap-1">
-            {([
-              { to: "/discover", icon: Compass, label: "Disc", color: "oklch(0.84 0.14 205)" },
-              { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
-              { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
-              { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
-              { to: "/wordle", icon: BookOpen, label: "Word", color: "oklch(0.82 0.18 152)" },
-              { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
-              { to: "/roadmap", icon: Map, label: "Map", color: "oklch(0.72 0.16 305)" },
-              { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
-            ] as const).map(({ to, icon: Icon, label, color }) => (
-              <button
-                key={to}
-                onClick={() => navigate({ to })}
-                className="flex flex-col items-center gap-0.5 rounded p-1.5 transition-all duration-150 hover:bg-white/[0.06]"
-                title={label}
-              >
-                <Icon className="h-3.5 w-3.5" style={{ color }} />
-                <span className="font-mono-tv text-[8px] uppercase tracking-wider" style={{ color, opacity: 0.8 }}>{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* GitHub Repo Link & Live Stats at the bottom of the sidebar */}
-          <div className="border-t border-border/60 bg-black/40 p-2.5 flex flex-col gap-2">
-            <div className="flex flex-col gap-1 rounded bg-black/30 p-2 font-mono-tv text-[9px] text-muted-foreground border border-border/20">
-              <div className="flex justify-between items-center">
-                <span>VERSION</span>
-                <span className="text-primary font-bold">v2.4.2</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>UPDATED</span>
-                <span className="text-foreground">Jun 14, 2026</span>
-              </div>
-              <div className="h-[1px] bg-border/40 my-1" />
-              <div className="flex justify-between items-center">
-                <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  ACTIVE
-                </span>
-                <span className="text-emerald-400 font-bold">{activeViewers}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>TOTAL VIEWS</span>
-                <span className="text-sky-400 font-bold">{totalViewers.toLocaleString()}</span>
-              </div>
+            {/* Sidebar bottom: quick nav to extra routes (inside scroll area) */}
+            <div className="border-t border-border/60 p-2 grid grid-cols-4 gap-1 mt-4 bg-black/10">
+              {([
+                { to: "/discover", icon: Compass, label: "Disc", color: "oklch(0.84 0.14 205)" },
+                { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
+                { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
+                { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
+                { to: "/wordle", icon: BookOpen, label: "Word", color: "oklch(0.82 0.18 152)" },
+                { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
+                { to: "/roadmap", icon: Map, label: "Map", color: "oklch(0.72 0.16 305)" },
+                { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
+              ] as const).map(({ to, icon: Icon, label, color }) => (
+                <button
+                  key={to}
+                  onClick={() => navigate({ to })}
+                  className="flex flex-col items-center gap-0.5 rounded p-1.5 transition-all duration-150 hover:bg-white/[0.06]"
+                  title={label}
+                >
+                  <Icon className="h-3.5 w-3.5" style={{ color }} />
+                  <span className="font-mono-tv text-[8px] uppercase tracking-wider" style={{ color, opacity: 0.8 }}>{label}</span>
+                </button>
+              ))}
             </div>
 
-            <a
-              href="https://github.com/Paranjayy/youtubeiptv"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 rounded px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-200 hover:bg-white/[0.04] hover:text-foreground w-full border border-dashed border-border/40 hover:border-border/80"
-            >
-              <Github className="h-3.5 w-3.5 text-primary" />
-              <span className="font-mono-tv text-[9px] uppercase tracking-[0.15em]">GitHub Source</span>
-            </a>
+            {/* GitHub Repo Link & Live Stats at the bottom of the sidebar (inside scroll area) */}
+            <div className="border-t border-border/60 bg-black/40 p-2.5 flex flex-col gap-2">
+              <div className="flex flex-col gap-1 rounded bg-black/30 p-2 font-mono-tv text-[9px] text-muted-foreground border border-border/20">
+                <div className="flex justify-between items-center">
+                  <span>VERSION</span>
+                  <span className="text-primary font-bold">v2.4.2</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>UPDATED</span>
+                  <span className="text-foreground">Jun 14, 2026</span>
+                </div>
+                <div className="h-[1px] bg-border/40 my-1" />
+                <div className="flex justify-between items-center">
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    ACTIVE
+                  </span>
+                  <span className="text-emerald-400 font-bold">{activeViewers}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>TOTAL VIEWS</span>
+                  <span className="text-sky-400 font-bold">{totalViewers.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <a
+                href="https://github.com/Paranjayy/youtubeiptv"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded px-2.5 py-1.5 text-xs text-muted-foreground transition-all duration-200 hover:bg-white/[0.04] hover:text-foreground w-full border border-dashed border-border/40 hover:border-border/80"
+              >
+                <Github className="h-3.5 w-3.5 text-primary" />
+                <span className="font-mono-tv text-[9px] uppercase tracking-[0.15em]">GitHub Source</span>
+              </a>
+            </div>
           </div>
         </aside>
 
