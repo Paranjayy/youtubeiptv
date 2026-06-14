@@ -12,6 +12,7 @@ export interface MediaItem {
   ageRating: string;
   synopsis: string;
   backdropUrl: string;
+  posterUrl: string;
   // Fallback rich details when no API key is present
   director?: string;
   budget?: string;
@@ -55,7 +56,7 @@ export function getGenreName(id: number): string {
 
 export const TRENDING_MEDIA: MediaItem[] = [
   {
-    id: "1160164",
+    id: "803796",
     title: "KPop Demon Hunters",
     year: "2025",
     type: "movie",
@@ -65,7 +66,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "96 Min",
     ageRating: "PG",
     synopsis: "When K-pop superstars Rumi, Mira, and Zoey aren't selling out stadiums, they're using their secret powers to protect their fans from supernatural threats.",
-    backdropUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/1At1GfA23eS5H4Qx8WdY9L5VU5s.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/kC5H3l2e40Gv75t6tJgHhUHhD4.jpg",
     director: "Chris Appelhans",
     budget: "$45,000,000",
     revenue: "$112,000,000",
@@ -89,7 +91,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "148 Min",
     ageRating: "PG-13",
     synopsis: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-    backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/8ZTVqv2tCN1Ogp0u42f3uY343hX.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
     director: "Christopher Nolan",
     budget: "$160,000,000",
     revenue: "$836,836,967",
@@ -114,7 +117,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "169 Min",
     ageRating: "PG-13",
     synopsis: "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
-    backdropUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/xJHokZBljvj27hp07co6g5icLGa.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
     director: "Christopher Nolan",
     budget: "$165,000,000",
     revenue: "$701,729,206",
@@ -138,7 +142,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "166 Min",
     ageRating: "PG-13",
     synopsis: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
-    backdropUrl: "https://images.unsplash.com/photo-1547483238-f400e65ccd56?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/xOMo8mGWszwV6g4487J6colHd9C.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/6izwz7rsy95ARzTR3poZ8H6c5pp.jpg",
     director: "Denis Villeneuve",
     budget: "$190,000,000",
     revenue: "$712,000,000",
@@ -161,7 +166,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "152 Min",
     ageRating: "PG-13",
     synopsis: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-    backdropUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/nMKdUU5685i64Nm19K46kYyZ5tq.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
     director: "Christopher Nolan",
     budget: "$185,000,000",
     revenue: "$1,006,234,167",
@@ -185,7 +191,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "132 Min",
     ageRating: "R",
     synopsis: "Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.",
-    backdropUrl: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/7ryg15V9t9u2Asjo2n5028453.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/jjHccoFjbqlfr4VGLVLT7yek0Xn.jpg",
     director: "Bong Joon Ho",
     budget: "$11,400,000",
     revenue: "$263,000,000",
@@ -208,7 +215,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "180 Min",
     ageRating: "R",
     synopsis: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.",
-    backdropUrl: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/fm6KqX2DhbvNz84J1EX9XRhX3AO.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/8Gxv1U41qZgKqS2W75r7wzQe22M.jpg",
     director: "Christopher Nolan",
     budget: "$100,000,000",
     revenue: "$957,000,000",
@@ -232,7 +240,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "5 Seasons",
     ageRating: "TV-MA",
     synopsis: "A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine with a former student in order to secure his family's future.",
-    backdropUrl: "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/84gC2357422g0tIEeh7LVlG70Fl.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/ztkgnFjVf10V8yG1vW2Pj132w1q.jpg",
     director: "Vince Gilligan",
     budget: "N/A",
     revenue: "N/A",
@@ -245,7 +254,7 @@ export const TRENDING_MEDIA: MediaItem[] = [
     ]
   },
   {
-    id: "95396",
+    id: "117078",
     title: "Severance",
     year: "2022",
     type: "tv",
@@ -255,7 +264,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "2 Seasons",
     ageRating: "TV-MA",
     synopsis: "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
-    backdropUrl: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/l5K4vXQzS1nUu5eUa71rV7YJd8C.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/uXDfbCgq9Zweep2B1QiDKuh.jpg",
     director: "Ben Stiller",
     budget: "N/A",
     revenue: "N/A",
@@ -278,7 +288,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "9 Seasons",
     ageRating: "TV-14",
     synopsis: "A mockumentary on a group of typical office workers, where the workday consists of ego clashes, inappropriate behavior, and tedium.",
-    backdropUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/dgx1p07rT8pLhU36U148UeX3d8B.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/qWvGsvi24H7m6X7lV8C1a6M38jE.jpg",
     director: "Greg Daniels",
     budget: "N/A",
     revenue: "N/A",
@@ -302,7 +313,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "1 Season",
     ageRating: "TV-MA",
     synopsis: "In April 1986, an explosion at the Chernobyl nuclear power plant in the Union of Soviet Socialist Republics becomes one of the world's worst man-made catastrophes.",
-    backdropUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/9N64d50t8NUXFjSntFhV4l3QvY.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/hlLXt2tOPT6RRnjiUmoxyG1LTFi.jpg",
     director: "Craig Mazin",
     budget: "N/A",
     revenue: "N/A",
@@ -325,7 +337,8 @@ export const TRENDING_MEDIA: MediaItem[] = [
     duration: "5 Seasons",
     ageRating: "TV-14",
     synopsis: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.",
-    backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=60",
+    backdropUrl: "https://image.tmdb.org/t/p/w1280/56v2wYuvm12dz795a3146w3z2V.jpg",
+    posterUrl: "https://image.tmdb.org/t/p/w500/49WJz0S6z45v1HjYJkFk620S15p.jpg",
     director: "The Duffer Brothers",
     budget: "N/A",
     revenue: "N/A",
@@ -348,10 +361,10 @@ export interface VideoSource {
 export const VIDEO_SOURCES: VideoSource[] = [
   {
     name: "LordFlix (Premium)",
-    getUrl: (id, imdbId, type) =>
+    getUrl: (id, imdbId, type, season = 1, episode = 1) =>
       type === "movie"
         ? `https://lordflix.org/watch/movie/${id}`
-        : `https://lordflix.org/watch/tv/${id}`,
+        : `https://lordflix.org/watch/tv/${id}/${season}/${episode}`,
   },
   {
     name: "StreamIMDb (123Movies 1)",

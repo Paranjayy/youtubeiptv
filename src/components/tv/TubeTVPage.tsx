@@ -71,6 +71,8 @@ type TubeTVPageProps = {
   initialIptvItemSlug?: string | null;
   initialRadioCountry?: string | null;
   initialRadioItemSlug?: string | null;
+  initialMovieId?: string | null;
+  initialMovieType?: "movie" | "tv" | null;
 };
 
 const FAVORITES_KEY = "tubetv:favs";
@@ -88,6 +90,8 @@ export function TubeTVPage({
   initialIptvItemSlug,
   initialRadioCountry,
   initialRadioItemSlug,
+  initialMovieId,
+  initialMovieType,
 }: TubeTVPageProps) {
   const navigate = useNavigate();
   const initialChannel = initialChannelSlug ? getChannelBySlug(initialChannelSlug) : null;
@@ -150,7 +154,29 @@ export function TubeTVPage({
     }
     return "";
   });
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem>(TRENDING_MEDIA[0]);
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem>(() => {
+    if (initialMovieId && initialMovieType) {
+      const matched = TRENDING_MEDIA.find(
+        (m) => m.id === initialMovieId && m.type === initialMovieType
+      );
+      if (matched) return matched;
+      return {
+        id: initialMovieId,
+        title: initialMovieType === "tv" ? "TV Series Stream" : "Movie Stream",
+        year: "2026",
+        type: initialMovieType,
+        rating: "N/A",
+        votes: "0",
+        genres: ["Live"],
+        duration: initialMovieType === "tv" ? "TV Series" : "Movie",
+        ageRating: "PG-13",
+        synopsis: "Dynamic override stream loaded from URL.",
+        backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80",
+        posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+      };
+    }
+    return TRENDING_MEDIA[0];
+  });
   const [movieSearchQuery, setMovieSearchQuery] = useState("");
   const [movieSearchResults, setMovieSearchResults] = useState<MediaItem[]>([]);
   const [movieSearchLoading, setMovieSearchLoading] = useState(false);
@@ -258,6 +284,20 @@ export function TubeTVPage({
     };
   }, []);
 
+  // Synchronize route search parameters on selected media changes
+  useEffect(() => {
+    if (mode === "movies" && selectedMedia?.id) {
+      void navigate({
+        to: "/movies",
+        search: {
+          id: selectedMedia.id,
+          type: selectedMedia.type,
+        },
+        replace: true,
+      });
+    }
+  }, [selectedMedia, mode, navigate]);
+
   // Fetch TMDb details when selected media changes in movies mode
   useEffect(() => {
     if (mode !== "movies" || !selectedMedia.id) return;
@@ -292,6 +332,33 @@ export function TubeTVPage({
           } else if (data.imdb_id) {
             setMovieImdbId(data.imdb_id);
           }
+
+          // Resolve core placeholders on dynamic route hydration
+          setSelectedMedia((prev) => {
+            if (
+              prev.id === String(data.id) &&
+              (prev.title === "TV Series Stream" ||
+                prev.title === "Movie Stream" ||
+                !prev.backdropUrl.includes("image.tmdb.org"))
+            ) {
+              return {
+                ...prev,
+                title: data.title || data.name || prev.title,
+                year: (data.release_date || data.first_air_date || "").slice(0, 4) || prev.year,
+                rating: data.vote_average ? String(data.vote_average.toFixed(1)) : prev.rating,
+                votes: data.vote_count ? String(data.vote_count) : prev.votes,
+                genres: data.genres ? data.genres.map((g: any) => g.name) : prev.genres,
+                synopsis: data.overview || prev.synopsis,
+                backdropUrl: data.backdrop_path
+                  ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}`
+                  : prev.backdropUrl,
+                posterUrl: data.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+                  : prev.posterUrl,
+              };
+            }
+            return prev;
+          });
 
           if (data.credits?.cast) {
             const castList = data.credits.cast.slice(0, 12).map((member: any) => ({
@@ -355,6 +422,9 @@ export function TubeTVPage({
               synopsis: item.overview || "No overview description available.",
               backdropUrl: item.backdrop_path
                 ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
+                : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+              posterUrl: item.poster_path
+                ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
                 : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
             }));
             setMovieRecommendations(recList);
@@ -425,7 +495,10 @@ export function TubeTVPage({
                 ageRating: item.adult ? "R" : "PG-13",
                 synopsis: item.overview || "No overview description available.",
                 backdropUrl: item.backdrop_path
-                  ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
+                  ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}`
+                  : "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80",
+                posterUrl: item.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
                   : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
               }));
             setMovieSearchResults(formatted);
@@ -1447,7 +1520,7 @@ export function TubeTVPage({
                           >
                             <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
                               <img
-                                src={item.backdropUrl}
+                                src={item.posterUrl || item.backdropUrl}
                                 alt={item.title}
                                 className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                                 onError={(e) => {
@@ -1609,7 +1682,7 @@ export function TubeTVPage({
                             >
                               <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
                                 <img
-                                  src={item.backdropUrl}
+                                  src={item.posterUrl || item.backdropUrl}
                                   alt=""
                                   className="h-full w-full object-cover"
                                   onError={(e) => {
@@ -1661,7 +1734,7 @@ export function TubeTVPage({
                             >
                               <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
                                 <img
-                                  src={item.backdropUrl}
+                                  src={item.posterUrl || item.backdropUrl}
                                   alt=""
                                   className="h-full w-full object-cover"
                                   onError={(e) => {
@@ -1713,7 +1786,7 @@ export function TubeTVPage({
                             >
                               <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
                                 <img
-                                  src={item.backdropUrl}
+                                  src={item.posterUrl || item.backdropUrl}
                                   alt=""
                                   className="h-full w-full object-cover"
                                   onError={(e) => {
@@ -1753,7 +1826,7 @@ export function TubeTVPage({
                         style={{ backgroundImage: `url(${selectedMedia.backdropUrl})` }}
                       />
                       <iframe
-                        src={movieActiveSourceIndex === 0 ? `https://lordflix.org/watch/${selectedMedia.type}/${selectedMedia.id}` : VIDEO_SOURCES[movieActiveSourceIndex].getUrl(selectedMedia.id, movieImdbId, selectedMedia.type, movieSeason, movieEpisode)}
+                        src={VIDEO_SOURCES[movieActiveSourceIndex].getUrl(selectedMedia.id, movieImdbId, selectedMedia.type, movieSeason, movieEpisode)}
                         title="Cinema HD Stream Player"
                         className="relative z-10 h-full w-full"
                         allowFullScreen
@@ -1904,6 +1977,7 @@ export function TubeTVPage({
                           ageRating: "NR",
                           synopsis: "Manual override stream loaded via direct TMDB ID override.",
                           backdropUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+                          posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
                         });
                         setMovieSeason(1);
                         setMovieEpisode(1);
