@@ -242,8 +242,8 @@ export function TubeTVPage({
         .then((list) => {
           if (cancelled) return;
           const found = findIptvChannelBySlug(list, initialIptvItemSlugRef.current!);
-          initialIptvItemSlugRef.current = null;
           if (found) {
+            initialIptvItemSlugRef.current = null;
             setIptvChannel(found);
             setTitle(found.name);
             setIptvError(null);
@@ -253,7 +253,38 @@ export function TubeTVPage({
               replace: true,
             });
           } else {
-            void navigate({ to: getIptvPath(iptvCountry), replace: true });
+            // Fallback global search across other supported countries
+            const fallbackCountries = ["us", "uk", "ca", "in", "fr", "de", "es", "au", "jp", "kr"];
+            const targetSlug = initialIptvItemSlugRef.current!;
+            Promise.all(
+              fallbackCountries
+                .filter((c) => c !== iptvCountry)
+                .map((code) =>
+                  loadCountryChannels(code)
+                    .then((subList) => {
+                      const match = findIptvChannelBySlug(subList, targetSlug);
+                      return match ? { match, code } : null;
+                    })
+                    .catch(() => null)
+                )
+            ).then((results) => {
+              if (cancelled) return;
+              initialIptvItemSlugRef.current = null;
+              const match = results.find((r) => r !== null);
+              if (match) {
+                setIptvCountry(match.code);
+                setIptvChannel(match.match);
+                setTitle(match.match.name);
+                setIptvError(null);
+                pushHistory(makeIptvHistoryEntry(match.code, match.match));
+                void navigate({
+                  to: getIptvItemPath(match.code, match.match),
+                  replace: true,
+                });
+              } else {
+                void navigate({ to: getIptvPath(iptvCountry), replace: true });
+              }
+            });
           }
         })
         .catch(() => {

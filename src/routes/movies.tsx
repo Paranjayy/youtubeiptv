@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Tv,
@@ -7,20 +7,50 @@ import {
   Timer,
   Film,
   Play,
-  Share2,
-  AlertTriangle,
-  Info,
-  Layers,
   Star,
-  ChevronRight,
-  Flame,
+  Layers,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ─── Curated Movies & TV Shows Metadata (with TMDb IDs) ──────────────────────
+// ─── TMDb Genre Map ───────────────────────────────────────────────────────────
+function getGenreName(id: number): string {
+  const genres: Record<number, string> = {
+    28: "Action",
+    12: "Adventure",
+    16: "Animation",
+    35: "Comedy",
+    80: "Crime",
+    99: "Documentary",
+    18: "Drama",
+    10751: "Family",
+    14: "Fantasy",
+    36: "History",
+    27: "Horror",
+    10402: "Music",
+    9648: "Mystery",
+    10749: "Romance",
+    878: "Sci-Fi",
+    10770: "TV Movie",
+    53: "Thriller",
+    10752: "War",
+    37: "Western",
+    10759: "Action & Adventure",
+    10762: "Kids",
+    10763: "News",
+    10764: "Reality",
+    10765: "Sci-Fi & Fantasy",
+    10766: "Soap",
+    10767: "Talk",
+    10768: "War & Politics",
+  };
+  return genres[id] || "Genre";
+}
+
+// ─── Media Item Interface ─────────────────────────────────────────────────────
 interface MediaItem {
   id: string; // tmdb id
-  imdbId?: string;
   title: string;
   year: string;
   type: "movie" | "tv";
@@ -33,9 +63,10 @@ interface MediaItem {
   backdropUrl: string;
 }
 
-const CURATED_MEDIA: MediaItem[] = [
+// Curated list for fallback/trending links
+const TRENDING_MEDIA: MediaItem[] = [
   {
-    id: "1160164", // K-Pop Demon Hunters (fake/real tmdb or close match)
+    id: "1160164",
     title: "KPop Demon Hunters",
     year: "2025",
     type: "movie",
@@ -59,19 +90,6 @@ const CURATED_MEDIA: MediaItem[] = [
     ageRating: "PG-13",
     synopsis: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
     backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=60",
-  },
-  {
-    id: "19995",
-    title: "Avatar",
-    year: "2009",
-    type: "movie",
-    rating: "7.9",
-    votes: "1.3M",
-    genres: ["Action", "Adventure", "Fantasy", "Sci-Fi"],
-    duration: "162 Min",
-    ageRating: "PG-13",
-    synopsis: "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.",
-    backdropUrl: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=60",
   },
   {
     id: "693134",
@@ -127,7 +145,7 @@ const CURATED_MEDIA: MediaItem[] = [
   },
 ];
 
-// Video Sources / CDN mirrors (Orion, Elysium, etc. mapping to public API embeds)
+// Video Sources list
 interface VideoSource {
   name: string;
   getUrl: (id: string, type: "movie" | "tv", season?: number, episode?: number) => string;
@@ -169,6 +187,20 @@ const VIDEO_SOURCES: VideoSource[] = [
         ? `https://play2.vidapi.pro/movie/${id}`
         : `https://play2.vidapi.pro/tv/${id}/1/1`,
   },
+  {
+    name: "Nova",
+    getUrl: (id, type) =>
+      type === "movie"
+        ? `https://2embed.cc/embed/${id}`
+        : `https://2embed.cc/embedtv/${id}&s=1&e=1`,
+  },
+  {
+    name: "Lyra",
+    getUrl: (id, type) =>
+      type === "movie"
+        ? `https://vidsrc.cc/v2/embed/movie/${id}`
+        : `https://vidsrc.cc/v2/embed/tv/${id}/1/1`,
+  },
 ];
 
 export const Route = createFileRoute("/movies")({
@@ -177,7 +209,7 @@ export const Route = createFileRoute("/movies")({
       { title: "Cinema desk - TubeTV" },
       {
         name: "description",
-        content: "Watch movies and series via flawless non-torrent CDN servers directly.",
+        content: "Search and stream movies and series on-demand via flawless non-torrent servers.",
       },
     ],
   }),
@@ -185,19 +217,67 @@ export const Route = createFileRoute("/movies")({
 });
 
 function MoviesPage() {
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem>(CURATED_MEDIA[0]);
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem>(TRENDING_MEDIA[0]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<MediaItem[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [activeSourceIndex, setActiveSourceIndex] = useState(0);
 
-  // Manual query input for custom TMDb ids
+  // Manual ID query overrides
   const [customIdInput, setCustomIdInput] = useState("");
   const [customType, setCustomType] = useState<"movie" | "tv">("movie");
 
-  // Episode state for TV shows
+  // Season / Episode states for TV shows
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
 
-  // Handle custom manual ID load
+  // Trigger TMDb API search globally on search query input changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setSearchLoading(true);
+
+    const delayDebounce = setTimeout(() => {
+      // Fetching via a stable public API key
+      const url = `https://api.themoviedb.org/3/search/multi?api_key=15d1a227521ab6b773a7d5907d9b5741&query=${encodeURIComponent(searchQuery)}`;
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.results) {
+            const formatted: MediaItem[] = data.results
+              .filter((item: any) => item.media_type === "movie" || item.media_type === "tv")
+              .map((item: any) => ({
+                id: String(item.id),
+                title: item.title || item.name || "Untitled",
+                year: (item.release_date || item.first_air_date || "2026").slice(0, 4),
+                type: item.media_type === "tv" ? "tv" : "movie",
+                rating: item.vote_average ? String(item.vote_average.toFixed(1)) : "N/A",
+                votes: item.vote_count ? String(item.vote_count) : "0",
+                genres: item.genre_ids ? item.genre_ids.map((gid: number) => getGenreName(gid)) : ["Stream"],
+                duration: item.media_type === "tv" ? "TV Series" : "Movie",
+                ageRating: item.adult ? "R" : "PG-13",
+                synopsis: item.overview || "No overview description available.",
+                backdropUrl: item.backdrop_path
+                  ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
+                  : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+              }));
+            setSearchResults(formatted);
+          }
+        })
+        .catch((err) => {
+          console.error("TMDb fetch failed: ", err);
+        })
+        .finally(() => {
+          setSearchLoading(false);
+        });
+    }, 450);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
+  // Handle manual ID loading overrides
   const handleLoadCustom = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customIdInput.trim()) return;
@@ -209,7 +289,7 @@ function MoviesPage() {
       type: customType,
       rating: "N/A",
       votes: "0",
-      genres: ["Custom Stream"],
+      genres: ["Direct Link Override"],
       duration: customType === "movie" ? "Unknown" : "1 Season",
       ageRating: "NR",
       synopsis: "Manual override stream loaded via direct TMDb id input link.",
@@ -220,21 +300,12 @@ function MoviesPage() {
     setEpisode(1);
   };
 
-  // Filter curated media based on search query
-  const filteredMedia = useMemo(() => {
-    if (!searchQuery.trim()) return CURATED_MEDIA;
-    return CURATED_MEDIA.filter((item) =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
-
-  // Compute final iframe URL based on active source and episode numbers
+  // Compute player Url
   const playerUrl = useMemo(() => {
     const src = VIDEO_SOURCES[activeSourceIndex];
     if (selectedMedia.type === "movie") {
       return src.getUrl(selectedMedia.id, "movie");
     } else {
-      // Modify tv url with customized season/episode
       const base = src.getUrl(selectedMedia.id, "tv");
       if (base.includes("vidsrc.to")) {
         return `https://vidsrc.to/embed/tv/${selectedMedia.id}/${season}/${episode}`;
@@ -244,6 +315,10 @@ function MoviesPage() {
         return `https://embed.su/embed/tv/${selectedMedia.id}/${season}/${episode}`;
       } else if (base.includes("multiembed.to")) {
         return `https://multiembed.to/emulator.php?video_id=${selectedMedia.id}&tmdb=1&s=${season}&e=${episode}`;
+      } else if (base.includes("2embed.cc")) {
+        return `https://2embed.cc/embedtv/${selectedMedia.id}&s=${season}&e=${episode}`;
+      } else if (base.includes("vidsrc.cc")) {
+        return `https://vidsrc.cc/v2/embed/tv/${selectedMedia.id}/${season}/${episode}`;
       } else {
         return `https://play2.vidapi.pro/tv/${selectedMedia.id}/${season}/${episode}`;
       }
@@ -252,7 +327,6 @@ function MoviesPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050608] text-zinc-100 font-sans">
-      {/* Glow blobs */}
       <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:40px_40px]" />
       <div className="absolute inset-x-0 top-0 h-60 bg-gradient-to-b from-red-500/5 to-transparent pointer-events-none" />
 
@@ -266,7 +340,7 @@ function MoviesPage() {
               123Movies Cabinet
             </h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-300">
-              Flawless, non-torrent CDN streaming. Select a server source below if you hit errors or buffering issues.
+              On-demand, non-torrent CDN streaming. Search for absolutely any movie or series and select a mirror server below to play.
             </p>
           </div>
 
@@ -299,28 +373,25 @@ function MoviesPage() {
         </header>
 
         <section className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_0.9fr]">
-          {/* LEFT: Video Player & Controls */}
+          {/* LEFT: Video player & details */}
           <article className="space-y-4">
-            {/* Player Frame */}
             <div className="relative aspect-video w-full overflow-hidden rounded-[2rem] border border-white/10 bg-black/60 shadow-2xl shadow-black/80">
               <iframe
                 src={playerUrl}
                 title="TubeTV Cinema Player"
                 className="h-full w-full"
                 allowFullScreen
-                // Sandboxing blocks redirects and popups from public CDN providers
                 sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
               />
             </div>
 
-            {/* Server Mirror Picker Cabinet */}
             <div className="rounded-[2rem] border border-white/10 bg-[#0a0c10]/80 p-5 backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <div className="font-mono text-xs uppercase tracking-widest text-zinc-400">
                   Select Video Source
                 </div>
                 <div className="flex items-center gap-2 text-xs text-zinc-500">
-                  <AlertTriangle className="h-3.5 w-3.5 text-yellow-500/80" /> Report error if broken
+                  <AlertTriangle className="h-3.5 w-3.5 text-yellow-500/80" /> Report error if buffering
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -340,7 +411,6 @@ function MoviesPage() {
                 ))}
               </div>
 
-              {/* TV Show Episode Control Panel */}
               {selectedMedia.type === "tv" && (
                 <div className="mt-5 border-t border-white/5 pt-4">
                   <div className="font-mono text-xs uppercase tracking-widest text-zinc-400 mb-2">
@@ -352,7 +422,7 @@ function MoviesPage() {
                       <input
                         type="number"
                         min="1"
-                        max="20"
+                        max="30"
                         value={season}
                         onChange={(e) => setSeason(Math.max(1, parseInt(e.target.value) || 1))}
                         className="w-16 rounded-lg border border-white/10 bg-black/40 px-2 py-1 text-center font-mono text-xs text-white"
@@ -374,7 +444,6 @@ function MoviesPage() {
               )}
             </div>
 
-            {/* Media Information Card */}
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 backdrop-blur-md">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -420,9 +489,8 @@ function MoviesPage() {
             </div>
           </article>
 
-          {/* RIGHT: Search, Manual TMDb Loader, & Catalog */}
+          {/* RIGHT: Search input & movie list */}
           <aside className="space-y-4">
-            {/* Direct TMDb / IMDb ID Loader overrides */}
             <article className="rounded-[2rem] border border-red-500/20 bg-red-950/10 p-5">
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-red-400">
                 <Layers className="h-3.5 w-3.5" /> Direct ID Override
@@ -467,27 +535,34 @@ function MoviesPage() {
               </form>
             </article>
 
-            {/* Catalog search search */}
             <article className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search catalog titles..."
+                  placeholder="Search 1,000,000+ titles..."
                   className="w-full rounded-full border border-white/10 bg-black/20 px-10 py-2.5 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
                 />
               </div>
 
-              {/* Movie Cards list */}
+              {/* Show list loader */}
+              {searchLoading && (
+                <div className="mt-6 flex items-center justify-center gap-2 text-zinc-400 font-mono text-xs">
+                  <Loader2 className="h-4 w-4 animate-spin text-red-400" />
+                  Searching TMDb Database...
+                </div>
+              )}
+
               <div className="mt-4 space-y-2.5">
                 <div className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
-                  Catalog Results ({filteredMedia.length})
+                  {searchQuery.trim() ? `Search Results (${searchResults.length})` : "Trending Movies & TV"}
                 </div>
 
-                {filteredMedia.map((item) => (
+                {/* Grid list mapping */}
+                {(searchQuery.trim() ? searchResults : TRENDING_MEDIA).map((item) => (
                   <button
-                    key={item.id}
+                    key={item.id + item.type}
                     onClick={() => {
                       setSelectedMedia(item);
                       setSeason(1);
@@ -495,7 +570,7 @@ function MoviesPage() {
                     }}
                     className={cn(
                       "flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all hover:bg-white/5",
-                      selectedMedia.id === item.id
+                      selectedMedia.id === item.id && selectedMedia.type === item.type
                         ? "border-red-500/40 bg-red-500/5"
                         : "border-white/5 bg-black/10"
                     )}
@@ -505,6 +580,9 @@ function MoviesPage() {
                         src={item.backdropUrl}
                         alt=""
                         className="h-full w-full object-cover opacity-80"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=60";
+                        }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/35">
                         <Play className="h-4 w-4 text-white" />
@@ -534,7 +612,6 @@ function MoviesPage() {
               </div>
             </article>
 
-            {/* Disclaimer */}
             <div className="p-2 font-mono text-[8px] leading-relaxed text-zinc-600 text-center uppercase tracking-wider">
               Disclaimer: This app indexes third party streaming APIs for educational research. No files are stored locally.
             </div>
