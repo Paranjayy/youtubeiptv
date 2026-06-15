@@ -450,3 +450,11 @@ export const VIDEO_SOURCES: VideoSource[] = [
         : `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`,
   },
 ];
+
+export function getMovieSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+

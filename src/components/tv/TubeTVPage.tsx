@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { CHANNELS, getChannelBySlug, getChannelPath, shuffle, type Channel, CATEGORIES, normalizeChannelSlug } from "@/lib/channels";
-import { TRENDING_MEDIA, VIDEO_SOURCES, type MediaItem, getGenreName } from "@/lib/movies";
+import { TRENDING_MEDIA, VIDEO_SOURCES, type MediaItem, getGenreName, getMovieSlug } from "@/lib/movies";
 import {
   getIptvPath,
   getIptvItemPath,
@@ -131,6 +131,7 @@ export function TubeTVPage({
   const hasHydratedRef = useRef(false);
   const initialIptvItemSlugRef = useRef(initialIptvItemSlug);
   const initialRadioItemSlugRef = useRef(initialRadioItemSlug);
+  const [iptvSlugLoading, setIptvSlugLoading] = useState<boolean>(!!initialIptvItemSlug);
 
   const channel: Channel = CHANNELS[channelIdx];
 
@@ -210,9 +211,24 @@ export function TubeTVPage({
   const [movieEpisode, setMovieEpisode] = useState(1);
   const [movieCustomIdInput, setMovieCustomIdInput] = useState("");
   const [movieCustomType, setMovieCustomType] = useState<"movie" | "tv">("movie");
-  const [movieTotalSeasons, setMovieTotalSeasons] = useState(1);
-  const [movieEpisodesCount, setMovieEpisodesCount] = useState(10);
+  const [movieTotalSeasons, setMovieTotalSeasons] = useState(8);
+  const [movieEpisodesCount, setMovieEpisodesCount] = useState(24);
   const [movieSeasonsList, setMovieSeasonsList] = useState<{ seasonNumber: number; episodeCount: number }[]>([]);
+  const [movieDetailLoading, setMovieDetailLoading] = useState(false);
+  const [activeDownloadStats, setActiveDownloadStats] = useState<Record<string, { downloaded: number; total: number; speed: number }>>({});
+
+  // Helper to select movie or show and navigate to slug URL
+  const selectMovieOrShow = useCallback((item: MediaItem) => {
+    setSelectedMedia(item);
+    setMovieSeason(1);
+    setMovieEpisode(1);
+    setMovieSearchQuery("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const slug = getMovieSlug(item.title);
+    void navigate({
+      to: `/movies/${item.type}/${item.id}/${slug}`,
+    });
+  }, [navigate]);
 
   // Collapsible categories in sidebar
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
@@ -318,11 +334,12 @@ export function TubeTVPage({
     });
 
     const isTv = selectedMedia.type === "tv";
-    setMovieTotalSeasons(1);
-    setMovieEpisodesCount(10);
+    setMovieTotalSeasons(isTv ? 8 : 1);
+    setMovieEpisodesCount(isTv ? 24 : 1);
     setMovieSeasonsList([]);
     
     if (tmdbKey.trim()) {
+      setMovieDetailLoading(true);
       const url = isTv
         ? `https://api.themoviedb.org/3/tv/${selectedMedia.id}?api_key=${tmdbKey.trim()}&append_to_response=credits,videos,external_ids,recommendations`
         : `https://api.themoviedb.org/3/movie/${selectedMedia.id}?api_key=${tmdbKey.trim()}&append_to_response=credits,videos,recommendations`;
@@ -450,10 +467,12 @@ export function TubeTVPage({
             }));
             setMovieRecommendations(recList);
           }
+          setMovieDetailLoading(false);
         })
         .catch((err) => {
           console.error("Failed to fetch TMDb details, using fallback:", err);
           useLocalFallbackDetails();
+          setMovieDetailLoading(false);
         });
     } else {
       useLocalFallbackDetails();
@@ -476,6 +495,36 @@ export function TubeTVPage({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMedia.id, selectedMedia.type, tmdbKey, mode]);
+
+  // Synchronize dynamic URL changes with internal component state
+  useEffect(() => {
+    if (mode !== "movies") return;
+    if (initialMovieId && initialMovieType && (selectedMedia.id !== initialMovieId || selectedMedia.type !== initialMovieType)) {
+      const matched = TRENDING_MEDIA.find(
+        (m) => m.id === initialMovieId && m.type === initialMovieType
+      );
+      if (matched) {
+        setSelectedMedia(matched);
+      } else {
+        setSelectedMedia({
+          id: initialMovieId,
+          title: initialMovieType === "tv" ? "TV Series Stream" : "Movie Stream",
+          year: "2026",
+          type: initialMovieType,
+          rating: "N/A",
+          votes: "0",
+          genres: ["Live"],
+          duration: initialMovieType === "tv" ? "TV Series" : "Movie",
+          ageRating: "PG-13",
+          synopsis: "Dynamic override stream loaded from URL.",
+          backdropUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80",
+          posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
+        });
+      }
+      setMovieSeason(1);
+      setMovieEpisode(1);
+    }
+  }, [initialMovieId, initialMovieType, mode]);
 
   // Trigger TMDb API search globally on search query input changes
   useEffect(() => {
@@ -659,6 +708,7 @@ export function TubeTVPage({
     if (initialIptvItemSlug && mode === "iptv") {
       const currentSlug = iptvChannel ? getIptvItemSlug(iptvChannel) : null;
       if (normalizeChannelSlug(initialIptvItemSlug) !== currentSlug) {
+        setIptvSlugLoading(true);
         loadCountryChannels(iptvCountry)
           .then((list) => {
             if (cancelled) return;
@@ -667,6 +717,7 @@ export function TubeTVPage({
               setIptvChannel(found);
               setTitle(found.name);
               setIptvError(null);
+              setIptvSlugLoading(false);
               pushHistory(makeIptvHistoryEntry(iptvCountry, found));
               void navigate({
                 to: getIptvItemPath(iptvCountry, found),
@@ -694,18 +745,22 @@ export function TubeTVPage({
                   setIptvChannel(match.match);
                   setTitle(match.match.name);
                   setIptvError(null);
+                  setIptvSlugLoading(false);
                   pushHistory(makeIptvHistoryEntry(match.code, match.match));
                   void navigate({
                     to: getIptvItemPath(match.code, match.match),
                     replace: true,
                   });
                 } else {
+                  setIptvSlugLoading(false);
                   void navigate({ to: getIptvPath(iptvCountry), replace: true });
                 }
               });
             }
           })
-          .catch(() => {});
+          .catch(() => {
+            if (!cancelled) setIptvSlugLoading(false);
+          });
       }
     }
 
@@ -1530,13 +1585,7 @@ export function TubeTVPage({
                         {movieSearchResults.map((item) => (
                           <button
                             key={item.id + item.type + "-grid-search"}
-                            onClick={() => {
-                              setSelectedMedia(item);
-                              setMovieSeason(1);
-                              setMovieEpisode(1);
-                              setMovieSearchQuery("");
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
+                            onClick={() => selectMovieOrShow(item)}
                             className="group flex flex-col rounded-2xl overflow-hidden border border-white/5 bg-zinc-950/40 text-left transition-all duration-300 hover:scale-105 hover:border-red-500/40 hover:bg-zinc-900/40 cursor-pointer shadow-lg"
                           >
                             <div className="aspect-[2/3] relative overflow-hidden bg-zinc-900">
@@ -1628,49 +1677,58 @@ export function TubeTVPage({
                           {/* Visual Season & Episode Grid Selector */}
                           {selectedMedia.type === "tv" && (
                             <div className="mt-5 border-t border-white/5 pt-4">
-                              <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-                                <span className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold">
-                                  Season {movieSeason} · Episode {movieEpisode}
-                                </span>
-                                <div className="flex items-center gap-1 bg-black/45 border border-white/5 rounded-full p-0.5 flex-wrap max-w-full overflow-x-auto">
-                                  {/* Seasons Toggles - dynamic from TMDb */}
-                                  {(movieSeasonsList.length > 0 ? movieSeasonsList : Array.from({ length: movieTotalSeasons }).map((_, i) => ({ seasonNumber: i + 1, episodeCount: movieEpisodesCount }))).map((season) => (
-                                    <button
-                                      key={"season-tab-" + season.seasonNumber}
-                                      onClick={() => {
-                                        setMovieSeason(season.seasonNumber);
-                                        setMovieEpisode(1);
-                                        setMovieEpisodesCount(season.episodeCount);
-                                      }}
-                                      className={cn(
-                                        "px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase transition-all cursor-pointer whitespace-nowrap",
-                                        movieSeason === season.seasonNumber ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
-                                      )}
-                                    >
-                                      S{season.seasonNumber}
-                                    </button>
-                                  ))}
+                              {movieDetailLoading ? (
+                                <div className="flex items-center justify-center gap-2 py-8 text-zinc-400 font-mono text-[10px] uppercase tracking-wider">
+                                  <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+                                  <span>Syncing seasons from TMDb...</span>
                                 </div>
-                              </div>
-                              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
-                                {Array.from({ length: movieEpisodesCount }).map((_, idx) => {
-                                  const ep = idx + 1;
-                                  return (
-                                    <button
-                                      key={"episode-grid-" + ep}
-                                      onClick={() => setMovieEpisode(ep)}
-                                      className={cn(
-                                        "py-2 rounded-xl border font-mono text-[10px] font-bold text-center transition-all cursor-pointer",
-                                        movieEpisode === ep
-                                          ? "border-red-500/50 bg-red-600/10 text-red-500"
-                                          : "border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
-                                      )}
-                                    >
-                                      EP {ep}
-                                    </button>
-                                  );
-                                })}
-                              </div>
+                              ) : (
+                                <>
+                                  <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+                                    <span className="font-mono text-xs uppercase tracking-widest text-zinc-300 font-bold">
+                                      Season {movieSeason} · Episode {movieEpisode}
+                                    </span>
+                                    <div className="flex items-center gap-1 bg-black/45 border border-white/5 rounded-full p-0.5 flex-wrap max-w-full overflow-x-auto">
+                                      {/* Seasons Toggles - dynamic from TMDb */}
+                                      {(movieSeasonsList.length > 0 ? movieSeasonsList : Array.from({ length: movieTotalSeasons }).map((_, i) => ({ seasonNumber: i + 1, episodeCount: movieEpisodesCount }))).map((season) => (
+                                        <button
+                                          key={"season-tab-" + season.seasonNumber}
+                                          onClick={() => {
+                                            setMovieSeason(season.seasonNumber);
+                                            setMovieEpisode(1);
+                                            setMovieEpisodesCount(season.episodeCount);
+                                          }}
+                                          className={cn(
+                                            "px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase transition-all cursor-pointer whitespace-nowrap",
+                                            movieSeason === season.seasonNumber ? "bg-red-600 text-white" : "text-zinc-500 hover:text-zinc-300"
+                                          )}
+                                        >
+                                          S{season.seasonNumber}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+                                    {Array.from({ length: movieEpisodesCount }).map((_, idx) => {
+                                      const ep = idx + 1;
+                                      return (
+                                        <button
+                                          key={"episode-grid-" + ep}
+                                          onClick={() => setMovieEpisode(ep)}
+                                          className={cn(
+                                            "py-2 rounded-xl border font-mono text-[10px] font-bold text-center transition-all cursor-pointer",
+                                            movieEpisode === ep
+                                              ? "border-red-500/50 bg-red-600/10 text-red-500"
+                                              : "border-white/5 bg-white/[0.02] text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                                          )}
+                                        >
+                                          EP {ep}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1773,12 +1831,7 @@ export function TubeTVPage({
                           {TRENDING_MEDIA.map((item) => (
                             <button
                               key={item.id + item.type + "-trending-row"}
-                              onClick={() => {
-                                setSelectedMedia(item);
-                                setMovieSeason(1);
-                                setMovieEpisode(1);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
+                              onClick={() => selectMovieOrShow(item)}
                               className={cn(
                                 "flex-none w-[130px] sm:w-[170px] rounded-2xl overflow-hidden bg-zinc-950/60 border border-white/5 text-left transition-all duration-300 hover:scale-105 active:scale-95 group/card cursor-pointer shadow-lg",
                                 selectedMedia.id === item.id && selectedMedia.type === item.type
@@ -1825,12 +1878,7 @@ export function TubeTVPage({
                           {TRENDING_MEDIA.filter(m => m.type === "movie").map((item) => (
                             <button
                               key={item.id + item.type + "-movies-row"}
-                              onClick={() => {
-                                setSelectedMedia(item);
-                                setMovieSeason(1);
-                                setMovieEpisode(1);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
+                              onClick={() => selectMovieOrShow(item)}
                               className={cn(
                                 "flex-none w-[130px] sm:w-[170px] rounded-2xl overflow-hidden bg-zinc-950/60 border border-white/5 text-left transition-all duration-300 hover:scale-105 active:scale-95 group/card cursor-pointer shadow-lg",
                                 selectedMedia.id === item.id && selectedMedia.type === item.type
@@ -1877,12 +1925,7 @@ export function TubeTVPage({
                           {TRENDING_MEDIA.filter(m => m.type === "tv").map((item) => (
                             <button
                               key={item.id + item.type + "-series-row"}
-                              onClick={() => {
-                                setSelectedMedia(item);
-                                setMovieSeason(1);
-                                setMovieEpisode(1);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
+                              onClick={() => selectMovieOrShow(item)}
                               className={cn(
                                 "flex-none w-[130px] sm:w-[170px] rounded-2xl overflow-hidden bg-zinc-950/60 border border-white/5 text-left transition-all duration-300 hover:scale-105 active:scale-95 group/card cursor-pointer shadow-lg",
                                 selectedMedia.id === item.id && selectedMedia.type === item.type
@@ -1931,12 +1974,7 @@ export function TubeTVPage({
                             {movieRecommendations.map((item) => (
                               <button
                                 key={item.id + item.type + "-recs-row"}
-                                onClick={() => {
-                                  setSelectedMedia(item);
-                                  setMovieSeason(1);
-                                  setMovieEpisode(1);
-                                  window.scrollTo({ top: 0, behavior: "smooth" });
-                                }}
+                                onClick={() => selectMovieOrShow(item)}
                                 className={cn(
                                   "flex-none w-[130px] sm:w-[160px] rounded-2xl overflow-hidden bg-zinc-950/60 border border-white/5 text-left transition-all duration-300 hover:scale-105 active:scale-95 group/card cursor-pointer shadow-lg",
                                   selectedMedia.id === item.id && selectedMedia.type === item.type
@@ -2031,7 +2069,7 @@ export function TubeTVPage({
                     <form onSubmit={(e) => {
                       e.preventDefault();
                       if (!movieCustomIdInput.trim()) return;
-                      setSelectedMedia({
+                      const customItem: MediaItem = {
                         id: movieCustomIdInput.trim(),
                         title: `Custom ${movieCustomType === "movie" ? "Movie" : "TV"} #${movieCustomIdInput}`,
                         year: "2026",
@@ -2044,9 +2082,8 @@ export function TubeTVPage({
                         synopsis: "Manual override stream loaded via direct TMDB ID override.",
                         backdropUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
                         posterUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=60",
-                      });
-                      setMovieSeason(1);
-                      setMovieEpisode(1);
+                      };
+                      selectMovieOrShow(customItem);
                     }} className="mt-3.5 space-y-2.5">
                       <div className="flex gap-2">
                         <button
@@ -2183,20 +2220,58 @@ export function TubeTVPage({
                           const key = `${selectedMedia.id}-${quality}`;
                           const progress = movieDownloadProgress[key] ?? 0;
                           const isActive = movieDownloadActive === key;
+                          const stats = activeDownloadStats[key];
+
+                          const formatBytes = (mb: number) => {
+                            if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
+                            return `${mb.toFixed(1)} MB`;
+                          };
 
                           const triggerDownload = () => {
                             if (progress >= 100 || isActive) return;
+                            
+                            let totalMB = 1000;
+                            if (size.includes("GB")) {
+                              const match = size.match(/([\d.]+)/);
+                              const num = match ? parseFloat(match[1]) : 2.0;
+                              totalMB = Math.round(num * 1024);
+                            } else {
+                              const match = size.match(/(\d+)/);
+                              const num = match ? parseInt(match[1]) : 500;
+                              totalMB = num;
+                            }
+
                             setMovieDownloadActive(key);
-                            let p = 0;
+                            setActiveDownloadStats((prev) => ({
+                              ...prev,
+                              [key]: { downloaded: 0, total: totalMB, speed: Math.random() * 26 + 12 },
+                            }));
+
                             const interval = setInterval(() => {
-                              p += Math.floor(Math.random() * 8) + 4;
-                              if (p >= 100) {
-                                p = 100;
-                                clearInterval(interval);
-                                setMovieDownloadActive(null);
-                                toast.success(`${quality} downloaded successfully!`);
-                              }
-                              setMovieDownloadProgress((prev) => ({ ...prev, [key]: p }));
+                              setActiveDownloadStats((prev) => {
+                                const curr = prev[key];
+                                if (!curr) {
+                                  clearInterval(interval);
+                                  return prev;
+                                }
+                                const speed = Math.max(5, curr.speed + (Math.random() * 4 - 2));
+                                const chunk = speed * 0.25;
+                                const nextDownloaded = Math.min(curr.total, curr.downloaded + chunk);
+                                const percentage = Math.round((nextDownloaded / curr.total) * 100);
+
+                                setMovieDownloadProgress((prog) => ({ ...prog, [key]: percentage }));
+
+                                if (nextDownloaded >= curr.total) {
+                                  clearInterval(interval);
+                                  setMovieDownloadActive(null);
+                                  toast.success(`${quality} downloaded successfully!`);
+                                }
+
+                                return {
+                                  ...prev,
+                                  [key]: { downloaded: nextDownloaded, total: curr.total, speed },
+                                };
+                              });
                             }, 250);
                           };
 
@@ -2204,7 +2279,14 @@ export function TubeTVPage({
                             <div key={quality} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between gap-3 hover:border-white/10 hover:bg-white/[0.04] transition-all">
                               <div>
                                 <div className="font-bold text-sm text-zinc-100">{quality}</div>
-                                <div className="text-xs text-zinc-500 font-mono mt-1">{format} · {size}</div>
+                                <div className="text-xs text-zinc-500 font-mono mt-1">
+                                  {format} · {isActive && stats ? `${formatBytes(stats.downloaded)} of ${formatBytes(stats.total)}` : size}
+                                </div>
+                                {isActive && stats && (
+                                  <div className="text-[10px] text-red-400 font-mono mt-1 animate-pulse">
+                                    ⚡ Speed: {stats.speed.toFixed(1)} MB/s
+                                  </div>
+                                )}
                               </div>
 
                               {progress > 0 && (
@@ -2415,8 +2497,15 @@ export function TubeTVPage({
                           ? `Live TV - ${countryLabel?.name}`
                           : `Radio - ${radioCountryLabel?.name}`}
                     </div>
-                    <div className="mt-1 truncate text-base font-semibold tracking-tight sm:text-lg">
-                      {title || "Tuning in..."}
+                    <div className="mt-1 truncate text-base font-semibold tracking-tight sm:text-lg flex items-center gap-2">
+                      {iptvSlugLoading && mode === "iptv" ? (
+                        <>
+                          <span className="inline-block h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                          <span>Resolving channel from URL...</span>
+                        </>
+                      ) : (
+                        title || "Tuning in..."
+                      )}
                     </div>
                     <div className="mt-0.5 truncate text-sm text-muted-foreground">
                       {mode === "yt"

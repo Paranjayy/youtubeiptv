@@ -23,7 +23,9 @@ import { Route as RadioCountryRouteImport } from './routes/radio/$country'
 import { Route as IptvCountryRouteImport } from './routes/iptv/$country'
 import { Route as ChannelsSlugRouteImport } from './routes/channels/$slug'
 import { Route as RadioCountryStationRouteImport } from './routes/radio/$country/$station'
+import { Route as MoviesTypeIdRouteImport } from './routes/movies.$type.$id'
 import { Route as IptvCountryStreamRouteImport } from './routes/iptv/$country/$stream'
+import { Route as MoviesTypeIdSlugRouteImport } from './routes/movies.$type.$id.$slug'
 
 const WordleRoute = WordleRouteImport.update({
   id: '/wordle',
@@ -95,17 +97,27 @@ const RadioCountryStationRoute = RadioCountryStationRouteImport.update({
   path: '/$station',
   getParentRoute: () => RadioCountryRoute,
 } as any)
+const MoviesTypeIdRoute = MoviesTypeIdRouteImport.update({
+  id: '/$type/$id',
+  path: '/$type/$id',
+  getParentRoute: () => MoviesRoute,
+} as any)
 const IptvCountryStreamRoute = IptvCountryStreamRouteImport.update({
   id: '/$stream',
   path: '/$stream',
   getParentRoute: () => IptvCountryRoute,
+} as any)
+const MoviesTypeIdSlugRoute = MoviesTypeIdSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => MoviesTypeIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
-  '/movies': typeof MoviesRoute
+  '/movies': typeof MoviesRouteWithChildren
   '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
@@ -116,13 +128,15 @@ export interface FileRoutesByFullPath {
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
   '/iptv/$country/$stream': typeof IptvCountryStreamRoute
+  '/movies/$type/$id': typeof MoviesTypeIdRouteWithChildren
   '/radio/$country/$station': typeof RadioCountryStationRoute
+  '/movies/$type/$id/$slug': typeof MoviesTypeIdSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
-  '/movies': typeof MoviesRoute
+  '/movies': typeof MoviesRouteWithChildren
   '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
@@ -133,14 +147,16 @@ export interface FileRoutesByTo {
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
   '/iptv/$country/$stream': typeof IptvCountryStreamRoute
+  '/movies/$type/$id': typeof MoviesTypeIdRouteWithChildren
   '/radio/$country/$station': typeof RadioCountryStationRoute
+  '/movies/$type/$id/$slug': typeof MoviesTypeIdSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
   '/focus': typeof FocusRoute
-  '/movies': typeof MoviesRoute
+  '/movies': typeof MoviesRouteWithChildren
   '/news': typeof NewsRoute
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
@@ -151,7 +167,9 @@ export interface FileRoutesById {
   '/iptv/$country': typeof IptvCountryRouteWithChildren
   '/radio/$country': typeof RadioCountryRouteWithChildren
   '/iptv/$country/$stream': typeof IptvCountryStreamRoute
+  '/movies/$type/$id': typeof MoviesTypeIdRouteWithChildren
   '/radio/$country/$station': typeof RadioCountryStationRoute
+  '/movies/$type/$id/$slug': typeof MoviesTypeIdSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,7 +188,9 @@ export interface FileRouteTypes {
     | '/iptv/$country'
     | '/radio/$country'
     | '/iptv/$country/$stream'
+    | '/movies/$type/$id'
     | '/radio/$country/$station'
+    | '/movies/$type/$id/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -187,7 +207,9 @@ export interface FileRouteTypes {
     | '/iptv/$country'
     | '/radio/$country'
     | '/iptv/$country/$stream'
+    | '/movies/$type/$id'
     | '/radio/$country/$station'
+    | '/movies/$type/$id/$slug'
   id:
     | '__root__'
     | '/'
@@ -204,14 +226,16 @@ export interface FileRouteTypes {
     | '/iptv/$country'
     | '/radio/$country'
     | '/iptv/$country/$stream'
+    | '/movies/$type/$id'
     | '/radio/$country/$station'
+    | '/movies/$type/$id/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscoverRoute: typeof DiscoverRoute
   FocusRoute: typeof FocusRoute
-  MoviesRoute: typeof MoviesRoute
+  MoviesRoute: typeof MoviesRouteWithChildren
   NewsRoute: typeof NewsRoute
   PlaygroundRoute: typeof PlaygroundRoute
   ReaderRoute: typeof ReaderRoute
@@ -323,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RadioCountryStationRouteImport
       parentRoute: typeof RadioCountryRoute
     }
+    '/movies/$type/$id': {
+      id: '/movies/$type/$id'
+      path: '/$type/$id'
+      fullPath: '/movies/$type/$id'
+      preLoaderRoute: typeof MoviesTypeIdRouteImport
+      parentRoute: typeof MoviesRoute
+    }
     '/iptv/$country/$stream': {
       id: '/iptv/$country/$stream'
       path: '/$stream'
@@ -330,8 +361,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IptvCountryStreamRouteImport
       parentRoute: typeof IptvCountryRoute
     }
+    '/movies/$type/$id/$slug': {
+      id: '/movies/$type/$id/$slug'
+      path: '/$slug'
+      fullPath: '/movies/$type/$id/$slug'
+      preLoaderRoute: typeof MoviesTypeIdSlugRouteImport
+      parentRoute: typeof MoviesTypeIdRoute
+    }
   }
 }
+
+interface MoviesTypeIdRouteChildren {
+  MoviesTypeIdSlugRoute: typeof MoviesTypeIdSlugRoute
+}
+
+const MoviesTypeIdRouteChildren: MoviesTypeIdRouteChildren = {
+  MoviesTypeIdSlugRoute: MoviesTypeIdSlugRoute,
+}
+
+const MoviesTypeIdRouteWithChildren = MoviesTypeIdRoute._addFileChildren(
+  MoviesTypeIdRouteChildren,
+)
+
+interface MoviesRouteChildren {
+  MoviesTypeIdRoute: typeof MoviesTypeIdRouteWithChildren
+}
+
+const MoviesRouteChildren: MoviesRouteChildren = {
+  MoviesTypeIdRoute: MoviesTypeIdRouteWithChildren,
+}
+
+const MoviesRouteWithChildren =
+  MoviesRoute._addFileChildren(MoviesRouteChildren)
 
 interface IptvCountryRouteChildren {
   IptvCountryStreamRoute: typeof IptvCountryStreamRoute
@@ -361,7 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscoverRoute: DiscoverRoute,
   FocusRoute: FocusRoute,
-  MoviesRoute: MoviesRoute,
+  MoviesRoute: MoviesRouteWithChildren,
   NewsRoute: NewsRoute,
   PlaygroundRoute: PlaygroundRoute,
   ReaderRoute: ReaderRoute,
