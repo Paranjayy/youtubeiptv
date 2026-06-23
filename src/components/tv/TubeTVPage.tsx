@@ -31,6 +31,10 @@ import { CrtBoot } from "@/components/tv/CrtBoot";
 import { AmbientSounds } from "@/components/tv/AmbientSounds";
 import { SleepTimer } from "@/components/tv/SleepTimer";
 import { TimeBasedSuggestions } from "@/components/tv/TimeBasedSuggestions";
+import { AutoSurf } from "@/components/tv/AutoSurf";
+import { MoodSwitcher } from "@/components/tv/MoodSwitcher";
+import { useAutoPilot, AutoPilotPanel, getCurrentTimeSlot } from "@/lib/autopilot";
+import { useSessionMemory } from "@/lib/session-memory";
 import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/iptv";
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { getRandomChannel } from "@/lib/channels";
@@ -139,6 +143,30 @@ export function TubeTVPage({
   const [iptvSlugLoading, setIptvSlugLoading] = useState<boolean>(!!initialIptvItemSlug);
 
   const [booting, setBooting] = useState(true);
+
+  // Auto-pilot: time-based channel switching + ambient
+  const currentSlot = useMemo(() => getCurrentTimeSlot(), []);
+  const autoPilotCallbacks = useMemo(() => ({
+    onSwitchChannel: (ch: Channel) => {
+      const idx = CHANNELS.findIndex((c) => c.id === ch.id);
+      if (idx >= 0) {
+        setChannelIdx(idx);
+        setTitle("");
+        setElapsed(0);
+        setDuration(0);
+        setMode("yt");
+        pushHistory(makeYtHistoryEntry(ch));
+        void navigate({ to: getChannelPath(ch), replace: true });
+      }
+    },
+    onApplyAmbient: (_presetId: string) => {
+      // Ambient is managed by the engine directly
+    },
+    onDimChange: (_dim: number, _sat: number, _warm: number) => {
+      // Visual dimming — CSS filter applied via class
+    },
+  }), [navigate, pushHistory]);
+  const { state: autoPilotState, toggle: toggleAutoPilot, updateSetting: updateAutoPilotSetting } = useAutoPilot(autoPilotCallbacks);
 
   const channel: Channel = CHANNELS[channelIdx];
 
@@ -1496,6 +1524,28 @@ export function TubeTVPage({
               </div>
             )}
 
+            {/* Auto-Pilot settings */}
+            {mode === "yt" && (
+              <div className="px-2 pt-2">
+                <AutoPilotPanel
+                  enabled={autoPilotState.enabled}
+                  onToggle={toggleAutoPilot}
+                  autoSwitchChannel={autoPilotState.autoSwitchChannel}
+                  autoApplyAmbient={autoPilotState.autoApplyAmbient}
+                  autoDim={autoPilotState.autoDim}
+                  onSettingChange={(key, val) => updateAutoPilotSetting(key as "autoSwitchChannel", val as boolean)}
+                  currentSlot={currentSlot}
+                />
+              </div>
+            )}
+
+            {/* Auto-Surf */}
+            {mode === "yt" && (
+              <div className="px-2 pt-2">
+                <AutoSurf currentChannel={channel} onSwitchChannel={openChannel} />
+              </div>
+            )}
+
             {/* GitHub Repo Link & Live Stats at the bottom of the sidebar (inside scroll area) */}
             <div className="border-t border-border/60 bg-black/40 p-2.5 flex flex-col gap-2">
               <div className="flex flex-col gap-1 rounded bg-black/30 p-2 font-mono-tv text-[9px] text-muted-foreground border border-border/20">
@@ -2763,6 +2813,9 @@ export function TubeTVPage({
           </div>
         </div>
       )}
+
+      {/* Mood Switcher floating button + panel */}
+      <MoodSwitcher onSwitchChannel={openChannel} />
 
       {jumpOpen && (
         <div className="absolute inset-0 z-40 flex items-end justify-center bg-black/65 px-3 pb-3 backdrop-blur-sm sm:items-start sm:px-4 sm:pt-16 sm:pb-0">
