@@ -74,10 +74,18 @@ const SHIPPED: FeatureCard[] = [
   { name: 'Wordle Daily', detail: 'Classic 6-try word game, refreshes at midnight', category: 'games', emoji: '🟩' },
   { name: 'Vibes Explorer', detail: 'Mood-based music discovery across 12 vibes', category: 'focus', emoji: '🎵' },
   { name: 'Focus Room', detail: 'Pomodoro + ambient sounds + task list', category: 'focus', emoji: '🧘' },
+  { name: 'CRT Boot Animation', detail: 'Retro TV power-on sequence on app load', category: 'focus', emoji: '📺', isNew: true },
+  { name: 'Ambient Sound Layer', detail: 'Rain, cafe, keyboard, wind sounds via Web Audio', category: 'focus', emoji: '🌧️', isNew: true },
+  { name: 'Sleep Timer', detail: 'Auto-pause countdown with presets', category: 'focus', emoji: '🌙', isNew: true },
+  { name: 'Time-Based Channel Suggestions', detail: 'Morning/night smart channel recs', category: 'focus', emoji: '⏰', isNew: true },
   { name: 'Roadmap Page', detail: 'This very page you\'re reading right now', category: 'future', emoji: '🗺️' },
 ];
 
 const IN_PROGRESS: FeatureCard[] = [
+  { name: 'CRT Boot Animation', detail: 'Retro TV power-on sequence with warmup, static, logo reveal', category: 'focus', emoji: '📺', isNew: true },
+  { name: 'Ambient Sound Overlays', detail: 'Rain, cafe, keyboard, wind via Web Audio API noise generators', category: 'focus', emoji: '🌧️', isNew: true },
+  { name: 'Sleep Timer', detail: 'Countdown auto-pause with 15m/30m/1h/1.5h/2h presets', category: 'focus', emoji: '🌙', isNew: true },
+  { name: 'Time-Based Suggestions', detail: 'Context-aware channel recs based on time of day', category: 'focus', emoji: '⏰', isNew: true },
   { name: 'Mobile Responsiveness', detail: 'Full touch-first layout across all pages', category: 'tv', emoji: '📱' },
   { name: 'Reader Mode', detail: 'Wikipedia deep-reading with annotations', category: 'discovery', emoji: '📖' },
   { name: 'RSS Feeds', detail: 'Subscribe to custom RSS inside Discovery', category: 'discovery', emoji: '📡' },
@@ -87,14 +95,25 @@ const IN_PROGRESS: FeatureCard[] = [
 ];
 
 const PARKING_LOT: FeatureCard[] = [
+  // ── "Places Not Tools" Vision ────────────────────────────────────────────
+  { name: 'Window Views (WindowSwap-style)', detail: 'Embed live webcam feeds from public cameras worldwide — rain in Tokyo, streets in Paris, beaches in Bali. Uses Insecam public MJPEG streams or WindowSwap iframe. No API key needed.', category: 'focus', emoji: '🪟' },
+  { name: 'Virtual Cafe / Room Ambience', detail: 'YouTube embed layer: fireplace, rainy cafe, library, spaceship. Pick a "place" to study in. Ambient sound auto-syncs. LifeAt.io vibes without the account.', category: 'focus', emoji: '☕' },
+  { name: 'Study-with-me Co-presence', detail: 'WebSocket-based shared focus rooms. Camera optional. See who else is studying. Pomodoro sync. Simple presence indicators (green dot = studying).', category: 'focus', emoji: '👥' },
+  { name: 'Work-with-me Sessions', detail: 'Like study-with-me but for coding/remote work. Screen share optional. Focus timer sync. Background lofi auto-plays. "Virtual coworking" without the video call anxiety.', category: 'focus', emoji: '💻' },
+  { name: 'Weather-Triggered Ambience', detail: 'Open-Meteo API (free, no key) detects your local weather. Rainy outside? Auto-layer rain sounds. Snowing? Switch to cozy fireplace channel. Sunny? Open the window view.', category: 'focus', emoji: '🌦️' },
+  { name: 'Draggable Dashboard Widgets', detail: 'react-grid-layout (MIT). Let users build their own study desk: arrange timer, notes, ambient player, webcam view, chat, and task list. Save layout to localStorage.', category: 'future', emoji: '🧩' },
+  // ── TV & Content ─────────────────────────────────────────────────────────
   { name: 'Real-Debrid Torrent Player', detail: 'Stream cached torrents instantly by converting magnet links to HTTPS streams using Real-Debrid API (Highly feasible; uses HTML5 / Hls.js player).', category: 'tv', emoji: '⚡' },
-  { name: 'Polymarket & Kalshi Tickers', detail: 'Real-time prediction market probability tracking for sports, tech, elections, and macro news using public REST APIs.', category: 'discovery', emoji: '📈' },
-  { name: 'Mock AI Stock Simulator', detail: 'A trading playground allowing user-configured AI agents to paper-trade live stock tickers without real money.', category: 'games', emoji: '📊' },
-  { name: 'Google News RSS Panel', detail: 'Feed topics from Google News RSS categories styled in a sleek console grid layout.', category: 'discovery', emoji: '📰' },
   { name: '123movies-style Catalog', detail: 'Movie catalog indexing TMDb metadata with integrated direct source player streams (e.g. vidsrc.to, superembed) in custom player shell.', category: 'tv', emoji: '🎬' },
-  { name: 'Study-with-me Co-presence', detail: 'Real-time shared focus sessions', category: 'focus', emoji: '👥' },
+  { name: 'Channel Scheduling System', detail: 'Fake TV guide with time-based programming. Morning = news, afternoon = docs, evening = movies. Auto-switch channels on a real clock schedule. Like actual cable TV.', category: 'tv', emoji: '📅' },
+  // ── Discovery ────────────────────────────────────────────────────────────
+  { name: 'Polymarket & Kalshi Tickers', detail: 'Real-time prediction market probability tracking for sports, tech, elections, and macro news using public REST APIs.', category: 'discovery', emoji: '📈' },
+  { name: 'Google News RSS Panel', detail: 'Feed topics from Google News RSS categories styled in a sleek console grid layout.', category: 'discovery', emoji: '📰' },
+  // ── Games ────────────────────────────────────────────────────────────────
+  { name: 'Mock AI Stock Simulator', detail: 'A trading playground allowing user-configured AI agents to paper-trade live stock tickers without real money.', category: 'games', emoji: '📊' },
   { name: 'GeoGuessr-style Game', detail: 'Guess location from street-view screenshots', category: 'games', emoji: '🌍' },
   { name: 'Daily Crossword', detail: 'NYT-style crossword with auto-check', category: 'games', emoji: '✏️' },
+  // ── Future ───────────────────────────────────────────────────────────────
   { name: 'Social Sharing', detail: 'Share clips, playlists & scores', category: 'future', emoji: '🔗' },
   { name: 'Offline PWA', detail: 'Service worker for offline games + notes', category: 'future', emoji: '📦' },
 ];
