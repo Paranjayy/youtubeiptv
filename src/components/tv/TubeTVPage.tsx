@@ -27,6 +27,10 @@ import { Guide } from "@/components/tv/Guide";
 import { Ticker } from "@/components/tv/Ticker";
 import { Clock } from "@/components/tv/Clock";
 import { Schedule } from "@/components/tv/Schedule";
+import { CrtBoot } from "@/components/tv/CrtBoot";
+import { AmbientSounds } from "@/components/tv/AmbientSounds";
+import { SleepTimer } from "@/components/tv/SleepTimer";
+import { TimeBasedSuggestions } from "@/components/tv/TimeBasedSuggestions";
 import { IPTV_COUNTRIES, loadCountryChannels, type IptvChannel } from "@/lib/iptv";
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { getRandomChannel } from "@/lib/channels";
@@ -132,6 +136,8 @@ export function TubeTVPage({
   const initialIptvItemSlugRef = useRef(initialIptvItemSlug);
   const initialRadioItemSlugRef = useRef(initialRadioItemSlug);
   const [iptvSlugLoading, setIptvSlugLoading] = useState<boolean>(!!initialIptvItemSlug);
+
+  const [booting, setBooting] = useState(true);
 
   const channel: Channel = CHANNELS[channelIdx];
 
@@ -1279,7 +1285,9 @@ export function TubeTVPage({
   const currentMeta = mode === "yt" ? channel : null;
 
   return (
-    <main className="relative flex h-screen flex-col overflow-hidden bg-[#050608]">
+    <>
+      {booting && <CrtBoot onComplete={() => setBooting(false)} />}
+      <main className="relative flex h-screen flex-col overflow-hidden bg-[#050608]">
       <header className="relative flex items-center justify-between gap-3 overflow-hidden border-b border-border/60 bg-[linear-gradient(90deg,rgba(8,12,16,0.98),rgba(10,16,15,0.94)_42%,rgba(18,13,8,0.95))] px-3 py-2.5 sm:px-6 sm:py-3">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(112,239,183,0.68),rgba(255,196,92,0.58),transparent)]" />
         <div className="flex items-center gap-3">
@@ -1468,6 +1476,13 @@ export function TubeTVPage({
                 </button>
               ))}
             </div>
+
+            {/* Time-based channel suggestions */}
+            {mode === "yt" && (
+              <div className="px-2 pt-2">
+                <TimeBasedSuggestions onSelectChannel={openChannel} />
+              </div>
+            )}
 
             {/* GitHub Repo Link & Live Stats at the bottom of the sidebar (inside scroll area) */}
             <div className="border-t border-border/60 bg-black/40 p-2.5 flex flex-col gap-2">
@@ -2564,6 +2579,8 @@ export function TubeTVPage({
                     >
                       <Grid3x3 className="h-3.5 w-3.5" /> Guide
                     </button>
+                    <AmbientSounds />
+                    <SleepTimer onExpire={() => setMuted(true)} />
                     {history[0] && (
                       <button
                         onClick={resumeLatest}
@@ -2779,5 +2796,6 @@ export function TubeTVPage({
         </div>
       )}
     </main>
+    </>
   );
 }
