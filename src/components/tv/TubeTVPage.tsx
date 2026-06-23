@@ -66,6 +66,7 @@ import {
   AlertTriangle,
   Loader2,
   PanelLeft,
+  MapPin,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -1092,6 +1093,16 @@ export function TubeTVPage({
         },
       },
       {
+        id: "route-places",
+        title: "Places",
+        subtitle: "Study-with-me environments & window views",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/places" });
+        },
+      },
+      {
         id: "route-discover",
         title: "Discovery Desk",
         subtitle: "News, wiki, and artist trail",
@@ -1456,6 +1467,7 @@ export function TubeTVPage({
             {/* Sidebar bottom: quick nav to extra routes (inside scroll area) */}
             <div className="border-t border-border/60 p-2 grid grid-cols-4 gap-1 mt-4 bg-black/10">
               {([
+                { to: "/places", icon: Compass, label: "Place", color: "oklch(0.8 0.14 180)" },
                 { to: "/discover", icon: Compass, label: "Disc", color: "oklch(0.84 0.14 205)" },
                 { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
                 { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
@@ -2596,6 +2608,14 @@ export function TubeTVPage({
                       aria-label="Surprise me"
                     >
                       <Sparkles className="h-3.5 w-3.5" /> Surprise
+                    </button>
+
+                    <button
+                      onClick={() => navigate({ to: "/places" })}
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-[oklch(0.8_0.14_180_/_0.25)] bg-[oklch(0.8_0.14_180_/_0.07)] px-2.5 py-1.5 text-xs font-medium text-[oklch(0.8_0.14_180)] hover:bg-[oklch(0.8_0.14_180_/_0.14)]"
+                      aria-label="Open places"
+                    >
+                      <MapPin className="h-3.5 w-3.5" /> Places
                     </button>
 
                     {/* Separator */}
