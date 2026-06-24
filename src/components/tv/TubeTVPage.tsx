@@ -168,6 +168,24 @@ export function TubeTVPage({
   }), [navigate, pushHistory]);
   const { state: autoPilotState, toggle: toggleAutoPilot, updateSetting: updateAutoPilotSetting } = useAutoPilot(autoPilotCallbacks);
 
+  // Resume session banner
+  const [showResume, setShowResume] = useState(false);
+  const [resumeChannel, setResumeChannel] = useState<Channel | null>(null);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("tubetv:session-memory");
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (parsed?.channelId && parsed?.mode === "yt") {
+        const ch = CHANNELS.find((c) => c.id === parsed.channelId);
+        if (ch) {
+          setResumeChannel(ch);
+          setShowResume(true);
+        }
+      }
+    } catch {}
+  }, []);
+
   const channel: Channel = CHANNELS[channelIdx];
 
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
@@ -2809,6 +2827,36 @@ export function TubeTVPage({
               className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
               Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Session Banner */}
+      {showResume && resumeChannel && (
+        <div className="absolute bottom-4 left-1/2 z-40 -translate-x-1/2 sm:bottom-auto sm:top-4">
+          <div className="flex items-center gap-3 rounded-md border border-primary/40 bg-[linear-gradient(180deg,rgba(12,15,18,0.97),rgba(7,9,12,0.97))] px-4 py-2.5 shadow-xl backdrop-blur-md">
+            <span className="text-xs font-medium text-foreground/80">Resume:</span>
+            <span className="text-sm font-semibold text-primary">{resumeChannel.name}</span>
+            <button
+              onClick={() => {
+                const idx = CHANNELS.findIndex((c) => c.id === resumeChannel.id);
+                if (idx >= 0) {
+                  setChannelIdx(idx);
+                  setTitle("");
+                  setElapsed(0);
+                  setDuration(0);
+                  setMode("yt");
+                  void navigate({ to: getChannelPath(resumeChannel), replace: true });
+                }
+                setShowResume(false);
+              }}
+              className="rounded-sm bg-primary/20 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/30"
+            >
+              Resume
+            </button>
+            <button onClick={() => setShowResume(false)} className="ml-1 text-foreground/40 hover:text-foreground/70">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
         </div>
