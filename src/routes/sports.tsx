@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { loadCategoryChannels, type IptvChannel } from "@/lib/iptv";
 import { HlsPlayer } from "@/components/tv/HlsPlayer";
 import { Link } from "@tanstack/react-router";
@@ -33,7 +33,8 @@ export const Route = createFileRoute("/sports")({
       { property: "og:title", content: "TubeTV - Sports Desk" },
       {
         property: "og:description",
-        content: "Live FIFA World Cup, F1, Champions League, Cricket streams — free and embeddable.",
+        content:
+          "Live FIFA World Cup, F1, Champions League, Cricket streams — free and embeddable.",
       },
     ],
   }),
@@ -116,10 +117,33 @@ const FEATURED_STREAMS: {
 ];
 
 const SPORTS_KEYWORDS = [
-  "fifa", "world cup", "football", "soccer", "espn", "sky", "bein",
-  "sports", "tennis", "nba", "nfl", "ufc", "boxing", "f1", "formula",
-  "cricket", "premier", "la liga", "serie a", "bundesliga", "champions",
-  "olympics", "racing", "golf", "nhl", "rugby", "hockey",
+  "fifa",
+  "world cup",
+  "football",
+  "soccer",
+  "espn",
+  "sky",
+  "bein",
+  "sports",
+  "tennis",
+  "nba",
+  "nfl",
+  "ufc",
+  "boxing",
+  "f1",
+  "formula",
+  "cricket",
+  "premier",
+  "la liga",
+  "serie a",
+  "bundesliga",
+  "champions",
+  "olympics",
+  "racing",
+  "golf",
+  "nhl",
+  "rugby",
+  "hockey",
 ];
 
 function matchesSportsFilter(ch: IptvChannel): boolean {
@@ -132,12 +156,14 @@ function SportsDesk() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<IptvChannel | null>(null);
-  const [selectedFeatured, setSelectedFeatured] = useState<typeof FEATURED_STREAMS[0] | null>(null);
+  const [selectedFeatured, setSelectedFeatured] = useState<(typeof FEATURED_STREAMS)[0] | null>(
+    null,
+  );
   const [search, setSearch] = useState("");
   const [muted, setMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useState<HTMLDivElement>(null)[0];
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Load iptv-org sports category
   useEffect(() => {
@@ -160,10 +186,12 @@ function SportsDesk() {
         setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const playFeatured = useCallback((stream: typeof FEATURED_STREAMS[0]) => {
+  const playFeatured = useCallback((stream: (typeof FEATURED_STREAMS)[0]) => {
     setSelectedFeatured(stream);
     setSelectedChannel(null);
     setIsPlaying(true);
@@ -198,7 +226,7 @@ function SportsDesk() {
     } else if (selectedChannel) {
       const filteredList = search
         ? channels.filter((ch) =>
-            `${ch.name} ${ch.group || ""}`.toLowerCase().includes(search.toLowerCase())
+            `${ch.name} ${ch.group || ""}`.toLowerCase().includes(search.toLowerCase()),
           )
         : channels;
       const idx = filteredList.findIndex((ch) => ch.id === selectedChannel.id);
@@ -216,7 +244,7 @@ function SportsDesk() {
 
   const filteredChannels = search
     ? channels.filter((ch) =>
-        `${ch.name} ${ch.group || ""}`.toLowerCase().includes(search.toLowerCase())
+        `${ch.name} ${ch.group || ""}`.toLowerCase().includes(search.toLowerCase()),
       )
     : channels;
 
@@ -226,9 +254,14 @@ function SportsDesk() {
       <div className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
               <ChevronLeft className="h-4 w-4" />
-              <span className="font-mono-tv text-[10px] uppercase tracking-widest hidden sm:inline">TV Desk</span>
+              <span className="font-mono-tv text-[10px] uppercase tracking-widest hidden sm:inline">
+                TV Desk
+              </span>
             </Link>
             <div className="h-4 w-px bg-border/60" />
             <div className="flex items-center gap-2">
@@ -301,7 +334,7 @@ function SportsDesk() {
                   "group relative overflow-hidden rounded-xl border p-3 text-left transition-all",
                   selectedFeatured?.id === stream.id
                     ? "border-primary/60 bg-primary/10 shadow-[0_0_16px_rgba(79,174,123,0.15)]"
-                    : "border-border/50 bg-background/40 hover:border-primary/30 hover:bg-primary/5"
+                    : "border-border/50 bg-background/40 hover:border-primary/30 hover:bg-primary/5",
                 )}
               >
                 <div className="text-lg mb-1">{stream.emoji}</div>
@@ -324,10 +357,10 @@ function SportsDesk() {
         {/* Player area */}
         <div className="mb-8">
           <div
-            ref={containerRef}
+            ref={containerRef as React.Ref<HTMLDivElement>}
             className={cn(
               "relative overflow-hidden rounded-2xl border border-border/60 bg-black",
-              isFullscreen ? "fixed inset-0 z-50 rounded-none" : "aspect-video max-h-[60vh]"
+              isFullscreen ? "fixed inset-0 z-50 rounded-none" : "aspect-video max-h-[60vh]",
             )}
           >
             {currentStreamUrl ? (
@@ -375,7 +408,11 @@ function SportsDesk() {
                         onClick={toggleFullscreen}
                         className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-mono-tv text-white hover:bg-white/20 transition-colors"
                       >
-                        {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+                        {isFullscreen ? (
+                          <Minimize className="h-3 w-3" />
+                        ) : (
+                          <Maximize className="h-3 w-3" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -412,7 +449,9 @@ function SportsDesk() {
           {loading && (
             <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/40 py-12">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="font-mono-tv text-xs text-muted-foreground">Loading sports streams...</span>
+              <span className="font-mono-tv text-xs text-muted-foreground">
+                Loading sports streams...
+              </span>
             </div>
           )}
 
@@ -446,7 +485,7 @@ function SportsDesk() {
                     "group flex items-center gap-3 rounded-xl border p-3 text-left transition-all",
                     selectedChannel?.id === ch.id
                       ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(79,174,123,0.12)]"
-                      : "border-border/40 bg-background/40 hover:border-primary/30 hover:bg-primary/5"
+                      : "border-border/40 bg-background/40 hover:border-primary/30 hover:bg-primary/5",
                   )}
                 >
                   {ch.logo ? (
@@ -491,23 +530,42 @@ function SportsDesk() {
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { id: "fifa-wc", name: "FIFA WORLD CUP", emoji: "🏆", tagline: "official highlights & classic WC moments" },
-              { id: "f1-live", name: "FORMULA 1", emoji: "🏎️", tagline: "races, highlights & onboard battles" },
-              { id: "cricket", name: "CRICKET ZONE", emoji: "🏏", tagline: "world cup highlights & classic innings" },
-              { id: "ucl", name: "CHAMPIONS LEAGUE", emoji: "⚽", tagline: "UEFA classic matches & goals" },
+              {
+                id: "fifa-wc",
+                name: "FIFA WORLD CUP",
+                emoji: "🏆",
+                tagline: "official highlights & classic WC moments",
+              },
+              {
+                id: "f1-live",
+                name: "FORMULA 1",
+                emoji: "🏎️",
+                tagline: "races, highlights & onboard battles",
+              },
+              {
+                id: "cricket",
+                name: "CRICKET ZONE",
+                emoji: "🏏",
+                tagline: "world cup highlights & classic innings",
+              },
+              {
+                id: "ucl",
+                name: "CHAMPIONS LEAGUE",
+                emoji: "⚽",
+                tagline: "UEFA classic matches & goals",
+              },
             ].map((ch) => (
               <Link
                 key={ch.id}
-                to={`/channels/${ch.id}`}
+                to="/channels/$slug"
+                params={{ slug: ch.id }}
                 className="group overflow-hidden rounded-xl border border-border/40 bg-background/40 p-4 transition-all hover:border-primary/30 hover:bg-primary/5"
               >
                 <div className="text-2xl mb-2">{ch.emoji}</div>
                 <div className="font-mono-tv text-[11px] font-bold uppercase tracking-wider text-foreground">
                   {ch.name}
                 </div>
-                <div className="mt-1 text-[9px] text-muted-foreground">
-                  {ch.tagline}
-                </div>
+                <div className="mt-1 text-[9px] text-muted-foreground">{ch.tagline}</div>
                 <div className="mt-2 text-[9px] font-mono-tv text-primary/80 uppercase tracking-wider group-hover:text-primary transition-colors">
                   ▶ Watch Now
                 </div>

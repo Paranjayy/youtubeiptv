@@ -1436,8 +1436,16 @@ export function TubeTVPage({
                   return next;
                 });
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all active:scale-95 z-20 cursor-pointer"
-              title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all active:scale-95 z-20 cursor-pointer sm:h-8 sm:w-8"
+              title={
+                sidebarOpen
+                  ? window.innerWidth < 1024
+                    ? "Menu"
+                    : "Hide Sidebar"
+                  : window.innerWidth < 1024
+                    ? "Menu"
+                    : "Show Sidebar"
+              }
             >
               <PanelLeft className="h-4 w-4" />
             </button>
@@ -1458,13 +1466,25 @@ export function TubeTVPage({
 
         <Ticker />
 
-        <section className="relative flex flex-1 flex-col lg:flex-row min-h-0">
+        <section className="relative flex flex-1 flex-col lg:flex-row min-h-0 pb-14 lg:pb-0">
           <aside
             className={cn(
-              "w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.98),rgba(5,6,9,0.99))] flex-col transition-all duration-300",
-              sidebarOpen ? "hidden lg:flex" : "hidden",
+              "w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.98),rgba(5,6,9,0.99))] flex-col transition-all duration-300 z-30",
+              sidebarOpen
+                ? "fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] animate-slide-up shadow-2xl lg:relative lg:inset-auto lg:z-auto lg:flex lg:w-64 lg:animate-none lg:shadow-none"
+                : "hidden",
             )}
           >
+            {/* Mobile-only backdrop */}
+            {sidebarOpen && (
+              <div
+                className="fixed inset-0 -z-10 bg-black/60 backdrop-blur-sm lg:hidden"
+                onClick={() => {
+                  setSidebarOpen(false);
+                  localStorage.setItem("tubetv:sidebar-open", "false");
+                }}
+              />
+            )}
             {/* Header: Sources label */}
             <div className="flex items-center justify-between border-b border-border/60 px-4 py-2.5">
               <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -2935,7 +2955,7 @@ export function TubeTVPage({
                       </div>
                     </div>
 
-                    <div className="-mx-3 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+                    <div className="-mx-3 flex items-center gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>button]:min-h-[32px] [&>button]:min-w-[32px]">
                       {mode === "yt" && (
                         <>
                           <button
@@ -3265,6 +3285,38 @@ export function TubeTVPage({
             </div>
           </div>
         )}
+
+        {/* Mobile bottom navigation - visible only on small screens */}
+        <nav className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.96),rgba(4,5,7,0.98))] px-2 py-1.5 backdrop-blur-md lg:hidden">
+          {[
+            { to: "/", icon: Tv, label: "TV", color: "oklch(0.82 0.18 152)" },
+            { to: "/discover", icon: Compass, label: "Discover", color: "oklch(0.84 0.14 205)" },
+            { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
+            { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
+            { to: "/places", icon: MapPin, label: "Places", color: "oklch(0.8 0.14 180)" },
+            { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
+            { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
+            { to: "/wordle", icon: BookOpen, label: "Wordle", color: "oklch(0.82 0.18 152)" },
+            { to: "/sports", icon: Trophy, label: "Sports", color: "oklch(0.82 0.18 152)" },
+            { to: "/movies", icon: Film, label: "Movies", color: "oklch(0.74 0.18 335)" },
+            { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
+          ].map(({ to, icon: Icon, label, color }) => (
+            <button
+              key={to}
+              onClick={() => navigate({ to })}
+              className="flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 transition-all duration-150 active:scale-95 min-w-0"
+              title={label}
+            >
+              <Icon className="h-4 w-4 shrink-0" style={{ color }} />
+              <span
+                className="font-mono-tv text-[7px] uppercase tracking-wider leading-tight"
+                style={{ color, opacity: 0.85 }}
+              >
+                {label}
+              </span>
+            </button>
+          ))}
+        </nav>
       </main>
     </>
   );

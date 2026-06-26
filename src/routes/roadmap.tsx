@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState, useEffect, useRef } from 'react';
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
 
-export const Route = createFileRoute('/roadmap')({
+export const Route = createFileRoute("/roadmap")({
   head: () => ({
     meta: [
-      { title: 'Roadmap — TubeTV' },
-      { name: 'description', content: 'Feature roadmap and saturation tracker for TubeTV.' },
+      { title: "Roadmap — TubeTV" },
+      { name: "description", content: "Feature roadmap and saturation tracker for TubeTV." },
     ],
   }),
   component: RoadmapPage,
@@ -13,15 +13,15 @@ export const Route = createFileRoute('/roadmap')({
 
 // ─── Nav links ───────────────────────────────────────────────────────────────
 const NAV_LINKS = [
-  { to: '/', label: 'Home' },
-  { to: '/discover', label: 'Discover' },
-  { to: '/movies', label: 'Movies' },
-  { to: '/playground', label: 'Playground' },
-  { to: '/focus', label: 'Focus' },
-  { to: '/vibes', label: 'Vibes' },
-  { to: '/wordle', label: 'Wordle' },
-  { to: '/roadmap', label: 'Roadmap' },
-  { to: '/reader', label: 'Reader' },
+  { to: "/", label: "Home" },
+  { to: "/discover", label: "Discover" },
+  { to: "/movies", label: "Movies" },
+  { to: "/playground", label: "Playground" },
+  { to: "/focus", label: "Focus" },
+  { to: "/vibes", label: "Vibes" },
+  { to: "/wordle", label: "Wordle" },
+  { to: "/roadmap", label: "Roadmap" },
+  { to: "/reader", label: "Reader" },
 ];
 
 // ─── Saturation data ──────────────────────────────────────────────────────────
@@ -33,34 +33,34 @@ type SaturationItem = {
 };
 
 const SATURATION_ITEMS: SaturationItem[] = [
-  { label: 'Core TV / IPTV / Radio', value: 95, color: '#00ff88' },
-  { label: 'YouTube Channels (40 curated)', value: 100, color: '#00ff88' },
-  { label: 'Discovery Desk', value: 65, color: '#00eeff' },
-  { label: 'Playground Games', value: 75, color: '#ff44cc' },
-  { label: 'Focus Room', value: 90, color: '#ffbb00' },
-  { label: 'Places Page', value: 85, color: '#00ff88', isNew: true },
-  { label: 'Ambient Sounds (11)', value: 95, color: '#00eeff', isNew: true },
-  { label: 'Auto-Pilot System', value: 70, color: '#ff44cc', isNew: true },
-  { label: 'Auto-Surf Mode', value: 80, color: '#ff44cc', isNew: true },
-  { label: 'Mood Switcher', value: 90, color: '#ffbb00', isNew: true },
-  { label: 'News Aggregator', value: 100, color: '#00eeff', isNew: true },
-  { label: 'Wordle Daily', value: 100, color: '#ff44cc', isNew: true },
-  { label: 'Vibes Explorer', value: 100, color: '#ff44cc', isNew: true },
-  { label: 'Roadmap Page', value: 100, color: '#a855f7', isNew: true },
-  { label: 'Reader Mode', value: 80, color: '#00eeff', isNew: true },
-  { label: 'Mobile Experience', value: 20, color: '#ffbb00' },
-  { label: 'Overall', value: 75, color: '#ffffff' },
+  { label: "Core TV / IPTV / Radio", value: 95, color: "#00ff88" },
+  { label: "YouTube Channels (40 curated)", value: 100, color: "#00ff88" },
+  { label: "Discovery Desk", value: 65, color: "#00eeff" },
+  { label: "Playground Games", value: 75, color: "#ff44cc" },
+  { label: "Focus Room", value: 90, color: "#ffbb00" },
+  { label: "Places Page", value: 85, color: "#00ff88", isNew: true },
+  { label: "Ambient Sounds (11)", value: 95, color: "#00eeff", isNew: true },
+  { label: "Auto-Pilot System", value: 70, color: "#ff44cc", isNew: true },
+  { label: "Auto-Surf Mode", value: 80, color: "#ff44cc", isNew: true },
+  { label: "Mood Switcher", value: 90, color: "#ffbb00", isNew: true },
+  { label: "News Aggregator", value: 100, color: "#00eeff", isNew: true },
+  { label: "Wordle Daily", value: 100, color: "#ff44cc", isNew: true },
+  { label: "Vibes Explorer", value: 100, color: "#ff44cc", isNew: true },
+  { label: "Roadmap Page", value: 100, color: "#a855f7", isNew: true },
+  { label: "Reader Mode", value: 80, color: "#00eeff", isNew: true },
+  { label: "Mobile Experience", value: 20, color: "#ffbb00" },
+  { label: "Overall", value: 75, color: "#ffffff" },
 ];
 
 // ─── Feature card data ────────────────────────────────────────────────────────
-type Category = 'tv' | 'discovery' | 'games' | 'focus' | 'future';
+type Category = "tv" | "discovery" | "games" | "focus" | "future";
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  tv:        '#00ff88',
-  discovery: '#00eeff',
-  games:     '#ff44cc',
-  focus:     '#ffbb00',
-  future:    '#a855f7',
+  tv: "#00ff88",
+  discovery: "#00eeff",
+  games: "#ff44cc",
+  focus: "#ffbb00",
+  future: "#a855f7",
 };
 
 type FeatureCard = {
@@ -68,87 +68,310 @@ type FeatureCard = {
   detail: string;
   category: Category;
   emoji: string;
+  isNew?: boolean;
 };
 
 const SHIPPED: FeatureCard[] = [
-  { name: 'TV / IPTV / Radio', detail: 'Live streams from 150+ countries & genre radio', category: 'tv', emoji: '📺' },
-  { name: 'YouTube 40 Channels', detail: 'Curated set across news, edu, music & more', category: 'tv', emoji: '▶️' },
-  { name: 'Discovery Desk', detail: 'Wikipedia rabbit-holes + MusicBrainz lookups', category: 'discovery', emoji: '🔭' },
-  { name: 'News Aggregator', detail: 'Live headlines from global RSS feeds', category: 'discovery', emoji: '📰' },
-  { name: 'Playground (5 categories)', detail: 'Trivia, Snake, Memory, Math Blitz, Reaction', category: 'games', emoji: '🕹️' },
-  { name: 'Wordle Daily', detail: 'Classic 6-try word game, refreshes at midnight', category: 'games', emoji: '🟩' },
-  { name: 'Vibes Explorer', detail: 'Mood-based music discovery across 12 vibes', category: 'focus', emoji: '🎵' },
-  { name: 'Focus Room', detail: 'Pomodoro + ambient sounds + task list', category: 'focus', emoji: '🧘' },
-  { name: 'CRT Boot Animation', detail: 'Retro TV power-on sequence on app load', category: 'focus', emoji: '📺', isNew: true },
-  { name: 'Places Page', detail: 'Study-with-me hub with 12 window views + weather + ambient presets', category: 'focus', emoji: '🪟', isNew: true },
-  { name: 'Ambient Sound Layer', detail: '11 sounds with rhythmic generators (fire, ocean, thunder, birds)', category: 'focus', emoji: '🌧️', isNew: true },
-  { name: '8 Ambient Presets', detail: 'Study, Sleep, Cozy, Forest, Deep Work, Beach, Storm, Cyberpunk', category: 'focus', emoji: '🎵', isNew: true },
-  { name: 'Roadmap Page', detail: 'This very page you\'re reading right now', category: 'future', emoji: '🗺️' },
+  {
+    name: "TV / IPTV / Radio",
+    detail: "Live streams from 150+ countries & genre radio",
+    category: "tv",
+    emoji: "📺",
+  },
+  {
+    name: "YouTube 40 Channels",
+    detail: "Curated set across news, edu, music & more",
+    category: "tv",
+    emoji: "▶️",
+  },
+  {
+    name: "Discovery Desk",
+    detail: "Wikipedia rabbit-holes + MusicBrainz lookups",
+    category: "discovery",
+    emoji: "🔭",
+  },
+  {
+    name: "News Aggregator",
+    detail: "Live headlines from global RSS feeds",
+    category: "discovery",
+    emoji: "📰",
+  },
+  {
+    name: "Playground (5 categories)",
+    detail: "Trivia, Snake, Memory, Math Blitz, Reaction",
+    category: "games",
+    emoji: "🕹️",
+  },
+  {
+    name: "Wordle Daily",
+    detail: "Classic 6-try word game, refreshes at midnight",
+    category: "games",
+    emoji: "🟩",
+  },
+  {
+    name: "Vibes Explorer",
+    detail: "Mood-based music discovery across 12 vibes",
+    category: "focus",
+    emoji: "🎵",
+  },
+  {
+    name: "Focus Room",
+    detail: "Pomodoro + ambient sounds + task list",
+    category: "focus",
+    emoji: "🧘",
+  },
+  {
+    name: "CRT Boot Animation",
+    detail: "Retro TV power-on sequence on app load",
+    category: "focus",
+    emoji: "📺",
+    isNew: true,
+  },
+  {
+    name: "Places Page",
+    detail: "Study-with-me hub with 12 window views + weather + ambient presets",
+    category: "focus",
+    emoji: "🪟",
+    isNew: true,
+  },
+  {
+    name: "Ambient Sound Layer",
+    detail: "11 sounds with rhythmic generators (fire, ocean, thunder, birds)",
+    category: "focus",
+    emoji: "🌧️",
+    isNew: true,
+  },
+  {
+    name: "8 Ambient Presets",
+    detail: "Study, Sleep, Cozy, Forest, Deep Work, Beach, Storm, Cyberpunk",
+    category: "focus",
+    emoji: "🎵",
+    isNew: true,
+  },
+  {
+    name: "Roadmap Page",
+    detail: "This very page you're reading right now",
+    category: "future",
+    emoji: "🗺️",
+  },
 ];
 
 const IN_PROGRESS: FeatureCard[] = [
-  { name: 'Auto-Pilot System', detail: 'Time-based channel switching + ambient auto-apply + visual dimming', category: 'focus', emoji: '🤖', isNew: true },
-  { name: 'Auto-Surf Mode', detail: 'Auto-flip through channels on a timer (10s/30s/1m/5m/15m)', category: 'tv', emoji: '🔄', isNew: true },
-  { name: 'Quick Mood Switcher', detail: 'Alt+1-8 keyboard shortcuts for instant mood presets', category: 'focus', emoji: '⚡', isNew: true },
-  { name: 'Places Page', detail: 'Study-with-me hub with 12 window views + weather + ambient', category: 'focus', emoji: '🪟', isNew: true },
-  { name: 'CRT Boot Animation', detail: 'Retro TV power-on sequence with warmup, static, logo reveal', category: 'focus', emoji: '📺', isNew: true },
-  { name: 'Ambient Sound Layer', detail: 'Rain, cafe, keyboard, wind, fire, ocean, birds, thunder (11 sounds)', category: 'focus', emoji: '🌧️', isNew: true },
-  { name: 'Sleep Timer', detail: 'Auto-pause countdown with presets', category: 'focus', emoji: '🌙', isNew: true },
-  { name: 'Time-Based Suggestions', detail: 'Morning/night smart channel recs', category: 'focus', emoji: '⏰', isNew: true },
-  { name: 'Mobile Responsiveness', detail: 'Full touch-first layout across all pages', category: 'tv', emoji: '📱' },
-  { name: 'Reader Mode', detail: 'Wikipedia deep-reading with annotations', category: 'discovery', emoji: '📖' },
+  {
+    name: "Auto-Pilot System",
+    detail: "Time-based channel switching + ambient auto-apply + visual dimming",
+    category: "focus",
+    emoji: "🤖",
+    isNew: true,
+  },
+  {
+    name: "Auto-Surf Mode",
+    detail: "Auto-flip through channels on a timer (10s/30s/1m/5m/15m)",
+    category: "tv",
+    emoji: "🔄",
+    isNew: true,
+  },
+  {
+    name: "Quick Mood Switcher",
+    detail: "Alt+1-8 keyboard shortcuts for instant mood presets",
+    category: "focus",
+    emoji: "⚡",
+    isNew: true,
+  },
+  {
+    name: "Places Page",
+    detail: "Study-with-me hub with 12 window views + weather + ambient",
+    category: "focus",
+    emoji: "🪟",
+    isNew: true,
+  },
+  {
+    name: "CRT Boot Animation",
+    detail: "Retro TV power-on sequence with warmup, static, logo reveal",
+    category: "focus",
+    emoji: "📺",
+    isNew: true,
+  },
+  {
+    name: "Ambient Sound Layer",
+    detail: "Rain, cafe, keyboard, wind, fire, ocean, birds, thunder (11 sounds)",
+    category: "focus",
+    emoji: "🌧️",
+    isNew: true,
+  },
+  {
+    name: "Sleep Timer",
+    detail: "Auto-pause countdown with presets",
+    category: "focus",
+    emoji: "🌙",
+    isNew: true,
+  },
+  {
+    name: "Time-Based Suggestions",
+    detail: "Morning/night smart channel recs",
+    category: "focus",
+    emoji: "⏰",
+    isNew: true,
+  },
+  {
+    name: "Mobile Responsiveness",
+    detail: "Full touch-first layout across all pages",
+    category: "tv",
+    emoji: "📱",
+  },
+  {
+    name: "Reader Mode",
+    detail: "Wikipedia deep-reading with annotations",
+    category: "discovery",
+    emoji: "📖",
+  },
 ];
 
 const PARKING_LOT: FeatureCard[] = [
   // ── "Places Not Tools" Vision ────────────────────────────────────────────
-  { name: 'Window Views (WindowSwap-style)', detail: 'Embed live webcam feeds from public cameras worldwide — rain in Tokyo, streets in Paris, beaches in Bali. Uses Insecam public MJPEG streams or WindowSwap iframe. No API key needed.', category: 'focus', emoji: '🪟' },
-  { name: 'Virtual Cafe / Room Ambience', detail: 'YouTube embed layer: fireplace, rainy cafe, library, spaceship. Pick a "place" to study in. Ambient sound auto-syncs. LifeAt.io vibes without the account.', category: 'focus', emoji: '☕' },
-  { name: 'Study-with-me Co-presence', detail: 'WebSocket-based shared focus rooms. Camera optional. See who else is studying. Pomodoro sync. Simple presence indicators (green dot = studying).', category: 'focus', emoji: '👥' },
-  { name: 'Work-with-me Sessions', detail: 'Like study-with-me but for coding/remote work. Screen share optional. Focus timer sync. Background lofi auto-plays. "Virtual coworking" without the video call anxiety.', category: 'focus', emoji: '💻' },
-  { name: 'Weather-Triggered Ambience', detail: 'Open-Meteo API (free, no key) detects your local weather. Rainy outside? Auto-layer rain sounds. Snowing? Switch to cozy fireplace channel. Sunny? Open the window view.', category: 'focus', emoji: '🌦️' },
-  { name: 'Draggable Dashboard Widgets', detail: 'react-grid-layout (MIT). Let users build their own study desk: arrange timer, notes, ambient player, webcam view, chat, and task list. Save layout to localStorage.', category: 'future', emoji: '🧩' },
+  {
+    name: "Window Views (WindowSwap-style)",
+    detail:
+      "Embed live webcam feeds from public cameras worldwide — rain in Tokyo, streets in Paris, beaches in Bali. Uses Insecam public MJPEG streams or WindowSwap iframe. No API key needed.",
+    category: "focus",
+    emoji: "🪟",
+  },
+  {
+    name: "Virtual Cafe / Room Ambience",
+    detail:
+      'YouTube embed layer: fireplace, rainy cafe, library, spaceship. Pick a "place" to study in. Ambient sound auto-syncs. LifeAt.io vibes without the account.',
+    category: "focus",
+    emoji: "☕",
+  },
+  {
+    name: "Study-with-me Co-presence",
+    detail:
+      "WebSocket-based shared focus rooms. Camera optional. See who else is studying. Pomodoro sync. Simple presence indicators (green dot = studying).",
+    category: "focus",
+    emoji: "👥",
+  },
+  {
+    name: "Work-with-me Sessions",
+    detail:
+      'Like study-with-me but for coding/remote work. Screen share optional. Focus timer sync. Background lofi auto-plays. "Virtual coworking" without the video call anxiety.',
+    category: "focus",
+    emoji: "💻",
+  },
+  {
+    name: "Weather-Triggered Ambience",
+    detail:
+      "Open-Meteo API (free, no key) detects your local weather. Rainy outside? Auto-layer rain sounds. Snowing? Switch to cozy fireplace channel. Sunny? Open the window view.",
+    category: "focus",
+    emoji: "🌦️",
+  },
+  {
+    name: "Draggable Dashboard Widgets",
+    detail:
+      "react-grid-layout (MIT). Let users build their own study desk: arrange timer, notes, ambient player, webcam view, chat, and task list. Save layout to localStorage.",
+    category: "future",
+    emoji: "🧩",
+  },
   // ── TV & Content ─────────────────────────────────────────────────────────
-  { name: 'Real-Debrid Torrent Player', detail: 'Stream cached torrents instantly by converting magnet links to HTTPS streams using Real-Debrid API (Highly feasible; uses HTML5 / Hls.js player).', category: 'tv', emoji: '⚡' },
-  { name: '123movies-style Catalog', detail: 'Movie catalog indexing TMDb metadata with integrated direct source player streams (e.g. vidsrc.to, superembed) in custom player shell.', category: 'tv', emoji: '🎬' },
-  { name: 'Channel Scheduling System', detail: 'Fake TV guide with time-based programming. Morning = news, afternoon = docs, evening = movies. Auto-switch channels on a real clock schedule. Like actual cable TV.', category: 'tv', emoji: '📅' },
+  {
+    name: "Real-Debrid Torrent Player",
+    detail:
+      "Stream cached torrents instantly by converting magnet links to HTTPS streams using Real-Debrid API (Highly feasible; uses HTML5 / Hls.js player).",
+    category: "tv",
+    emoji: "⚡",
+  },
+  {
+    name: "123movies-style Catalog",
+    detail:
+      "Movie catalog indexing TMDb metadata with integrated direct source player streams (e.g. vidsrc.to, superembed) in custom player shell.",
+    category: "tv",
+    emoji: "🎬",
+  },
+  {
+    name: "Channel Scheduling System",
+    detail:
+      "Fake TV guide with time-based programming. Morning = news, afternoon = docs, evening = movies. Auto-switch channels on a real clock schedule. Like actual cable TV.",
+    category: "tv",
+    emoji: "📅",
+  },
   // ── Discovery ────────────────────────────────────────────────────────────
-  { name: 'Polymarket & Kalshi Tickers', detail: 'Real-time prediction market probability tracking for sports, tech, elections, and macro news using public REST APIs.', category: 'discovery', emoji: '📈' },
-  { name: 'Google News RSS Panel', detail: 'Feed topics from Google News RSS categories styled in a sleek console grid layout.', category: 'discovery', emoji: '📰' },
+  {
+    name: "Polymarket & Kalshi Tickers",
+    detail:
+      "Real-time prediction market probability tracking for sports, tech, elections, and macro news using public REST APIs.",
+    category: "discovery",
+    emoji: "📈",
+  },
+  {
+    name: "Google News RSS Panel",
+    detail: "Feed topics from Google News RSS categories styled in a sleek console grid layout.",
+    category: "discovery",
+    emoji: "📰",
+  },
   // ── Games ────────────────────────────────────────────────────────────────
-  { name: 'Mock AI Stock Simulator', detail: 'A trading playground allowing user-configured AI agents to paper-trade live stock tickers without real money.', category: 'games', emoji: '📊' },
-  { name: 'GeoGuessr-style Game', detail: 'Guess location from street-view screenshots', category: 'games', emoji: '🌍' },
-  { name: 'Daily Crossword', detail: 'NYT-style crossword with auto-check', category: 'games', emoji: '✏️' },
+  {
+    name: "Mock AI Stock Simulator",
+    detail:
+      "A trading playground allowing user-configured AI agents to paper-trade live stock tickers without real money.",
+    category: "games",
+    emoji: "📊",
+  },
+  {
+    name: "GeoGuessr-style Game",
+    detail: "Guess location from street-view screenshots",
+    category: "games",
+    emoji: "🌍",
+  },
+  {
+    name: "Daily Crossword",
+    detail: "NYT-style crossword with auto-check",
+    category: "games",
+    emoji: "✏️",
+  },
   // ── Future ───────────────────────────────────────────────────────────────
-  { name: 'Social Sharing', detail: 'Share clips, playlists & scores', category: 'future', emoji: '🔗' },
-  { name: 'Offline PWA', detail: 'Service worker for offline games + notes', category: 'future', emoji: '📦' },
+  {
+    name: "Social Sharing",
+    detail: "Share clips, playlists & scores",
+    category: "future",
+    emoji: "🔗",
+  },
+  {
+    name: "Offline PWA",
+    detail: "Service worker for offline games + notes",
+    category: "future",
+    emoji: "📦",
+  },
 ];
 
 // ─── Timeline milestones ──────────────────────────────────────────────────────
 type Milestone = { quarter: string; label: string; done: boolean };
 const MILESTONES: Milestone[] = [
-  { quarter: 'Q1 2025', label: 'TV + IPTV + Radio MVP', done: true },
-  { quarter: 'Q2 2025', label: 'YouTube Channels + Discovery Desk', done: true },
-  { quarter: 'Q2 2025', label: 'Playground Games (5 categories)', done: true },
-  { quarter: 'Q3 2025', label: 'Focus Room + Wordle + Vibes', done: true },
-  { quarter: 'Q3 2025', label: 'News Aggregator + Reader Mode', done: true },
-  { quarter: 'Q4 2025', label: 'Mobile Polish + Score Streaks', done: false },
-  { quarter: 'Q1 2026', label: 'Movies / Series + RSS Feeds', done: false },
-  { quarter: 'Q2 2026', label: 'Offline PWA + Social Sharing', done: false },
+  { quarter: "Q1 2025", label: "TV + IPTV + Radio MVP", done: true },
+  { quarter: "Q2 2025", label: "YouTube Channels + Discovery Desk", done: true },
+  { quarter: "Q2 2025", label: "Playground Games (5 categories)", done: true },
+  { quarter: "Q3 2025", label: "Focus Room + Wordle + Vibes", done: true },
+  { quarter: "Q3 2025", label: "News Aggregator + Reader Mode", done: true },
+  { quarter: "Q4 2025", label: "Mobile Polish + Score Streaks", done: false },
+  { quarter: "Q1 2026", label: "Movies / Series + RSS Feeds", done: false },
+  { quarter: "Q2 2026", label: "Offline PWA + Social Sharing", done: false },
 ];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SaturationBar({ item, animate }: { item: SaturationItem; animate: boolean }) {
-  const isOverall = item.label === 'Overall';
+  const isOverall = item.label === "Overall";
   return (
-    <div className={`${isOverall ? 'mt-2 pt-4 border-t border-white/10' : ''}`}>
+    <div className={`${isOverall ? "mt-2 pt-4 border-t border-white/10" : ""}`}>
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-sm text-white/80 flex items-center gap-2">
           {item.label}
           {item.isNew && (
             <span
               className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-              style={{ background: `${item.color}30`, color: item.color, border: `1px solid ${item.color}66` }}
+              style={{
+                background: `${item.color}30`,
+                color: item.color,
+                border: `1px solid ${item.color}66`,
+              }}
             >
               NEW
             </span>
@@ -162,9 +385,9 @@ function SaturationBar({ item, animate }: { item: SaturationItem; animate: boole
         <div
           className="h-full rounded-full transition-all duration-[1.4s] ease-out"
           style={{
-            width: animate ? `${item.value}%` : '0%',
+            width: animate ? `${item.value}%` : "0%",
             background: `linear-gradient(90deg, ${item.color}cc, ${item.color})`,
-            boxShadow: animate ? `0 0 8px ${item.color}88` : 'none',
+            boxShadow: animate ? `0 0 8px ${item.color}88` : "none",
           }}
         />
       </div>
@@ -178,7 +401,7 @@ function FeatureCardComp({ card }: { card: FeatureCard }) {
     <div
       className="group relative flex items-start gap-3 p-4 rounded-xl border border-white/10 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:-translate-y-0.5"
       style={{
-        background: 'rgba(255,255,255,0.03)',
+        background: "rgba(255,255,255,0.03)",
         borderLeft: `3px solid ${color}`,
       }}
     >
@@ -235,7 +458,9 @@ function RoadmapPage() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setAnimate(true); },
+      ([entry]) => {
+        if (entry.isIntersecting) setAnimate(true);
+      },
       { threshold: 0.1 },
     );
     if (barsRef.current) observer.observe(barsRef.current);
@@ -243,18 +468,27 @@ function RoadmapPage() {
   }, []);
 
   return (
-    <div className="min-h-screen text-white" style={{ background: 'oklch(0.08 0.010 255)' }}>
+    <div className="min-h-screen text-white" style={{ background: "oklch(0.08 0.010 255)" }}>
       {/* Ambient glow blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #a855f7, transparent 70%)' }} />
-        <div className="absolute top-1/2 -right-48 w-96 h-96 rounded-full opacity-8" style={{ background: 'radial-gradient(circle, #00ff88, transparent 70%)' }} />
+        <div
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-10"
+          style={{ background: "radial-gradient(circle, #a855f7, transparent 70%)" }}
+        />
+        <div
+          className="absolute top-1/2 -right-48 w-96 h-96 rounded-full opacity-8"
+          style={{ background: "radial-gradient(circle, #00ff88, transparent 70%)" }}
+        />
       </div>
 
       {/* Nav */}
       <nav className="sticky top-0 z-40 border-b border-white/10 backdrop-blur-xl bg-black/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
-            <Link to="/" className="font-black text-lg tracking-tight text-white/90 hover:text-white transition-colors">
+            <Link
+              to="/"
+              className="font-black text-lg tracking-tight text-white/90 hover:text-white transition-colors"
+            >
               Tube<span className="text-red-500">TV</span>
             </Link>
             <div className="flex items-center gap-0.5 text-sm flex-wrap justify-end">
@@ -263,7 +497,9 @@ function RoadmapPage() {
                   key={to}
                   to={to}
                   className="px-2.5 py-1.5 rounded-lg text-white/55 hover:text-white hover:bg-white/10 transition-all text-xs"
-                  activeProps={{ className: 'px-2.5 py-1.5 rounded-lg text-white bg-white/15 text-xs' }}
+                  activeProps={{
+                    className: "px-2.5 py-1.5 rounded-lg text-white bg-white/15 text-xs",
+                  }}
                 >
                   {label}
                 </Link>
@@ -276,13 +512,18 @@ function RoadmapPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {/* Hero */}
         <div className="pt-14 pb-10 text-center">
-          <p className="text-white/40 text-xs font-bold tracking-[0.35em] uppercase mb-3">Feature Tracker</p>
-          <h1 className="text-5xl sm:text-6xl font-black tracking-tight mb-4 bg-clip-text text-transparent"
-            style={{ backgroundImage: 'linear-gradient(135deg, #ffffff 30%, #a855f7)' }}>
+          <p className="text-white/40 text-xs font-bold tracking-[0.35em] uppercase mb-3">
+            Feature Tracker
+          </p>
+          <h1
+            className="text-5xl sm:text-6xl font-black tracking-tight mb-4 bg-clip-text text-transparent"
+            style={{ backgroundImage: "linear-gradient(135deg, #ffffff 30%, #a855f7)" }}
+          >
             Roadmap
           </h1>
           <p className="text-white/50 max-w-xl mx-auto text-base leading-relaxed">
-            What's shipped, what's cooking, and what's parked. Built in the open, one feature at a time.
+            What's shipped, what's cooking, and what's parked. Built in the open, one feature at a
+            time.
           </p>
         </div>
 
@@ -296,14 +537,16 @@ function RoadmapPage() {
                   <div
                     className="w-3 h-3 rounded-full border-2 transition-all duration-300"
                     style={{
-                      borderColor: m.done ? '#00ff88' : '#ffffff30',
-                      background: m.done ? '#00ff88' : 'transparent',
-                      boxShadow: m.done ? '0 0 8px #00ff8888' : 'none',
+                      borderColor: m.done ? "#00ff88" : "#ffffff30",
+                      background: m.done ? "#00ff88" : "transparent",
+                      boxShadow: m.done ? "0 0 8px #00ff8888" : "none",
                     }}
                   />
                   <div className="text-center">
                     <div className="text-[10px] font-bold text-white/40">{m.quarter}</div>
-                    <div className={`text-xs font-medium mt-0.5 max-w-[110px] text-center leading-tight ${m.done ? 'text-white/80' : 'text-white/35'}`}>
+                    <div
+                      className={`text-xs font-medium mt-0.5 max-w-[110px] text-center leading-tight ${m.done ? "text-white/80" : "text-white/35"}`}
+                    >
                       {m.label}
                     </div>
                   </div>
@@ -313,11 +556,12 @@ function RoadmapPage() {
                   <div
                     className="w-14 h-[2px] mx-1 shrink-0"
                     style={{
-                      background: m.done && MILESTONES[i + 1].done
-                        ? 'linear-gradient(90deg, #00ff88, #00ff88)'
-                        : m.done
-                        ? 'linear-gradient(90deg, #00ff88, #ffffff20)'
-                        : '#ffffff15',
+                      background:
+                        m.done && MILESTONES[i + 1].done
+                          ? "linear-gradient(90deg, #00ff88, #00ff88)"
+                          : m.done
+                            ? "linear-gradient(90deg, #00ff88, #ffffff20)"
+                            : "#ffffff15",
                     }}
                   />
                 )}
@@ -330,9 +574,11 @@ function RoadmapPage() {
         <section
           ref={barsRef}
           className="mb-12 p-6 rounded-2xl border border-white/10"
-          style={{ background: 'rgba(255,255,255,0.03)' }}
+          style={{ background: "rgba(255,255,255,0.03)" }}
         >
-          <h2 className="text-xs font-bold tracking-widest text-white/40 uppercase mb-5">Saturation — how complete each area feels</h2>
+          <h2 className="text-xs font-bold tracking-widest text-white/40 uppercase mb-5">
+            Saturation — how complete each area feels
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4">
             {SATURATION_ITEMS.map((item) => (
               <SaturationBar key={item.label} item={item} animate={animate} />
@@ -346,7 +592,15 @@ function RoadmapPage() {
             <div key={cat} className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
               <span className="text-xs text-white/50 capitalize">
-                {cat === 'tv' ? 'TV / Streaming' : cat === 'discovery' ? 'Discovery / News' : cat === 'games' ? 'Games' : cat === 'focus' ? 'Focus' : 'Future'}
+                {cat === "tv"
+                  ? "TV / Streaming"
+                  : cat === "discovery"
+                    ? "Discovery / News"
+                    : cat === "games"
+                      ? "Games"
+                      : cat === "focus"
+                        ? "Focus"
+                        : "Future"}
               </span>
             </div>
           ))}
@@ -361,7 +615,8 @@ function RoadmapPage() {
 
         {/* Footer */}
         <div className="mt-16 text-center text-white/20 text-xs">
-          Last updated May 2025 · {SHIPPED.length + IN_PROGRESS.length + PARKING_LOT.length} features tracked
+          Last updated May 2025 · {SHIPPED.length + IN_PROGRESS.length + PARKING_LOT.length}{" "}
+          features tracked
         </div>
       </main>
     </div>

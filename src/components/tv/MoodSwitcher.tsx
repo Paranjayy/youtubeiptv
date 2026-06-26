@@ -57,7 +57,7 @@ const MOOD_PRESETS: MoodPreset[] = [
     emoji: "⚡",
     description: "Workout vibes and EDM",
     channelId: "workout",
-    ambientPresetId: null,
+    ambientPresetId: undefined,
     shortcut: "5",
   },
   {
@@ -112,7 +112,7 @@ export function MoodSwitcher({ onSwitchChannel }: MoodSwitcherProps) {
       setLastApplied(preset.id);
       setTimeout(() => setLastApplied(null), 2000);
     },
-    [onSwitchChannel]
+    [onSwitchChannel],
   );
 
   // Keyboard shortcuts: Alt+1 through Alt+8
@@ -151,7 +151,7 @@ export function MoodSwitcher({ onSwitchChannel }: MoodSwitcherProps) {
           "fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border transition-all shadow-lg",
           open
             ? "bg-primary border-primary/50 shadow-[0_0_20px_rgba(79,174,123,0.3)]"
-            : "bg-[#0a0c10]/90 border-white/10 hover:border-primary/30 hover:bg-[#0a0c10]"
+            : "bg-[#0a0c10]/90 border-white/10 hover:border-primary/30 hover:bg-[#0a0c10]",
         )}
         title="Mood Switcher (Alt+Z)"
       >
@@ -164,7 +164,9 @@ export function MoodSwitcher({ onSwitchChannel }: MoodSwitcherProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap className="h-3.5 w-3.5 text-primary" />
-              <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">Quick Moods</span>
+              <span className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+                Quick Moods
+              </span>
             </div>
             <span className="font-mono-tv text-[9px] text-muted-foreground/60">Alt+1-8</span>
           </div>
@@ -178,21 +180,28 @@ export function MoodSwitcher({ onSwitchChannel }: MoodSwitcherProps) {
                   "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition-all",
                   lastApplied === preset.id
                     ? "border-primary/50 bg-primary/10 shadow-[0_0_10px_rgba(79,174,123,0.15)]"
-                    : "border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10"
+                    : "border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10",
                 )}
               >
                 <div className="flex items-center gap-1.5">
                   <span className="text-base">{preset.emoji}</span>
                   <span className="text-[10px] font-bold text-foreground/90">{preset.label}</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground leading-tight">{preset.description}</span>
-                <span className="font-mono-tv text-[8px] text-muted-foreground/40 mt-auto">Alt+{preset.shortcut}</span>
+                <span className="text-[9px] text-muted-foreground leading-tight">
+                  {preset.description}
+                </span>
+                <span className="font-mono-tv text-[8px] text-muted-foreground/40 mt-auto">
+                  Alt+{preset.shortcut}
+                </span>
               </button>
             ))}
           </div>
 
           <div className="mt-3 pt-2 border-t border-white/5 text-[9px] font-mono-tv text-muted-foreground text-center">
-            Press <kbd className="px-1 py-0.5 rounded bg-white/10 text-foreground/60">Alt+Z</kbd> to toggle · <kbd className="px-1 py-0.5 rounded bg-white/10 text-foreground/60">Alt+1-8</kbd> quick apply
+            Press <kbd className="px-1 py-0.5 rounded bg-white/10 text-foreground/60">Alt+Z</kbd> to
+            toggle ·{" "}
+            <kbd className="px-1 py-0.5 rounded bg-white/10 text-foreground/60">Alt+1-8</kbd> quick
+            apply
           </div>
         </div>
       )}
