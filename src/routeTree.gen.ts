@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WordleRouteImport } from './routes/wordle'
 import { Route as VibesRouteImport } from './routes/vibes'
+import { Route as SportsRouteImport } from './routes/sports'
 import { Route as RoadmapRouteImport } from './routes/roadmap'
 import { Route as ReaderRouteImport } from './routes/reader'
 import { Route as PlaygroundRouteImport } from './routes/playground'
@@ -36,6 +37,11 @@ const WordleRoute = WordleRouteImport.update({
 const VibesRoute = VibesRouteImport.update({
   id: '/vibes',
   path: '/vibes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SportsRoute = SportsRouteImport.update({
+  id: '/sports',
+  path: '/sports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RoadmapRoute = RoadmapRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
   '/roadmap': typeof RoadmapRoute
+  '/sports': typeof SportsRoute
   '/vibes': typeof VibesRoute
   '/wordle': typeof WordleRoute
   '/channels/$slug': typeof ChannelsSlugRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
   '/roadmap': typeof RoadmapRoute
+  '/sports': typeof SportsRoute
   '/vibes': typeof VibesRoute
   '/wordle': typeof WordleRoute
   '/channels/$slug': typeof ChannelsSlugRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/playground': typeof PlaygroundRoute
   '/reader': typeof ReaderRoute
   '/roadmap': typeof RoadmapRoute
+  '/sports': typeof SportsRoute
   '/vibes': typeof VibesRoute
   '/wordle': typeof WordleRoute
   '/channels/$slug': typeof ChannelsSlugRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/playground'
     | '/reader'
     | '/roadmap'
+    | '/sports'
     | '/vibes'
     | '/wordle'
     | '/channels/$slug'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/playground'
     | '/reader'
     | '/roadmap'
+    | '/sports'
     | '/vibes'
     | '/wordle'
     | '/channels/$slug'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/playground'
     | '/reader'
     | '/roadmap'
+    | '/sports'
     | '/vibes'
     | '/wordle'
     | '/channels/$slug'
@@ -253,6 +265,7 @@ export interface RootRouteChildren {
   PlaygroundRoute: typeof PlaygroundRoute
   ReaderRoute: typeof ReaderRoute
   RoadmapRoute: typeof RoadmapRoute
+  SportsRoute: typeof SportsRoute
   VibesRoute: typeof VibesRoute
   WordleRoute: typeof WordleRoute
   ChannelsSlugRoute: typeof ChannelsSlugRoute
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/vibes'
       fullPath: '/vibes'
       preLoaderRoute: typeof VibesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sports': {
+      id: '/sports'
+      path: '/sports'
+      fullPath: '/sports'
+      preLoaderRoute: typeof SportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/roadmap': {
@@ -448,6 +468,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlaygroundRoute: PlaygroundRoute,
   ReaderRoute: ReaderRoute,
   RoadmapRoute: RoadmapRoute,
+  SportsRoute: SportsRoute,
   VibesRoute: VibesRoute,
   WordleRoute: WordleRoute,
   ChannelsSlugRoute: ChannelsSlugRoute,

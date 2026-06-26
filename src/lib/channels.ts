@@ -439,3 +439,63 @@ export function shuffle<T>(arr: T[], seed = Date.now()): T[] {
   }
   return a;
 }
+
+// ─── Sports & live events — curated embeddable highlights. ──────────────────────
+CHANNELS.push(
+  {
+    id: "fifa-wc",
+    number: "41",
+    name: "FIFA WORLD CUP",
+    tagline: "official highlights & classic WC moments",
+    category: "Sports",
+    color: "var(--neon-green)",
+    videos: [
+      "sCMRkFYJM0I", // 2022 WC Final highlights
+      "kHFoCxsyIhU", // Best World Cup Goals
+      "yRQ20LZ5VJE", // World Cup 2022 best moments
+      "1GUMnQ14LQg", // FIFA World Cup official
+      "R5fC1rW9VQI", // 2014 WC Final
+    ],
+  },
+  {
+    id: "f1-live",
+    number: "42",
+    name: "FORMULA 1",
+    tagline: "races, highlights & onboard battles",
+    category: "Sports",
+    color: "var(--neon-red, #ef4444)",
+    videos: [
+      "Z5HEpobnqR4", // F1 best overtakes 2024
+      "kOAKF-BR6PE", // F1 2024 season highlights
+      "4CTyNdC7gug", // F1 greatest races
+      "7dVpDBJ4x_s", // F1 fastest laps
+    ],
+  },
+  {
+    id: "cricket",
+    number: "43",
+    name: "CRICKET ZONE",
+    tagline: "world cup highlights & classic innings",
+    category: "Sports",
+    color: "var(--neon-amber)",
+    videos: [
+      "YKcT7GZ0kMQ", // Cricket World Cup 2023 highlights
+      "QFMq24YkLhU", // Best cricket moments
+      "tqJ0k5Cz8V8", // Greatest cricket innings
+      "w1o6wVnCbLk", // T20 World Cup best
+    ],
+  },
+  {
+    id: "ucl",
+    number: "44",
+    name: "CHAMPIONS LEAGUE",
+    tagline: "UEFA classic matches & goals",
+    category: "Sports",
+    color: "var(--neon-cyan)",
+    videos: [
+      "a4dHlIFRk0k", // UCL best goals
+      "qhkEJwHqT2I", // Champions League highlights
+      "YKVfJpDQnRo", // UCL finals compilations
+    ],
+  },
+);

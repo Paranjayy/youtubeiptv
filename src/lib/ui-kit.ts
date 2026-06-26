@@ -191,4 +191,5 @@ export const ROUTE_COLORS = {
   "/roadmap": { label: "Roadmap", emoji: "🗺️", neon: "oklch(0.72 0.16 305)" },
   "/reader": { label: "Reader", emoji: "📖", neon: "oklch(0.86 0.16 72)" },
   "/": { label: "TV", emoji: "📺", neon: "oklch(0.82 0.18 152)" },
+  "/sports": { label: "Sports", emoji: "🏆", neon: "oklch(0.82 0.18 152)" },
 } as const;

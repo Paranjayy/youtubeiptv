@@ -41,6 +41,7 @@ import { Guide } from "@/components/tv/Guide";
 import { Ticker } from "@/components/tv/Ticker";
 import { Clock } from "@/components/tv/Clock";
 import { Schedule } from "@/components/tv/Schedule";
+import { ScheduleGrid } from "@/components/tv/ScheduleGrid";
 import { CrtBoot } from "@/components/tv/CrtBoot";
 import { AmbientSounds } from "@/components/tv/AmbientSounds";
 import { SleepTimer } from "@/components/tv/SleepTimer";
@@ -85,6 +86,7 @@ import {
   Loader2,
   PanelLeft,
   MapPin,
+  Trophy,
 } from "lucide-react";
 
 type TubeTVPageProps = {
@@ -1208,6 +1210,16 @@ export function TubeTVPage({
         },
       },
       {
+        id: "route-sports",
+        title: "Sports Desk",
+        subtitle: "FIFA World Cup, F1, Cricket — live HLS streams",
+        kind: "route",
+        run: () => {
+          setJumpOpen(false);
+          void navigate({ to: "/sports" });
+        },
+      },
+      {
         id: "route-discover",
         title: "Discovery Desk",
         subtitle: "News, wiki, and artist trail",
@@ -1680,6 +1692,7 @@ export function TubeTVPage({
                     { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
                     { to: "/wordle", icon: BookOpen, label: "Word", color: "oklch(0.82 0.18 152)" },
                     { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
+                    { to: "/sports", icon: Trophy, label: "Sport", color: "oklch(0.82 0.18 152)" },
                     { to: "/roadmap", icon: Map, label: "Map", color: "oklch(0.72 0.16 305)" },
                     { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
                   ] as const
@@ -3090,12 +3103,20 @@ export function TubeTVPage({
                 </div>
 
                 {mode === "yt" && (
-                  <Schedule
-                    channel={channel}
-                    order={q.order}
-                    cursor={q.cursor}
-                    currentDuration={duration}
-                    currentElapsed={elapsed}
+                  <ScheduleGrid
+                    currentChannelId={channel.id}
+                    onPickChannel={(ch) => {
+                      const idx = CHANNELS.findIndex((c) => c.id === ch.id);
+                      if (idx >= 0) {
+                        setChannelIdx(idx);
+                        setTitle("");
+                        setElapsed(0);
+                        setDuration(0);
+                        setMode("yt");
+                        pushHistory(makeYtHistoryEntry(ch));
+                        void navigate({ to: getChannelPath(ch), replace: true });
+                      }
+                    }}
                   />
                 )}
               </>
