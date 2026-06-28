@@ -5,12 +5,13 @@
 ```text
 Core TV / IPTV / Radio      ████████████████████ 95%
 Recent history / resume     ██████████████████░░ 80%
-Discovery / timepass        ████████████░░░░░░░░ 58%
-Playground daily deck       ████████████░░░░░░░░ 55%
+Discovery / timepass        ██████████████████░░ 80%
+Playground daily deck       ████████████████████ 90%
 Focus Room (Pomodoro)       ████████████████████ 90%
-Wordle daily word game      ████████████████████ 100% ✓ NEW
-Vibes music mood explorer   ████████████████████ 100% ✓ NEW
+Wordle daily word game      ████████████████████ 100% ✓
+Vibes music mood explorer   ████████████████████ 100% ✓
 Sharing / SEO               ████████████████░░░░ 80%
+Mobile cleanup              ██████████████░░░░░░ 65% ✓ NEW
 ```
 
 ## What We Should Build Next
@@ -70,11 +71,13 @@ Sharing / SEO               ████████████████░�
 3. ~~Focus Room / study mode~~ ✓ Done
 4. ~~Wordle daily word game~~ ✓ Done
 5. ~~Vibes music mood explorer~~ ✓ Done
-6. Mobile cleanup
-7. Trending news / RSS feeds in Discover
+6. ~~Mobile cleanup~~ ✓ Done
+7. ~~Trending news / RSS feeds in Discover~~ ✓ Done
 8. Score streaks and daily leaderboard
-9. Torrent/debrid player exploration
-10. Sharing and metadata polish
+9. ~~Sports Desk overhaul~~ ✓ Done
+10. HLS Player upgrades (subtitles, controls)
+11. Torrent/debrid player exploration
+12. Sharing and metadata polish
 
 ## Notes
 

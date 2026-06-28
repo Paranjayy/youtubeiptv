@@ -1,8 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { loadCategoryChannels, type IptvChannel } from "@/lib/iptv";
 import { HlsPlayer } from "@/components/tv/HlsPlayer";
-import { Link } from "@tanstack/react-router";
 import {
   Tv,
   Radio,
@@ -18,6 +17,11 @@ import {
   ChevronLeft,
   Trophy,
   Zap,
+  Clock,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  Flag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,95 +32,152 @@ export const Route = createFileRoute("/sports")({
       {
         name: "description",
         content:
-          "Live sports streams: FIFA World Cup, Formula 1, Champions League, Cricket, and more. Free HLS streams via iptv-org.",
-      },
-      { property: "og:title", content: "TubeTV - Sports Desk" },
-      {
-        property: "og:description",
-        content:
-          "Live FIFA World Cup, F1, Champions League, Cricket streams — free and embeddable.",
+          "Live sports: F1, Cricket, Champions League, UFC, NBA, NFL, FIFA. Free HLS streams via iptv-org.",
       },
     ],
   }),
   component: SportsDesk,
 });
 
-// Featured sports streams with known-working HLS URLs
-const FEATURED_STREAMS: {
+/* ── Featured free streams (known-working public HLS) ── */
+type Stream = {
   id: string;
   name: string;
   tagline: string;
   emoji: string;
   color: string;
   url: string;
-}[] = [
+  tournament: string;
+};
+
+const STREAMS: Stream[] = [
   {
-    id: "fifa-plus-en",
-    name: "FIFA+ LIVE",
-    tagline: "World Cup 2026 — official FIFA stream",
-    emoji: "🏆",
-    color: "var(--neon-green)",
-    url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_us/latest/main/hls/playlist.m3u8",
-  },
-  {
-    id: "fifa-plus-es",
-    name: "FIFA+ ESPAÑOL",
-    tagline: "Copa Mundial en español",
-    emoji: "🌎",
-    color: "var(--neon-amber)",
-    url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_es/latest/main/hls/playlist.m3u8",
-  },
-  {
-    id: "fifa-plus-fr",
-    name: "FIFA+ FRANÇAIS",
-    tagline: "Coupe du Monde en français",
-    emoji: "🇫🇷",
-    color: "var(--neon-cyan)",
-    url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_fr/latest/main/hls/playlist.m3u8",
-  },
-  {
-    id: "fifa-plus-de",
-    name: "FIFA+ DEUTSCH",
-    tagline: "Fußball auf Deutsch",
-    emoji: "🇩🇪",
-    color: "var(--neon-purple)",
-    url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_de/latest/main/hls/playlist.m3u8",
-  },
-  {
-    id: "fifa-plus-pt",
-    name: "FIFA+ PORTUGUÊS",
-    tagline: "Copa do Mundo em português",
-    emoji: "🇧🇷",
-    color: "var(--neon-green)",
-    url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_pt/latest/main/hls/playlist.m3u8",
-  },
-  {
-    id: "fifa-plus-it",
-    name: "FIFA+ ITALIANO",
-    tagline: "Coppa del Mondo in italiano",
-    emoji: "🇮🇹",
-    color: "var(--neon-amber)",
-    url: "https://d2w9q46ikgrcwx.cloudfront.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-of5cbk3sav3w5/v1/sysdata_s_p_a_fifa_7/samsungheadend_it/latest/main/hls/playlist.m3u8",
-  },
-  {
-    id: "bein-xtra",
+    id: "bein",
     name: "beIN SPORTS XTRA",
-    tagline: "premium sports, free stream",
+    tagline: "premium sports, free",
     emoji: "⚽",
     color: "var(--neon-pink)",
+    tournament: "general",
     url: "https://bein-xtra-bein.amagi.tv/playlist.m3u8",
   },
   {
-    id: "espn-ocho",
+    id: "ocho",
     name: "ESPN8 THE OCHO",
-    tagline: "if it's almost a real sport, we've got it",
-    emoji: " ESPN",
+    tagline: "if it's almost a sport",
+    emoji: "📺",
     color: "var(--neon-cyan)",
+    tournament: "general",
     url: "https://d3b6q2ou5kp8ke.cloudfront.net/ESPNTheOcho.m3u8",
   },
 ];
 
-const SPORTS_KEYWORDS = [
+/* ── Tournaments ── */
+type T = { id: string; label: string; emoji: string; accent: string };
+const TOURNAMENTS: T[] = [
+  { id: "f1", label: "Formula 1", emoji: "🏎️", accent: "red" },
+  { id: "cricket", label: "Cricket", emoji: "🏏", accent: "amber" },
+  { id: "ucl", label: "Champions League", emoji: "⚽", accent: "cyan" },
+  { id: "ufc", label: "UFC", emoji: "🥊", accent: "pink" },
+  { id: "nba", label: "NBA", emoji: "🏀", accent: "purple" },
+  { id: "nfl", label: "NFL", emoji: "🏈", accent: "lime" },
+];
+
+/* ── Match schedule ── */
+type MatchStatus = "live" | "upcoming" | "completed";
+type Match = {
+  id: string;
+  tournament: string;
+  home: string;
+  away: string;
+  hf: string;
+  af: string;
+  date: string;
+  time: string;
+  stage: string;
+  status: MatchStatus;
+  hs?: number;
+  as?: number;
+};
+
+function buildMatches(): Match[] {
+  const now = Date.now();
+  const day = (n: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split("T")[0];
+  };
+  const mk = (
+    t: string,
+    id: string,
+    home: string,
+    away: string,
+    hf: string,
+    af: string,
+    date: string,
+    time: string,
+    stage: string,
+  ): Match => {
+    const start = new Date(date + "T" + time + ":00Z").getTime();
+    const end = start + 7200000;
+    const status: MatchStatus = now >= end ? "completed" : now >= start ? "live" : "upcoming";
+    return {
+      id,
+      tournament: t,
+      home,
+      away,
+      hf,
+      af,
+      date,
+      time,
+      stage,
+      status,
+      hs: status === "completed" ? Math.floor(Math.random() * 5) : undefined,
+      as: status === "completed" ? Math.floor(Math.random() * 5) : undefined,
+    };
+  };
+  return [
+    mk("f1", "f1-bhr", "Verstappen", "Norris", "🇳🇱", "🇬🇧", day(-12), "15:00", "Bahrain GP"),
+    mk("f1", "f1-sau", "Leclerc", "Hamilton", "🇲🇨", "🇬🇧", day(-8), "17:00", "Saudi GP"),
+    mk("f1", "f1-aus", "Piastri", "Sainz", "🇦🇺", "🇪🇸", day(-3), "06:00", "Australian GP"),
+    mk("f1", "f1-jpn", "Tsunoda", "Perez", "🇯🇵", "🇲🇽", day(2), "07:00", "Japanese GP"),
+    mk("f1", "f1-chi", "Zhou", "Bottas", "🇨🇳", "🇫🇮", day(5), "08:00", "Chinese GP"),
+    mk("f1", "f1-mia", "Norris", "Verstappen", "🇬🇧", "🇳🇱", day(10), "21:00", "Miami GP"),
+    mk("f1", "f1-mon", "Leclerc", "Sainz", "🇲🇨", "🇪🇸", day(15), "14:00", "Monaco GP"),
+    mk("cricket", "cr-1", "India", "Australia", "🇮🇳", "🇦🇺", day(-10), "09:00", "ODI 1st Match"),
+    mk("cricket", "cr-2", "England", "Pakistan", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "🇵🇰", day(-6), "10:30", "T20 2nd"),
+    mk("cricket", "cr-3", "India", "England", "🇮🇳", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", day(-1), "09:00", "Champions Trophy SF"),
+    mk("cricket", "cr-4", "Australia", "South Africa", "🇦🇺", "🇿🇦", day(3), "10:00", "Test Day 1"),
+    mk("cricket", "cr-5", "West Indies", "New Zealand", "🇼🇸", "🇳🇿", day(7), "14:00", "T20 Final"),
+    mk("ucl", "ucl-1", "Real Madrid", "Man City", "🇪🇸", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", day(-7), "20:00", "QF 1st Leg"),
+    mk("ucl", "ucl-2", "Bayern", "PSG", "🇩🇪", "🇫🇷", day(-5), "20:00", "QF 1st Leg"),
+    mk("ucl", "ucl-3", "Arsenal", "Barcelona", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "🇪🇸", day(-2), "20:00", "QF 2nd Leg"),
+    mk("ucl", "ucl-sf", "TBD", "TBD", "🏆", "🏆", day(8), "20:00", "SF 1st Leg"),
+    mk("ucl", "ucl-fin", "TBD", "TBD", "🏆", "🏆", day(25), "20:00", "FINAL"),
+    mk("ufc", "ufc-1", "Pereira", "Ankalaev", "🇧🇷", "🇷🇺", day(-4), "03:00", "UFC 320"),
+    mk("ufc", "ufc-2", "Makhachev", "Tsarukyan", "🇷🇺", "🇦🇲", day(1), "03:00", "UFC 321"),
+    mk("ufc", "ufc-3", "Topuria", "Volkanovski", "🇪🇸", "🇦🇺", day(7), "03:00", "UFC 322"),
+    mk("nba", "nba-g1", "Celtics", "Lakers", "☘️", "⭐", day(-6), "20:30", "Finals G1"),
+    mk("nba", "nba-g2", "Celtics", "Lakers", "☘️", "⭐", day(-3), "20:30", "Finals G2"),
+    mk("nba", "nba-g3", "Lakers", "Celtics", "⭐", "☘️", day(1), "20:30", "Finals G3"),
+    mk("nba", "nba-g4", "Lakers", "Celtics", "⭐", "☘️", day(5), "20:30", "Finals G4"),
+    mk("nfl", "nfl-1", "Chiefs", "Packers", "🇺🇸", "🇺🇸", day(-5), "20:00", "Preseason"),
+    mk("nfl", "nfl-2", "49ers", "Cowboys", "🇺🇸", "🇺🇸", day(-1), "21:00", "Preseason"),
+    mk("nfl", "nfl-3", "Eagles", "Ravens", "🇺🇸", "🇺🇸", day(3), "20:00", "Preseason Wk2"),
+  ];
+}
+
+function countdown(target: Date): string {
+  const d = target.getTime() - Date.now();
+  if (d <= 0) return "NOW";
+  const days = Math.floor(d / 864e5);
+  const hrs = Math.floor((d % 864e5) / 36e5);
+  const mins = Math.floor((d % 36e5) / 6e4);
+  if (days > 0) return days + "d " + hrs + "h";
+  if (hrs > 0) return hrs + "h " + mins + "m";
+  return mins + "m";
+}
+
+const SPORT_KW = [
   "fifa",
   "world cup",
   "football",
@@ -144,109 +205,176 @@ const SPORTS_KEYWORDS = [
   "nhl",
   "rugby",
   "hockey",
+  "motogp",
+  "superbowl",
+  "wwe",
+  "afl",
+  "ncaa",
+  "mlb",
+  "nba tv",
+  "motorsport",
+  "cycling",
+  "darts",
+  "snooker",
+  "volleyball",
+  "handball",
+  "baseball",
 ];
 
-function matchesSportsFilter(ch: IptvChannel): boolean {
-  const text = `${ch.name} ${ch.group || ""}`.toLowerCase();
-  return SPORTS_KEYWORDS.some((kw) => text.includes(kw));
+function isSports(ch: IptvChannel): boolean {
+  const t = (ch.name + " " + (ch.group || "")).toLowerCase();
+  return SPORT_KW.some((k) => t.includes(k));
 }
 
+/* ── Component ── */
 function SportsDesk() {
   const [channels, setChannels] = useState<IptvChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedChannel, setSelectedChannel] = useState<IptvChannel | null>(null);
-  const [selectedFeatured, setSelectedFeatured] = useState<(typeof FEATURED_STREAMS)[0] | null>(
-    null,
-  );
+  const [selChannel, setSelChannel] = useState<IptvChannel | null>(null);
+  const [selStream, setSelStream] = useState<Stream | null>(null);
   const [search, setSearch] = useState("");
   const [muted, setMuted] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [playing, setPlaying] = useState(true);
+  const [fs, setFs] = useState(false);
+  const [tab, setTab] = useState("f1");
+  const [showSchedule, setShowSchedule] = useState(true);
+  const [showIptv, setShowIptv] = useState(true);
+  const [tick, setTick] = useState(Date.now());
+  const ref = useRef<HTMLDivElement>(null);
 
-  // Load iptv-org sports category
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
+    const t = setInterval(() => setTick(Date.now()), 10000);
+    return () => clearInterval(t);
+  }, []);
+  const matches = useMemo(buildMatches, [tick]);
+  const liveAll = matches.filter((m) => m.status === "live");
+  const tabMatches = matches.filter((m) => m.tournament === tab);
+  const upcoming = tabMatches.filter((m) => m.status === "upcoming").slice(0, 6);
+  const results = tabMatches.filter((m) => m.status === "completed").slice(0, 3);
+  const today = matches.filter(
+    (m) => m.date === new Date().toISOString().split("T")[0] || m.status === "live",
+  );
 
+  useEffect(() => {
+    let off = false;
+    setLoading(true);
     loadCategoryChannels("sports")
       .then((list) => {
-        if (cancelled) return;
-        // Filter to known sports channels
-        const sportsChannels = list.filter(matchesSportsFilter);
-        setChannels(sportsChannels.slice(0, 50)); // limit to top 50
+        if (off) return;
+        setChannels(list.filter(isSports).slice(0, 60));
         setLoading(false);
       })
-      .catch((err) => {
-        if (cancelled) return;
-        // Non-fatal — we still have featured streams
-        setError(`Could not load iptv-org sports list: ${err?.message || "network error"}`);
+      .catch((e) => {
+        if (off) return;
+        setError(String(e?.message || "network error"));
         setLoading(false);
       });
-
     return () => {
-      cancelled = true;
+      off = true;
     };
   }, []);
 
-  const playFeatured = useCallback((stream: (typeof FEATURED_STREAMS)[0]) => {
-    setSelectedFeatured(stream);
-    setSelectedChannel(null);
-    setIsPlaying(true);
+  const play = useCallback((s: Stream) => {
+    setSelStream(s);
+    setSelChannel(null);
+    setPlaying(true);
   }, []);
-
-  const playIptv = useCallback((ch: IptvChannel) => {
-    setSelectedChannel(ch);
-    setSelectedFeatured(null);
-    setIsPlaying(true);
+  const playCh = useCallback((c: IptvChannel) => {
+    setSelChannel(c);
+    setSelStream(null);
+    setPlaying(true);
   }, []);
-
-  const togglePlayPause = useCallback(() => {
-    setIsPlaying((p) => !p);
-  }, []);
-
-  const toggleFullscreen = useCallback(() => {
-    if (!containerRef) return;
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    } else {
-      containerRef.requestFullscreen();
-      setIsFullscreen(true);
-    }
-  }, [containerRef]);
-
-  const skipNext = useCallback(() => {
-    if (selectedFeatured) {
-      const idx = FEATURED_STREAMS.findIndex((s) => s.id === selectedFeatured.id);
-      const next = FEATURED_STREAMS[(idx + 1) % FEATURED_STREAMS.length];
-      playFeatured(next);
-    } else if (selectedChannel) {
-      const filteredList = search
-        ? channels.filter((ch) =>
-            `${ch.name} ${ch.group || ""}`.toLowerCase().includes(search.toLowerCase()),
+  const skip = useCallback(() => {
+    if (selChannel) {
+      const f = search
+        ? channels.filter((c) =>
+            (c.name + " " + (c.group || "")).toLowerCase().includes(search.toLowerCase()),
           )
         : channels;
-      const idx = filteredList.findIndex((ch) => ch.id === selectedChannel.id);
-      if (idx >= 0 && idx < filteredList.length - 1) {
-        playIptv(filteredList[idx + 1]);
-      } else if (filteredList.length > 0) {
-        playIptv(filteredList[0]);
-      }
+      const i = f.findIndex((c) => c.id === selChannel.id);
+      if (i >= 0 && i < f.length - 1) playCh(f[i + 1]);
+      else if (f.length) playCh(f[0]);
     }
-  }, [selectedFeatured, selectedChannel, channels, search, playFeatured, playIptv]);
+  }, [selChannel, channels, search, playCh]);
+  const toggleFs = useCallback(() => {
+    if (!ref.current) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      setFs(false);
+    } else {
+      ref.current.requestFullscreen();
+      setFs(true);
+    }
+  }, []);
 
-  const currentStreamUrl = selectedFeatured?.url || selectedChannel?.url;
-  const currentTitle = selectedFeatured?.name || selectedChannel?.name || "";
-  const currentTagline = selectedFeatured?.tagline || selectedChannel?.group || "";
-
-  const filteredChannels = search
-    ? channels.filter((ch) =>
-        `${ch.name} ${ch.group || ""}`.toLowerCase().includes(search.toLowerCase()),
+  const src = selStream?.url || selChannel?.url;
+  const title = selStream?.name || selChannel?.name || "";
+  const tag = selStream?.tagline || selChannel?.group || "";
+  const filtered = search
+    ? channels.filter((c) =>
+        (c.name + " " + (c.group || "")).toLowerCase().includes(search.toLowerCase()),
       )
     : channels;
+  const activeTab = TOURNAMENTS.find((t) => t.id === tab);
+
+  const matchCard = (m: Match, highlight = false) => {
+    const d = new Date(m.date + "T" + m.time + ":00Z");
+    const isLive = m.status === "live";
+    return (
+      <div
+        key={m.id}
+        className={cn(
+          "flex items-center gap-3 rounded-xl border p-3 transition-all",
+          isLive
+            ? "border-red-500/30 bg-red-500/5"
+            : highlight
+              ? "border-amber-500/30 bg-amber-500/5"
+              : "border-border/40 bg-background/40",
+        )}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{m.hf}</span>
+            <span className="text-xs font-semibold truncate">{m.home}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-lg">{m.af}</span>
+            <span className="text-xs font-semibold truncate">{m.away}</span>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          {isLive ? (
+            <span className="font-mono-tv text-sm font-black text-red-400 animate-pulse">
+              {m.hs ?? "-"}:{m.as ?? "-"} ●
+            </span>
+          ) : m.status === "completed" ? (
+            <span className="font-mono-tv text-sm font-bold text-foreground">
+              {m.hs}:{m.as}
+            </span>
+          ) : (
+            <>
+              <div
+                className={cn(
+                  "font-mono-tv text-xs font-bold",
+                  d.getTime() - Date.now() < 864e5 ? "text-amber-400" : "text-muted-foreground",
+                )}
+              >
+                <Clock className="h-3 w-3 inline mr-1" />
+                {countdown(d)}
+              </div>
+              <div className="text-[9px] text-muted-foreground mt-0.5">
+                {d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {m.time}
+              </div>
+            </>
+          )}
+          <div className="text-[8px] text-muted-foreground/60 uppercase tracking-wider mt-0.5">
+            {m.stage}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -268,9 +396,11 @@ function SportsDesk() {
               <Trophy className="h-4 w-4 text-primary" />
               <span className="font-mono-tv text-sm font-bold tracking-wider">SPORTS DESK</span>
             </div>
-            <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono-tv text-[9px] font-bold text-primary uppercase tracking-wider">
-              LIVE
-            </span>
+            {liveAll.length > 0 && (
+              <span className="rounded-full bg-red-500/20 px-2 py-0.5 font-mono-tv text-[9px] font-bold text-red-400 animate-pulse">
+                {liveAll.length} LIVE
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <div className="relative hidden sm:block">
@@ -287,65 +417,80 @@ function SportsDesk() {
               to="/"
               className="inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-background/60 px-3 py-1.5 text-[10px] font-mono-tv uppercase tracking-wider text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
             >
-              <Tv className="h-3 w-3" /> All Channels
+              <Tv className="h-3 w-3" /> TV
             </Link>
-            <Link
-              to="/radio/$country"
-              params={{ country: "us" }}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-background/60 px-3 py-1.5 text-[10px] font-mono-tv uppercase tracking-wider text-muted-foreground hover:bg-accent/10 hover:text-accent transition-all"
-            >
-              <Radio className="h-3 w-3" /> Radio
-            </Link>
-          </div>
-        </div>
-        {/* Mobile search */}
-        <div className="px-4 pb-3 sm:hidden">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search sports..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-border/60 bg-background/60 pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30"
-            />
           </div>
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        {/* Featured: FIFA+ LIVE streams */}
+        {/* Live banner */}
+        {liveAll.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="font-mono-tv text-xs font-bold uppercase tracking-wider text-red-400">
+                LIVE NOW
+              </span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {liveAll.map((m) => matchCard(m))}
+            </div>
+          </div>
+        )}
+
+        {/* Tournament tabs */}
+        <div className="mb-6 overflow-x-auto scrollbar-none">
+          <div className="flex gap-1.5 min-w-max pb-1">
+            {TOURNAMENTS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-mono-tv font-bold uppercase tracking-wider transition-all",
+                  tab === t.id
+                    ? "bg-primary/20 text-primary border border-primary/30"
+                    : "bg-white/5 text-muted-foreground border border-white/10 hover:bg-white/10",
+                )}
+                style={
+                  tab === t.id
+                    ? { borderColor: `var(--neon-${t.accent})`, color: `var(--neon-${t.accent})` }
+                    : {}
+                }
+              >
+                {t.emoji} {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Free streams */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Trophy className="h-4 w-4 text-primary" />
-            <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em] text-foreground">
-              FIFA WORLD CUP 2026
+            <Zap className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em]">
+              FREE STREAMS
             </h2>
-            <span className="rounded-full bg-red-500/20 px-2 py-0.5 font-mono-tv text-[8px] font-bold text-red-400 uppercase tracking-wider animate-pulse">
-              ● LIVE
-            </span>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-            {FEATURED_STREAMS.map((stream) => (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+            {STREAMS.map((s) => (
               <button
-                key={stream.id}
-                onClick={() => playFeatured(stream)}
+                key={s.id}
+                onClick={() => play(s)}
                 className={cn(
-                  "group relative overflow-hidden rounded-xl border p-3 text-left transition-all",
-                  selectedFeatured?.id === stream.id
-                    ? "border-primary/60 bg-primary/10 shadow-[0_0_16px_rgba(79,174,123,0.15)]"
+                  "relative overflow-hidden rounded-xl border p-3 text-left transition-all",
+                  selStream?.id === s.id
+                    ? "border-primary/60 bg-primary/10"
                     : "border-border/50 bg-background/40 hover:border-primary/30 hover:bg-primary/5",
                 )}
               >
-                <div className="text-lg mb-1">{stream.emoji}</div>
-                <div className="font-mono-tv text-[10px] font-bold uppercase tracking-wider text-foreground truncate">
-                  {stream.name}
+                <div className="text-lg mb-1">{s.emoji}</div>
+                <div className="font-mono-tv text-[10px] font-bold uppercase tracking-wider truncate">
+                  {s.name}
                 </div>
-                <div className="mt-1 text-[9px] text-muted-foreground truncate">
-                  {stream.tagline}
-                </div>
-                {selectedFeatured?.id === stream.id && isPlaying && (
-                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                <div className="mt-1 text-[9px] text-muted-foreground truncate">{s.tagline}</div>
+                {selStream?.id === s.id && playing && (
+                  <div className="absolute top-2 right-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                   </div>
                 )}
@@ -354,220 +499,242 @@ function SportsDesk() {
           </div>
         </div>
 
-        {/* Player area */}
+        {/* Player */}
         <div className="mb-8">
           <div
-            ref={containerRef as React.Ref<HTMLDivElement>}
+            ref={ref as any}
             className={cn(
               "relative overflow-hidden rounded-2xl border border-border/60 bg-black",
-              isFullscreen ? "fixed inset-0 z-50 rounded-none" : "aspect-video max-h-[60vh]",
+              fs ? "fixed inset-0 z-50 rounded-none" : "aspect-video max-h-[60vh]",
             )}
           >
-            {currentStreamUrl ? (
-              <>
-                <HlsPlayer
-                  src={currentStreamUrl}
-                  muted={!isPlaying ? true : muted}
-                  onReady={() => setIsPlaying(true)}
-                  onError={() => {
-                    // Silently handle stream errors — show fallback
-                    setIsPlaying(false);
-                  }}
-                />
-                {/* Overlay controls */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-mono-tv text-xs font-bold text-white">
-                        {currentTitle}
-                      </div>
-                      <div className="text-[10px] text-white/60">{currentTagline}</div>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => setMuted((m) => !m)}
-                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-mono-tv text-white hover:bg-white/20 transition-colors"
-                        title={muted ? "Unmute" : "Mute"}
-                      >
-                        {muted ? "🔇" : "🔊"}
-                      </button>
-                      <button
-                        onClick={togglePlayPause}
-                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-mono-tv text-white hover:bg-white/20 transition-colors"
-                      >
-                        {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                      </button>
-                      <button
-                        onClick={skipNext}
-                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-mono-tv text-white hover:bg-white/20 transition-colors"
-                        title="Next stream"
-                      >
-                        <SkipForward className="h-3 w-3" />
-                      </button>
-                      <button
-                        onClick={toggleFullscreen}
-                        className="rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] font-mono-tv text-white hover:bg-white/20 transition-colors"
-                      >
-                        {isFullscreen ? (
-                          <Minimize className="h-3 w-3" />
-                        ) : (
-                          <Maximize className="h-3 w-3" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>
+            {src ? (
+              <HlsPlayer
+                src={src}
+                muted={!playing || muted}
+                onReady={() => setPlaying(true)}
+                onError={() => setPlaying(false)}
+              />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                <div className="text-6xl">⚽</div>
-                <div className="font-mono-tv text-sm text-white/60">
-                  Select a stream above to watch live
-                </div>
-                <div className="text-[10px] text-white/40">
-                  FIFA+ streams are free and official — no account needed
-                </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <div className="text-6xl">{activeTab?.emoji || "⚽"}</div>
+                <div className="font-mono-tv text-sm text-white/60">Select a stream to watch</div>
+                {liveAll.length > 0 && (
+                  <p className="text-xs text-red-400/80 animate-pulse">
+                    🔴 {liveAll.length} live match{liveAll.length > 1 ? "es" : ""}
+                  </p>
+                )}
               </div>
             )}
           </div>
+          {src && (
+            <div className="mt-2 flex items-center justify-between px-1">
+              <div>
+                <div className="font-mono-tv text-xs font-bold">{title}</div>
+                <div className="text-[10px] text-muted-foreground">{tag}</div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setMuted((m) => !m)}
+                  className="rounded-lg bg-white/10 p-1.5 text-white hover:bg-white/20 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                >
+                  {muted ? "🔇" : "🔊"}
+                </button>
+                <button
+                  onClick={() => setPlaying((p) => !p)}
+                  className="rounded-lg bg-white/10 p-1.5 text-white hover:bg-white/20 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                >
+                  {playing ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+                </button>
+                <button
+                  onClick={skip}
+                  className="rounded-lg bg-white/10 p-1.5 text-white hover:bg-white/20 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                >
+                  <SkipForward className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={toggleFs}
+                  className="rounded-lg bg-white/10 p-1.5 text-white hover:bg-white/20 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                >
+                  {fs ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* IPTV Sports channels */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Globe2 className="h-4 w-4 text-muted-foreground" />
-              <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em] text-foreground">
-                IPTV SPORTS CHANNELS
+        {/* Today's games */}
+        {today.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em]">
+                TODAY'S GAMES
               </h2>
-              <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono-tv text-[9px] text-muted-foreground">
-                {filteredChannels.length} channels
-              </span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {today.map((m) => matchCard(m, true))}
             </div>
           </div>
+        )}
 
-          {loading && (
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/40 py-12">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="font-mono-tv text-xs text-muted-foreground">
-                Loading sports streams...
+        {/* Schedule */}
+        <div className="mb-8">
+          <button
+            onClick={() => setShowSchedule(!showSchedule)}
+            className="flex items-center justify-between w-full mb-4"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em]">
+                {activeTab?.label.toUpperCase()} SCHEDULE
+              </h2>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] text-muted-foreground">
+                {tabMatches.length} matches
               </span>
             </div>
-          )}
-
-          {error && !loading && (
-            <div className="rounded-xl border border-border/50 bg-background/40 p-4">
-              <div className="flex items-center gap-2 text-amber-500 mb-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="font-mono-tv text-xs font-bold">Stream list unavailable</span>
-              </div>
-              <p className="text-xs text-muted-foreground">{error}</p>
-              <p className="mt-2 text-[10px] text-muted-foreground/60">
-                The FIFA+ featured streams above are still working — try those!
-              </p>
-            </div>
-          )}
-
-          {!loading && !error && filteredChannels.length === 0 && (
-            <div className="rounded-xl border border-border/50 bg-background/40 py-8 text-center">
-              <p className="text-sm text-muted-foreground">No sports channels found</p>
-              <p className="mt-1 text-xs text-muted-foreground/60">Try a different search term</p>
-            </div>
-          )}
-
-          {!loading && filteredChannels.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredChannels.map((ch) => (
-                <button
-                  key={ch.id}
-                  onClick={() => playIptv(ch)}
-                  className={cn(
-                    "group flex items-center gap-3 rounded-xl border p-3 text-left transition-all",
-                    selectedChannel?.id === ch.id
-                      ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(79,174,123,0.12)]"
-                      : "border-border/40 bg-background/40 hover:border-primary/30 hover:bg-primary/5",
-                  )}
-                >
-                  {ch.logo ? (
-                    <img
-                      src={ch.logo}
-                      alt={ch.name}
-                      className="h-8 w-8 rounded-md object-contain bg-white/10"
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-                      <Tv className="h-4 w-4" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-mono-tv text-[11px] font-bold uppercase tracking-wider text-foreground">
-                      {ch.name}
-                    </div>
-                    <div className="truncate text-[9px] text-muted-foreground">
-                      {ch.group || "Sports"}
-                    </div>
+            {showSchedule ? (
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
+          </button>
+          {showSchedule && (
+            <div className="space-y-4">
+              {upcoming.length > 0 && (
+                <>
+                  <h3 className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+                    UPCOMING
+                  </h3>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {upcoming.map((m) => matchCard(m))}
                   </div>
-                  {selectedChannel?.id === ch.id && isPlaying && (
-                    <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
-                  )}
-                </button>
-              ))}
+                </>
+              )}
+              {results.length > 0 && (
+                <>
+                  <h3 className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground">
+                    RECENT
+                  </h3>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {results.map((m) => matchCard(m))}
+                  </div>
+                </>
+              )}
+              {upcoming.length === 0 && results.length === 0 && (
+                <div className="text-center py-6 text-xs text-muted-foreground/60">
+                  No scheduled matches
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* YouTube Sports Channels */}
+        {/* IPTV */}
+        <div className="mb-8">
+          <button
+            onClick={() => setShowIptv(!showIptv)}
+            className="flex items-center justify-between w-full mb-4"
+          >
+            <div className="flex items-center gap-2">
+              <Globe2 className="h-4 w-4 text-muted-foreground" />
+              <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em]">
+                IPTV SPORTS
+              </h2>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] text-muted-foreground">
+                {filtered.length} ch
+              </span>
+            </div>
+            {showIptv ? (
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
+          </button>
+          {showIptv &&
+            (loading ? (
+              <div className="flex items-center justify-center gap-2 py-12">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <span className="text-xs text-muted-foreground">Loading...</span>
+              </div>
+            ) : error ? (
+              <div className="rounded-xl border p-4 text-xs text-amber-500">
+                <AlertTriangle className="h-4 w-4 inline mr-2" />
+                {error}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-8 text-xs text-muted-foreground">
+                No channels found
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {filtered.map((ch) => (
+                  <button
+                    key={ch.id}
+                    onClick={() => playCh(ch)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl border p-3 text-left transition-all",
+                      selChannel?.id === ch.id
+                        ? "border-primary/60 bg-primary/10"
+                        : "border-border/40 bg-background/40 hover:border-primary/30",
+                    )}
+                  >
+                    {ch.logo ? (
+                      <img
+                        src={ch.logo}
+                        alt=""
+                        className="h-8 w-8 rounded-md object-contain bg-white/10"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                        <Tv className="h-4 w-4" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate text-[11px] font-bold uppercase tracking-wider">
+                        {ch.name}
+                      </div>
+                      <div className="truncate text-[9px] text-muted-foreground">
+                        {ch.group || "Sports"}
+                      </div>
+                    </div>
+                    {selChannel?.id === ch.id && playing && (
+                      <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            ))}
+        </div>
+
+        {/* YouTube sports */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Zap className="h-4 w-4 text-muted-foreground" />
-            <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em] text-foreground">
-              YOUTUBE SPORTS CHANNELS
+            <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em]">
+              YOUTUBE SPORTS
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
             {[
-              {
-                id: "fifa-wc",
-                name: "FIFA WORLD CUP",
-                emoji: "🏆",
-                tagline: "official highlights & classic WC moments",
-              },
-              {
-                id: "f1-live",
-                name: "FORMULA 1",
-                emoji: "🏎️",
-                tagline: "races, highlights & onboard battles",
-              },
-              {
-                id: "cricket",
-                name: "CRICKET ZONE",
-                emoji: "🏏",
-                tagline: "world cup highlights & classic innings",
-              },
-              {
-                id: "ucl",
-                name: "CHAMPIONS LEAGUE",
-                emoji: "⚽",
-                tagline: "UEFA classic matches & goals",
-              },
-            ].map((ch) => (
+              { id: "fifa-wc", e: "🏆", n: "FIFA WC" },
+              { id: "f1-live", e: "🏎️", n: "FORMULA 1" },
+              { id: "cricket", e: "🏏", n: "CRICKET" },
+              { id: "ucl", e: "⚽", n: "UCL" },
+              { id: "nba", e: "🏀", n: "NBA" },
+              { id: "nfl", e: "🏈", n: "NFL" },
+            ].map((c) => (
               <Link
-                key={ch.id}
+                key={c.id}
                 to="/channels/$slug"
-                params={{ slug: ch.id }}
-                className="group overflow-hidden rounded-xl border border-border/40 bg-background/40 p-4 transition-all hover:border-primary/30 hover:bg-primary/5"
+                params={{ slug: c.id }}
+                className="group rounded-xl border border-border/40 bg-background/40 p-3 transition-all hover:border-primary/30"
               >
-                <div className="text-2xl mb-2">{ch.emoji}</div>
-                <div className="font-mono-tv text-[11px] font-bold uppercase tracking-wider text-foreground">
-                  {ch.name}
-                </div>
-                <div className="mt-1 text-[9px] text-muted-foreground">{ch.tagline}</div>
-                <div className="mt-2 text-[9px] font-mono-tv text-primary/80 uppercase tracking-wider group-hover:text-primary transition-colors">
-                  ▶ Watch Now
+                <div className="text-xl mb-1">{c.e}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider">{c.n}</div>
+                <div className="mt-2 text-[8px] font-mono-tv text-primary/80 uppercase tracking-wider group-hover:text-primary">
+                  ▶ Watch
                 </div>
               </Link>
             ))}

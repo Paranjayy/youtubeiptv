@@ -70,6 +70,8 @@ function DiscoveryPage() {
   const [artistResults, setArtistResults] = useState<ArtistSearchResult[]>([]);
   const [artistLoading, setArtistLoading] = useState(false);
   const [artistError, setArtistError] = useState<string | null>(null);
+  const [hnStories, setHnStories] = useState<{ title: string; url: string; score: number }[]>([]);
+  const [hnLoading, setHnLoading] = useState(true);
 
   const deferredWikiQuery = useDeferredValue(wikiQuery.trim());
   const deferredArtistQuery = useDeferredValue(artistQuery.trim());
@@ -170,6 +172,50 @@ function DiscoveryPage() {
     };
   }, [deferredArtistQuery]);
 
+  // Fetch trending Hacker News stories
+  useEffect(() => {
+    let cancelled = false;
+    setHnLoading(true);
+    fetch("https://hacker-news.firebaseio.com/v0/topstories.json")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed");
+        return res.json() as Promise<number[]>;
+      })
+      .then((ids) => {
+        if (cancelled) return;
+        const top10 = ids.slice(0, 10);
+        return Promise.allSettled(
+          top10.map((id) =>
+            fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(
+              (r) => r.json() as Promise<{ title: string; url?: string; score: number }>,
+            ),
+          ),
+        );
+      })
+      .then((results) => {
+        if (cancelled || !results) return;
+        const stories = results
+          .filter((r) => r.status === "fulfilled" && r.value?.title)
+          .map((r) => {
+            const v = (r as PromiseFulfilledResult<any>).value;
+            return {
+              title: v.title,
+              url: v.url || `https://news.ycombinator.com/item?id=${v.id}`,
+              score: v.score || 0,
+            };
+          })
+          .slice(0, 5);
+        setHnStories(stories);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setHnLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const currentReadout = useMemo(
     () => ({
       wikiCount: wikiResults.length,
@@ -218,6 +264,13 @@ function DiscoveryPage() {
             >
               <Timer className="h-4 w-4" />
               Focus
+            </Link>
+            <Link
+              to="/news"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-white/10"
+            >
+              <Newspaper className="h-4 w-4" />
+              News
             </Link>
             <button
               onClick={() => {
@@ -321,7 +374,9 @@ function DiscoveryPage() {
                   <div className="text-xs font-mono-tv uppercase tracking-[0.35em] text-amber-200/60">
                     Random article
                   </div>
-                  <h2 className="mt-2 text-3xl font-black tracking-tight text-zinc-100">{randomArticle.title}</h2>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight text-zinc-100">
+                    {randomArticle.title}
+                  </h2>
                   {randomArticle.description && (
                     <p className="mt-2 text-sm font-medium text-zinc-400">
                       {randomArticle.description}
@@ -408,7 +463,9 @@ function DiscoveryPage() {
                     className="group block rounded-2xl border border-white/10 bg-black/20 p-4 transition-colors hover:border-amber-200/40 hover:bg-black/30"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="font-semibold tracking-tight text-zinc-100">{result.title}</div>
+                      <div className="font-semibold tracking-tight text-zinc-100">
+                        {result.title}
+                      </div>
                       <ArrowUpRight className="h-4 w-4 text-zinc-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                     </div>
                     <p className="mt-2 text-sm leading-6 text-zinc-300">{result.snippet}</p>
@@ -579,6 +636,56 @@ function DiscoveryPage() {
               </div>
             </article>
           </aside>
+        </section>
+
+        {/* Trending HN section */}
+        <section className="mt-6">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-orange-400 text-lg">🔥</span>
+              <h2 className="text-lg font-bold text-zinc-100">Trending on Hacker News</h2>
+            </div>
+            <Link
+              to="/news"
+              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-300 hover:bg-white/10 transition-colors"
+            >
+              <Newspaper className="h-3 w-3" />
+              All News
+            </Link>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {hnLoading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-20 rounded-2xl border border-white/10 bg-white/[0.02] animate-pulse"
+                  />
+                ))
+              : hnStories.map((story, i) => (
+                  <a
+                    key={i}
+                    href={story.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition-all hover:border-orange-400/30 hover:bg-white/[0.05]"
+                  >
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-[10px] font-mono font-bold text-orange-400">
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium leading-snug text-zinc-100 line-clamp-2 group-hover:text-orange-200 transition-colors">
+                        {story.title}
+                      </p>
+                      <div className="mt-1.5 flex items-center gap-2 text-[10px] font-mono text-zinc-500">
+                        <span>▲ {story.score}</span>
+                        <span>·</span>
+                        <span className="truncate">{new URL(story.url).hostname}</span>
+                      </div>
+                    </div>
+                    <ArrowUpRight className="mt-1 h-3.5 w-3.5 shrink-0 text-zinc-500 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </a>
+                ))}
+          </div>
         </section>
       </div>
     </main>

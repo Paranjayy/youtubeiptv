@@ -1,5 +1,11 @@
 import { CATEGORIES, CHANNELS, type Channel } from "@/lib/channels";
-import { IPTV_COUNTRIES, loadCountryChannels, loadCategoryChannels, searchGlobally, type IptvChannel } from "@/lib/iptv";
+import {
+  IPTV_COUNTRIES,
+  loadCountryChannels,
+  loadCategoryChannels,
+  searchGlobally,
+  type IptvChannel,
+} from "@/lib/iptv";
 import { RADIO_COUNTRIES, loadCountryRadio, type RadioStation } from "@/lib/radio";
 import { type TvHistoryEntry } from "@/lib/tv-routes";
 import { useEffect, useMemo, useState } from "react";
@@ -60,7 +66,9 @@ export function Guide({
   const [radioSearch, setRadioSearch] = useState("");
   const [radioTag, setRadioTag] = useState<string>("All");
 
-  const [iptvSearchMode, setIptvSearchMode] = useState<"country" | "category" | "global">("country");
+  const [iptvSearchMode, setIptvSearchMode] = useState<"country" | "category" | "global">(
+    "country",
+  );
   const [iptvCategory, setIptvCategory] = useState<string>("movies");
   const [globalResults, setGlobalResults] = useState<IptvChannel[]>([]);
   const [globalLoading, setGlobalLoading] = useState(false);
@@ -73,9 +81,10 @@ export function Guide({
     setError(null);
     setGroup("All");
 
-    const promise = iptvSearchMode === "country"
-      ? loadCountryChannels(iptvCountry)
-      : loadCategoryChannels(iptvCategory);
+    const promise =
+      iptvSearchMode === "country"
+        ? loadCountryChannels(iptvCountry)
+        : loadCategoryChannels(iptvCategory);
 
     promise
       .then((list) => {
@@ -253,9 +262,10 @@ export function Guide({
           </div>
           <button
             onClick={onClose}
-            className="hidden font-mono-tv text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground sm:block"
+            className="font-mono-tv text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
           >
-            [ESC] close
+            <span className="sm:hidden">✕</span>
+            <span className="hidden sm:inline">[ESC] close</span>
           </button>
         </div>
       </div>
@@ -398,7 +408,7 @@ export function Guide({
             {[
               { id: "country", label: "🗺️ Countries" },
               { id: "category", label: "🎬 Categories & Movies" },
-              { id: "global", label: "🌐 Global Search" }
+              { id: "global", label: "🌐 Global Search" },
             ].map((subMode) => (
               <button
                 key={subMode.id}
@@ -410,7 +420,7 @@ export function Guide({
                   "rounded-md px-3 py-1 font-mono-tv text-[10px] uppercase tracking-wider transition-all border",
                   iptvSearchMode === subMode.id
                     ? "bg-accent/15 text-accent border-accent/40 shadow-[0_0_8px_rgba(226,174,74,0.15)]"
-                    : "border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-white/5 hover:text-foreground",
                 )}
               >
                 {subMode.label}
@@ -476,7 +486,11 @@ export function Guide({
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={iptvSearchMode === "global" ? "Type 'f1' or 'movies' to search globally..." : "Search channels…"}
+              placeholder={
+                iptvSearchMode === "global"
+                  ? "Type 'f1' or 'movies' to search globally..."
+                  : "Search channels…"
+              }
               className="min-w-full flex-1 rounded-md border border-border/60 bg-background/40 px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:border-accent/60 focus:outline-none sm:min-w-[220px]"
             />
 
@@ -493,7 +507,8 @@ export function Guide({
             )}
             {(loading || globalLoading) && (
               <div className="flex items-center gap-2 text-muted-foreground font-mono-tv text-sm">
-                <Loader2 className="h-4 w-4 animate-spin text-accent" /> Loading playlist from iptv-org…
+                <Loader2 className="h-4 w-4 animate-spin text-accent" /> Loading playlist from
+                iptv-org…
               </div>
             )}
             {!(loading || globalLoading) && !error && (

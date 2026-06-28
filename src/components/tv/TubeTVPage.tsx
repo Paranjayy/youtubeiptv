@@ -161,7 +161,11 @@ export function TubeTVPage({
   const initialRadioItemSlugRef = useRef(initialRadioItemSlug);
   const [iptvSlugLoading, setIptvSlugLoading] = useState<boolean>(!!initialIptvItemSlug);
 
-  const [booting, setBooting] = useState(true);
+  const [booting, setBooting] = useState(() => {
+    // Only show CRT boot once per browser session
+    if (typeof window === "undefined") return true;
+    return !sessionStorage.getItem("tubetv:booted");
+  });
 
   // Auto-pilot: time-based channel switching + ambient
   const currentSlot = useMemo(() => getCurrentTimeSlot(), []);
@@ -214,13 +218,13 @@ export function TubeTVPage({
 
   const channel: Channel = CHANNELS[channelIdx];
 
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  useEffect(() => {
+    try {
       const val = localStorage.getItem("tubetv:sidebar-open");
-      return val !== "false";
-    }
-    return true;
-  });
+      if (val !== null) setSidebarOpen(val !== "false");
+    } catch {}
+  }, []);
 
   // Real connection-based (active tab) count
   const [activeTabsCount, setActiveTabsCount] = useState(1);
@@ -228,12 +232,12 @@ export function TubeTVPage({
   const [totalViewers, setTotalViewers] = useState(14832);
 
   // Movies & Series mode state
-  const [tmdbKey, setTmdbKey] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("tubetv:tmdb-key") || "";
-    }
-    return "";
-  });
+  const [tmdbKey, setTmdbKey] = useState<string>("");
+  useEffect(() => {
+    try {
+      setTmdbKey(localStorage.getItem("tubetv:tmdb-key") || "");
+    } catch {}
+  }, []);
   const [selectedMedia, setSelectedMedia] = useState<MediaItem>(() => {
     if (initialMovieId && initialMovieType) {
       const matched = TRENDING_MEDIA.find(
@@ -1437,15 +1441,7 @@ export function TubeTVPage({
                 });
               }}
               className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-all active:scale-95 z-20 cursor-pointer sm:h-8 sm:w-8"
-              title={
-                sidebarOpen
-                  ? window.innerWidth < 1024
-                    ? "Menu"
-                    : "Hide Sidebar"
-                  : window.innerWidth < 1024
-                    ? "Menu"
-                    : "Show Sidebar"
-              }
+              title="Menu"
             >
               <PanelLeft className="h-4 w-4" />
             </button>
@@ -1466,7 +1462,7 @@ export function TubeTVPage({
 
         <Ticker />
 
-        <section className="relative flex flex-1 flex-col lg:flex-row min-h-0 pb-14 lg:pb-0">
+        <section className="relative flex flex-1 flex-col lg:flex-row min-h-0 pb-16 lg:pb-0">
           <aside
             className={cn(
               "w-64 shrink-0 border-r border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.98),rgba(5,6,9,0.99))] flex-col transition-all duration-300 z-30",
@@ -3287,24 +3283,24 @@ export function TubeTVPage({
         )}
 
         {/* Mobile bottom navigation - visible only on small screens */}
-        <nav className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.96),rgba(4,5,7,0.98))] px-2 py-1.5 backdrop-blur-md lg:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-1 overflow-x-auto border-t border-border/60 bg-[linear-gradient(180deg,rgba(8,10,14,0.96),rgba(4,5,7,0.98))] px-3 py-1.5 backdrop-blur-md lg:hidden scrollbar-none [&::-webkit-scrollbar]:hidden">
           {[
             { to: "/", icon: Tv, label: "TV", color: "oklch(0.82 0.18 152)" },
-            { to: "/discover", icon: Compass, label: "Discover", color: "oklch(0.84 0.14 205)" },
+            { to: "/discover", icon: Compass, label: "Disc", color: "oklch(0.84 0.14 205)" },
             { to: "/news", icon: Newspaper, label: "News", color: "oklch(0.84 0.14 205)" },
             { to: "/playground", icon: Gamepad2, label: "Play", color: "oklch(0.74 0.18 335)" },
-            { to: "/places", icon: MapPin, label: "Places", color: "oklch(0.8 0.14 180)" },
+            { to: "/places", icon: MapPin, label: "Place", color: "oklch(0.8 0.14 180)" },
             { to: "/focus", icon: Timer, label: "Focus", color: "oklch(0.86 0.16 72)" },
             { to: "/vibes", icon: Music2, label: "Vibes", color: "oklch(0.8 0.14 180)" },
-            { to: "/wordle", icon: BookOpen, label: "Wordle", color: "oklch(0.82 0.18 152)" },
-            { to: "/sports", icon: Trophy, label: "Sports", color: "oklch(0.82 0.18 152)" },
-            { to: "/movies", icon: Film, label: "Movies", color: "oklch(0.74 0.18 335)" },
+            { to: "/wordle", icon: BookOpen, label: "Word", color: "oklch(0.82 0.18 152)" },
+            { to: "/sports", icon: Trophy, label: "Sport", color: "oklch(0.82 0.18 152)" },
+            { to: "/movies", icon: Film, label: "Movie", color: "oklch(0.74 0.18 335)" },
             { to: "/reader", icon: BookOpen, label: "Read", color: "oklch(0.86 0.16 72)" },
           ].map(({ to, icon: Icon, label, color }) => (
             <button
               key={to}
               onClick={() => navigate({ to })}
-              className="flex flex-col items-center gap-0.5 rounded-lg px-2 py-1 transition-all duration-150 active:scale-95 min-w-0"
+              className="flex shrink-0 flex-col items-center gap-0.5 rounded-lg px-3 py-1 transition-all duration-150 active:scale-95"
               title={label}
             >
               <Icon className="h-4 w-4 shrink-0" style={{ color }} />

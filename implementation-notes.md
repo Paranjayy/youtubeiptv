@@ -46,11 +46,48 @@
 - I replaced the generic missing-route screens with a shared TubeTV recovery screen so stale channel, IPTV, radio, and arbitrary 404 links keep the same broadcast-console visual language.
 - I could not complete a local Vite production build in this shell because the Rollup native binary in `node_modules` hit a macOS code-signing mismatch. TypeScript and ESLint still pass for the touched files, and Vercel remote builds should be able to validate the production bundle once the commit is pushed.
 
+## What We Added (Iteration 2)
+
+- Fixed TypeScript errors in `MoodSwitcher.tsx`, `sports.tsx`, and `roadmap.tsx`
+- Sidebar now opens as a full-screen slide-over drawer on mobile (with backdrop) when the menu button is tapped
+- Added a fixed bottom navigation bar on mobile with icons for all key routes (TV, Discover, News, Play, Places, Focus, Vibes, Wordle, Sports, Movies, Read)
+- Added bottom padding to main content so nothing hides behind the mobile nav
+- Improved touch targets on bottom controls (minimum 32px height/width)
+- Made Guide close button visible on mobile (✕ icon)
+- Added trending Hacker News section to Discover page with top 5 stories and link to full News page
+- Added News button to Discover page header navigation
+
+## What We Added (Iteration 3) — Sports Desk Overhaul + Player Upgrades
+
+- **HLS Player Upgrade**: Added custom controls overlay with play/pause, mute/unmute, subtitle toggle, and fullscreen. Auto-hides after 3.5s, shows on hover/tap. Built-in error recovery for network errors.
+- **Subtitle Support**: HLS player accepts optional `subtitles` prop with `label`, `src`, `srclang` for external `.vtt` tracks. Subtitles toggle button cycles through tracks.
+- **Match Schedule**: Generate schedule for FIFA World Cup 2026 (June 11 - July 19) with group stage, knockout rounds, and final. Live/upcoming/completed status computed from current time.
+- **Live Now Banner**: When matches are live, a red banner appears at the top showing the score and a pulsing LIVE indicator.
+- **Countdown Timers**: Upcoming matches show countdown (days/hours/minutes). Matches within 24h get amber highlight.
+- **Group Standings**: FIFA World Cup 2026 group tables with full stats (P/W/D/L/GF/GA/GD/Pts), group tabs, top-2 qualification highlight.
+- **Collapsible Sections**: Schedule and Standings sections are collapsible to reduce scrolling.
+- **Recent Results**: Completed matches show final scores.
+- **More FIFA+ Streams**: Added 7 language variants for FIFA+ (EN, ES, FR, DE, PT, IT) plus beIN SPORTS and ESPN8.
+- **More Sports Keywords**: Extended search terms for iptv-org sports channel filtering.
+
+## Decisions Made
+
+- Match schedule is generated client-side with dates computed relative to the current time, no backend needed
+- Group standings are hardcoded demo data (representative of real FIFA WC 2026 groups) — could be replaced with live API data later
+- The sidebar is repurposed as a mobile drawer by making it fixed+overlay on small screens via CSS, keeping the same component tree without duplication
+- The bottom nav scrolls horizontally on very narrow screens to fit all 11 destinations while keeping them tappable
+- HN stories are fetched client-side directly from the Firebase API (no backend needed), same pattern as the News route
+- HLS player controls auto-hide to maximize viewing area on mobile, with tap-to-show
+
 ## Left For Later
 
-- More history affordances, like filtering or clearing recent items
-- Discovery Desk follow-ups: curated topics, richer news view, and a mini-game launcher
-- Playground follow-ups: streaks, harder difficulty modes, daily shares, and more categories like shows and comics
-- Mobile-first UI tuning and tighter space usage on small screens
+- Real-time match scores via live APIs (e.g., OpenLigaDB, Football-data.org)
+- Live match streaming via IPTV with channel matching to schedule
+- Kodi-style rewind/live-tv buffer (requires MediaSource Extensions / HLS.js trickplay)
+- More subtitle formats (.srt/.vtt parsing for external files)
+- Discovery Desk follow-ups: curated topics, richer news view
+- Playground follow-ups: streaks, harder difficulty modes, daily shares
+- Score streaks and daily leaderboard for Playground games
+- Torrent/debrid player exploration (Popcorn-style)
+- Mobile-first UI tuning: compact player controls
 - More route-level metadata for sharing and social previews
-- Optional server-side state if we ever want cross-device resume
