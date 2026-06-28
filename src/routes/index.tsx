@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { TubeTVPage } from "@/components/tv/TubeTVPage";
+import { useState, useEffect, lazy, Suspense } from "react";
+
+const TubeTVPage = lazy(() =>
+  import("@/components/tv/TubeTVPage").then((m) => ({ default: m.TubeTVPage })),
+);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,24 +25,30 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function Index() {
-  const [ready, setReady] = useState(false);
-  useEffect(() => setReady(true), []);
-
-  if (!ready) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#050608]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="text-2xl font-black tracking-tight text-white">
-            Tube<span className="text-[oklch(0.82_0.18_152)]">TV</span>
-          </div>
-          <div className="text-[10px] font-mono-tv uppercase tracking-[0.5em] text-white/30">
-            loading...
-          </div>
+function LoadingScreen() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-[#050608]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="text-2xl font-black tracking-tight text-white">
+          Tube<span className="text-[oklch(0.82_0.18_152)]">TV</span>
+        </div>
+        <div className="text-[10px] font-mono-tv uppercase tracking-[0.5em] text-white/30">
+          loading...
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  return <TubeTVPage />;
+function Index() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return <LoadingScreen />;
+
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <TubeTVPage />
+    </Suspense>
+  );
 }
