@@ -242,6 +242,19 @@ function SportsDesk() {
   const [showIptv, setShowIptv] = useState(true);
   const [tick, setTick] = useState(Date.now());
   const ref = useRef<HTMLDivElement>(null);
+  const [pitStreams, setPitStreams] = useState<
+    {
+      category: string;
+      title: string;
+      uri: string;
+      thumbnail: string;
+      embedUrl: string;
+      startTime: number;
+      endTime: number;
+    }[]
+  >([]);
+  const [pitLoading, setPitLoading] = useState(true);
+  const [selPitStream, setSelPitStream] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setTick(Date.now()), 10000);
@@ -273,6 +286,32 @@ function SportsDesk() {
     return () => {
       off = true;
     };
+  }, []);
+
+  // Fetch live streams from PitSport API
+  useEffect(() => {
+    fetch("https://api.pitsport.live/v1/streams")
+      .then((r) => r.json())
+      .then((data: any) => {
+        if (!data?.categories) return;
+        const live: typeof pitStreams = [];
+        for (const cat of data.categories) {
+          for (const s of cat.streams || []) {
+            live.push({
+              category: cat.category,
+              title: s.title,
+              uri: s.uri,
+              thumbnail: s.thumbnail || cat.thumbnail || "",
+              embedUrl: "https://pitsport.xyz" + s.uri,
+              startTime: s.timestamp || 0,
+              endTime: s.endtime || 0,
+            });
+          }
+        }
+        setPitStreams(live);
+        setPitLoading(false);
+      })
+      .catch(() => setPitLoading(false));
   }, []);
 
   const play = useCallback((s: Stream) => {
@@ -499,6 +538,63 @@ function SportsDesk() {
           </div>
         </div>
 
+        {/* PitSport Live Motorsport */}
+        {pitStreams.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm">🏎️</span>
+              <h2 className="font-mono-tv text-xs font-bold uppercase tracking-[0.2em]">
+                LIVE FROM PITSPORT
+              </h2>
+              <span className="rounded-full bg-red-500/20 px-2 py-0.5 font-mono-tv text-[9px] text-red-400 font-bold animate-pulse">
+                ● LIVE
+              </span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {pitStreams.map((ps, i) => {
+                const isLive = ps.endTime > 0 && Date.now() / 1000 < ps.endTime;
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "rounded-xl border p-3 transition-all cursor-pointer",
+                      selPitStream === ps.uri
+                        ? "border-primary/60 bg-primary/10"
+                        : isLive
+                          ? "border-red-500/30 bg-red-500/5 hover:border-red-500/50"
+                          : "border-border/40 bg-background/40 hover:border-primary/30",
+                    )}
+                    onClick={() => setSelPitStream(selPitStream === ps.uri ? null : ps.uri)}
+                  >
+                    {ps.thumbnail && (
+                      <img
+                        src={ps.thumbnail}
+                        alt=""
+                        className="w-full h-28 object-cover rounded-lg mb-2"
+                        loading="lazy"
+                      />
+                    )}
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0">
+                        <div className="text-[9px] font-mono-tv text-muted-foreground uppercase tracking-wider">
+                          {ps.category}
+                        </div>
+                        <div className="text-xs font-bold truncate">{ps.title}</div>
+                      </div>
+                      {isLive && (
+                        <span className="text-[9px] font-mono-tv text-red-400 font-bold shrink-0">
+                          ● LIVE
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Player */}
         {/* Player */}
         <div className="mb-8">
           <div
@@ -508,7 +604,14 @@ function SportsDesk() {
               fs ? "fixed inset-0 z-50 rounded-none" : "aspect-video max-h-[60vh]",
             )}
           >
-            {src ? (
+            {selPitStream ? (
+              <iframe
+                src={"https://pitsport.xyz" + selPitStream}
+                className="absolute inset-0 h-full w-full border-0"
+                allowFullScreen
+                allow="autoplay; fullscreen"
+              />
+            ) : src ? (
               <HlsPlayer
                 src={src}
                 muted={!playing || muted}
@@ -527,11 +630,19 @@ function SportsDesk() {
               </div>
             )}
           </div>
-          {src && (
+          {(src || selPitStream) && (
             <div className="mt-2 flex items-center justify-between px-1">
               <div>
-                <div className="font-mono-tv text-xs font-bold">{title}</div>
-                <div className="text-[10px] text-muted-foreground">{tag}</div>
+                <div className="font-mono-tv text-xs font-bold">
+                  {selPitStream
+                    ? pitStreams.find((p) => p.uri === selPitStream)?.title || "PitSport Stream"
+                    : title}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  {selPitStream
+                    ? pitStreams.find((p) => p.uri === selPitStream)?.category || "Motorsport"
+                    : tag}
+                </div>
               </div>
               <div className="flex items-center gap-1.5">
                 <button
