@@ -161,11 +161,14 @@ export function TubeTVPage({
   const initialRadioItemSlugRef = useRef(initialRadioItemSlug);
   const [iptvSlugLoading, setIptvSlugLoading] = useState<boolean>(!!initialIptvItemSlug);
 
-  const [booting, setBooting] = useState(() => {
-    // Only show CRT boot once per browser session
-    if (typeof window === "undefined") return true;
-    return !sessionStorage.getItem("tubetv:booted");
-  });
+  const [booting, setBooting] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    try {
+      if (sessionStorage.getItem("tubetv:booted")) setBooting(false);
+    } catch {}
+  }, []);
 
   // Auto-pilot: time-based channel switching + ambient
   const currentSlot = useMemo(() => getCurrentTimeSlot(), []);

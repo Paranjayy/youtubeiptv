@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { TubeTVPage } from "@/components/tv/TubeTVPage";
 
 export const Route = createFileRoute("/")({
@@ -22,5 +23,23 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+
+  if (!ready) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#050608]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="text-2xl font-black tracking-tight text-white">
+            Tube<span className="text-[oklch(0.82_0.18_152)]">TV</span>
+          </div>
+          <div className="text-[10px] font-mono-tv uppercase tracking-[0.5em] text-white/30">
+            loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return <TubeTVPage />;
 }
